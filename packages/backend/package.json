@@ -1,0 +1,31 @@
+{
+  "name": "grype",
+  "displayName": "Grype",
+  "description": "Unofficial grype & syft integration for Podman Desktop",
+  "version": "0.1.0-next",
+  "icon": "icon.png",
+  "publisher": "podman-desktop",
+  "type": "module",
+  "license": "Apache-2.0",
+  "engines": {
+    "podman-desktop": ">=1.25.0"
+  },
+  "main": "./dist/extension.cjs",
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest watch --coverage",
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "format:fix": "prettier --write \"src/**/*.ts\"",
+    "watch": "vite --mode development build -w",
+    "typecheck": "tsc --noEmit"
+  },
+  "contributes": {},
+  "devDependencies": {
+    "@podman-desktop/api": "^1.25.1",
+    "@types/node": "^24",
+    "vite": "^7.3.1",
+    "vitest": "^4.0.16"
+  },
+  "dependencies": {}
+}
