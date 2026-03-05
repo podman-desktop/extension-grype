@@ -15,29 +15,25 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
-import { MainService } from './services/main-service';
-import type { ExtensionContext } from '@podman-desktop/api';
-import {
-  cli as cliApi,
-  env as envApi,
-  process as processApi,
-  window as windowApi,
-} from '@podman-desktop/api';
+import type { Disposable } from '@podman-desktop/api';
+import { AnchoreCliService, type BaseCliDependencies } from './anchore-cli-service';
 
-let main: MainService | undefined;
+type Dependencies = BaseCliDependencies;
 
-// Initialize the activation of the extension.
-export async function activate(context: ExtensionContext): Promise<void> {
-  main = new MainService({
-    cliApi,
-    envApi,
-    processApi,
-    windowApi,
-  });
-  return main.init(context);
-}
-
-export async function deactivate(): Promise<void> {
-  main?.dispose();
-  main = undefined;
+export class SyftService extends AnchoreCliService<Dependencies> implements Disposable {
+  protected override get icon(): string {
+    return 'syft.png';
+  }
+  protected get toolId(): string {
+    return 'syft';
+  }
+  protected get displayName(): string {
+    return 'Syft';
+  }
+  protected get markdownDescription(): string {
+    return 'Syft is a powerful open-source tool for generating Software Bills of Materials (SBOMs).';
+  }
+  protected get repoName(): string {
+    return 'syft';
+  }
 }

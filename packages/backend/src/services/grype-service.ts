@@ -15,29 +15,26 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
-import { MainService } from './services/main-service';
-import type { ExtensionContext } from '@podman-desktop/api';
-import {
-  cli as cliApi,
-  env as envApi,
-  process as processApi,
-  window as windowApi,
-} from '@podman-desktop/api';
 
-let main: MainService | undefined;
+import type { Disposable } from '@podman-desktop/api';
+import { AnchoreCliService, type BaseCliDependencies } from './anchore-cli-service';
 
-// Initialize the activation of the extension.
-export async function activate(context: ExtensionContext): Promise<void> {
-  main = new MainService({
-    cliApi,
-    envApi,
-    processApi,
-    windowApi,
-  });
-  return main.init(context);
-}
+type Dependencies = BaseCliDependencies;
 
-export async function deactivate(): Promise<void> {
-  main?.dispose();
-  main = undefined;
+export class GrypeService extends AnchoreCliService<Dependencies> implements Disposable {
+  protected override get icon(): string {
+    return 'icon.png';
+  }
+  protected get toolId(): string {
+    return 'grype';
+  }
+  protected get displayName(): string {
+    return 'Grype';
+  }
+  protected get markdownDescription(): string {
+    return 'Grype is a vulnerability scanner for container images and filesystems.';
+  }
+  protected get repoName(): string {
+    return 'grype';
+  }
 }
