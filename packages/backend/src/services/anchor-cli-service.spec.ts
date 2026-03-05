@@ -26,14 +26,8 @@ import {
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import type { Octokit } from '@octokit/rest';
-import {
-  cli as cliApi,
-  process as processApi,
-  window as windowApi,
-} from '@podman-desktop/api';
-import type { CliToolInstaller ,
-  CliTool,
-  Logger} from '@podman-desktop/api';
+import { cli as cliApi, process as processApi, window as windowApi } from '@podman-desktop/api';
+import type { CliToolInstaller, CliTool, Logger } from '@podman-desktop/api';
 import type { Endpoints } from '@octokit/types';
 import { existsSync } from 'node:fs';
 import { rm } from 'node:fs/promises';
@@ -111,7 +105,9 @@ const LOGGER_MOCK: Logger = {
   warn: vi.fn(),
 };
 
-const LIST_RELEASES: Endpoints['GET /repos/{owner}/{repo}/releases']['response']['data'] = Array.from({ length: 10}).map((_, index) => ({
+const LIST_RELEASES: Endpoints['GET /repos/{owner}/{repo}/releases']['response']['data'] = Array.from({
+  length: 10,
+}).map((_, index) => ({
   id: index,
   tag_name: `v1.0.${index}`,
   name: `v1.0.${index}`,

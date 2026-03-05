@@ -16,18 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import type {
-  CliTool,
-  Disposable,
-  Logger,
-  QuickPickItem,
-} from '@podman-desktop/api';
-import {
-  cli as cliApi,
-  env as envApi,
-  process as processApi,
-  window as windowApi,
-} from '@podman-desktop/api';
+import type { CliTool, Disposable, Logger, QuickPickItem } from '@podman-desktop/api';
+import { cli as cliApi, env as envApi, process as processApi, window as windowApi } from '@podman-desktop/api';
 import type { AsyncInit } from '../utils/async-init';
 import type { Octokit } from '@octokit/rest';
 import { arch as nodeArch, platform as nodePlatform } from 'node:process';
@@ -70,10 +60,7 @@ export abstract class AnchoreCliService<D extends BaseCliDependencies> implement
   }
 
   protected get binaryPath(): string {
-    return join(
-      this.storageDir,
-      envApi.isWindows ? `${this.binaryBaseName}.exe` : this.binaryBaseName,
-    );
+    return join(this.storageDir, envApi.isWindows ? `${this.binaryBaseName}.exe` : this.binaryBaseName);
   }
 
   dispose(): void {
@@ -182,7 +169,7 @@ export abstract class AnchoreCliService<D extends BaseCliDependencies> implement
     }
 
     // if only one return it directly
-    if(lastReleasesMetadata.length === 1) return lastReleasesMetadata[0];
+    if (lastReleasesMetadata.length === 1) return lastReleasesMetadata[0];
 
     // Show the quickpick
     const selectedRelease = await windowApi.showQuickPick(lastReleasesMetadata, {

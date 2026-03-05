@@ -18,12 +18,12 @@
 
 import { vi } from 'vitest';
 import type * as podmanDesktopApi from '@podman-desktop/api';
-import { devDependencies } from './package.json' with { type: 'json'};
+import { devDependencies } from './package.json' with { type: 'json' };
 import { coerce } from 'semver';
 
 function getVersionExtensionAPIVersion(): string {
-  const version = coerce(devDependencies['@podman-desktop/api'])?.version
-  if(!version) throw new Error('cannot find version of @podman-desktop/api');
+  const version = coerce(devDependencies['@podman-desktop/api'])?.version;
+  if (!version) throw new Error('cannot find version of @podman-desktop/api');
   return version;
 }
 

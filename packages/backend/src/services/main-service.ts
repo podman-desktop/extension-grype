@@ -15,9 +15,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
-import type {
-  ExtensionContext
-} from '@podman-desktop/api';
+import type { ExtensionContext } from '@podman-desktop/api';
 import { Disposable } from '@podman-desktop/api';
 import type { AsyncInit } from '../utils/async-init';
 import { GrypeService } from './grype-service';
@@ -42,7 +40,7 @@ export class MainService implements Disposable, AsyncInit<ExtensionContext> {
         signal: abortController.signal,
       },
     });
-  };
+  }
 
   async init(context: ExtensionContext): Promise<void> {
     const octokit = this.getOctokit();
