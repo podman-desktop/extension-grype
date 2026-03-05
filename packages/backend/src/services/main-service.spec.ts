@@ -18,7 +18,7 @@
 
 import { test, vi, beforeEach, expect, assert } from 'vitest';
 import { MainService } from './main-service';
-import type { cli as cliApi, env as envApi, ExtensionContext, process as processApi, window as windowApi, Disposable } from '@podman-desktop/api';
+import type { ExtensionContext, Disposable } from '@podman-desktop/api';
 
 import { SyftService } from './syft-service';
 import { GrypeService } from './grype-service';
@@ -29,10 +29,6 @@ vi.mock(import('./syft-service'));
 vi.mock(import('./grype-service'));
 vi.mock(import('@octokit/rest'));
 
-const CLI_API_MOCK: typeof cliApi = {} as unknown as typeof cliApi;
-const ENV_API_MOCK: typeof envApi = {} as unknown as typeof envApi;
-const WINDOW_API_MOCK: typeof windowApi = {} as unknown as typeof windowApi;
-const PROCESS_API_MOCK: typeof processApi = {} as unknown as typeof processApi;
 const EXTENSION_CONTEXT_MOCK: ExtensionContext = {} as unknown as ExtensionContext;
 
 let main: MainService;
@@ -40,12 +36,7 @@ let main: MainService;
 beforeEach(() => {
   vi.resetAllMocks();
 
-  main = new MainService({
-    cliApi: CLI_API_MOCK,
-    envApi: ENV_API_MOCK,
-    windowApi: WINDOW_API_MOCK,
-    processApi: PROCESS_API_MOCK,
-  });
+  main = new MainService();
 });
 
 test('octokit request signal should be aborted after Main#dispose', async () => {

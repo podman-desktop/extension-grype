@@ -17,23 +17,12 @@
  ***********************************************************************/
 import { MainService } from './services/main-service';
 import type { ExtensionContext } from '@podman-desktop/api';
-import {
-  cli as cliApi,
-  env as envApi,
-  process as processApi,
-  window as windowApi,
-} from '@podman-desktop/api';
 
 let main: MainService | undefined;
 
 // Initialize the activation of the extension.
 export async function activate(context: ExtensionContext): Promise<void> {
-  main = new MainService({
-    cliApi,
-    envApi,
-    processApi,
-    windowApi,
-  });
+  main = new MainService();
   return main.init(context);
 }
 

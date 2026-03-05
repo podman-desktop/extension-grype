@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 import type {
-  cli as cliApi, env as envApi, ExtensionContext, process as processApi, window as windowApi,
+  ExtensionContext
 } from '@podman-desktop/api';
 import { Disposable } from '@podman-desktop/api';
 import type { AsyncInit } from '../utils/async-init';
@@ -24,17 +24,10 @@ import { GrypeService } from './grype-service';
 import { Octokit } from '@octokit/rest';
 import { SyftService } from './syft-service';
 
-interface Dependencies {
-  cliApi: typeof cliApi;
-  envApi: typeof envApi;
-  windowApi: typeof windowApi;
-  processApi: typeof processApi;
-}
-
 export class MainService implements Disposable, AsyncInit<ExtensionContext> {
   #disposables: Disposable[] = [];
 
-  constructor(protected readonly dependencies: Dependencies) {}
+  constructor() {}
 
   protected getOctokit(): Octokit {
     const abortController = new AbortController();
@@ -58,10 +51,6 @@ export class MainService implements Disposable, AsyncInit<ExtensionContext> {
     const grype: GrypeService = new GrypeService({
       octokit,
       storagePath: context.storagePath,
-      cliApi: this.dependencies.cliApi,
-      envApi: this.dependencies.envApi,
-      windowApi: this.dependencies.windowApi,
-      processApi: this.dependencies.processApi,
     });
     await grype.init();
     this.#disposables.push(grype);
@@ -70,10 +59,6 @@ export class MainService implements Disposable, AsyncInit<ExtensionContext> {
     const syft: SyftService = new SyftService({
       octokit,
       storagePath: context.storagePath,
-      cliApi: this.dependencies.cliApi,
-      envApi: this.dependencies.envApi,
-      windowApi: this.dependencies.windowApi,
-      processApi: this.dependencies.processApi,
     });
     await syft.init();
     this.#disposables.push(syft);

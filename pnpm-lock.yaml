@@ -121,6 +121,9 @@ importers:
       '@types/tar':
         specifier: ^6.1.13
         version: 6.1.13
+      semver:
+        specifier: ^7.7.4
+        version: 7.7.4
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@24.11.0)

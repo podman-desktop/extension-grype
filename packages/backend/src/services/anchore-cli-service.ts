@@ -17,13 +17,15 @@
  ***********************************************************************/
 
 import type {
-  cli as cliApi,
   CliTool,
   Disposable,
-  env as envApi,
   Logger,
-  process as processApi,
   QuickPickItem,
+} from '@podman-desktop/api';
+import {
+  cli as cliApi,
+  env as envApi,
+  process as processApi,
   window as windowApi,
 } from '@podman-desktop/api';
 import type { AsyncInit } from '../utils/async-init';
@@ -38,10 +40,6 @@ import { existsSync } from 'node:fs';
 export interface BaseCliDependencies {
   octokit: Octokit;
   storagePath: string;
-  cliApi: typeof cliApi;
-  envApi: typeof envApi;
-  windowApi: typeof windowApi;
-  processApi: typeof processApi;
 }
 
 export interface GithubReleaseMetadata extends QuickPickItem {
@@ -74,7 +72,7 @@ export abstract class AnchoreCliService<D extends BaseCliDependencies> implement
   protected get binaryPath(): string {
     return join(
       this.storageDir,
-      this.dependencies.envApi.isWindows ? `${this.binaryBaseName}.exe` : this.binaryBaseName,
+      envApi.isWindows ? `${this.binaryBaseName}.exe` : this.binaryBaseName,
     );
   }
 
@@ -84,7 +82,7 @@ export abstract class AnchoreCliService<D extends BaseCliDependencies> implement
 
   protected async getInstalledVersion(): Promise<string> {
     // default parse: '<tool> <semver>' from '--version'
-    const { stdout } = await this.dependencies.processApi.exec(this.binaryPath, ['--version']);
+    const { stdout } = await processApi.exec(this.binaryPath, ['--version']);
     // example: 'syft 1.41.2' or 'grype 0.109.0'
     const text = stdout.trim();
     const [, version] = text.split(/\s+/);
@@ -107,7 +105,7 @@ export abstract class AnchoreCliService<D extends BaseCliDependencies> implement
     // Ensure tool-specific storage folder exists early
     await mkdir(this.storageDir, { recursive: true });
 
-    this.cliTool = this.dependencies.cliApi.createCliTool({
+    this.cliTool = cliApi.createCliTool({
       name: this.toolId,
       displayName: this.displayName,
       markdownDescription: this.markdownDescription,
@@ -121,7 +119,7 @@ export abstract class AnchoreCliService<D extends BaseCliDependencies> implement
     });
 
     let selected: GithubReleaseMetadata | undefined = undefined;
-    this.cliTool?.registerInstaller({
+    this.cliTool.registerInstaller({
       doUninstall(_: Logger): Promise<void> {
         // We could remove the binary and keep cache; keep not implemented for now
         throw new Error('Not implemented');
@@ -187,7 +185,7 @@ export abstract class AnchoreCliService<D extends BaseCliDependencies> implement
     if(lastReleasesMetadata.length === 1) return lastReleasesMetadata[0];
 
     // Show the quickpick
-    const selectedRelease = await this.dependencies.windowApi.showQuickPick(lastReleasesMetadata, {
+    const selectedRelease = await windowApi.showQuickPick(lastReleasesMetadata, {
       placeHolder: `Select ${this.displayName} version to download`,
     });
 
@@ -238,10 +236,10 @@ export abstract class AnchoreCliService<D extends BaseCliDependencies> implement
       throw new Error(`Unsupported archive format: ${archivePath}`);
     }
 
-    const binaryName = this.dependencies.envApi.isWindows ? `${this.binaryBaseName}.exe` : this.binaryBaseName;
+    const binaryName = envApi.isWindows ? `${this.binaryBaseName}.exe` : this.binaryBaseName;
     const binaryPath = join(destDir, binaryName);
 
-    if (!this.dependencies.envApi.isWindows) {
+    if (!envApi.isWindows) {
       // eslint-disable-next-line sonarjs/file-permissions
       await chmod(binaryPath, 0o755);
     }
