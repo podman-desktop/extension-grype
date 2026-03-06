@@ -77,18 +77,18 @@ export class GrypeService extends AnchoreCliService {
     },
   ): Promise<GrypeOutput> {
     if (!this.cliTool?.version || !this.cliTool.path)
-      throw new Error('cannot analyse image without syft binary installed');
+      throw new Error('cannot analyse sbom without grype binary installed');
 
     const cancel = new CancellationTokenSource();
     options?.token?.onCancellationRequested(() => {
       cancel.cancel();
     });
     if (options?.token?.isCancellationRequested)
-      throw new Error('cannot analyse image: cancellation has been requested');
+      throw new Error('cannot analyse sbom: cancellation has been requested');
 
     const binary = this.cliTool.path;
 
-    if (!existsSync(sbom)) throw new Error('cannot analyse image without sbom file');
+    if (!existsSync(sbom)) throw new Error('cannot analyse without sbom file');
 
     const dir = dirname(sbom);
     const [name] = basename(sbom).split('.');

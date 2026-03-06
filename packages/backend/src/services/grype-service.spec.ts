@@ -88,7 +88,7 @@ describe('GrypeService#analyse', () => {
   test('non-existent sbom should throw an error', async () => {
     await expect(async () => {
       await grype.analyse('fake');
-    }).rejects.toThrowError('cannot analyse image without sbom file');
+    }).rejects.toThrowError('cannot analyse without sbom file');
   });
 
   test('existing sbom and cached grype output should return it', async () => {
