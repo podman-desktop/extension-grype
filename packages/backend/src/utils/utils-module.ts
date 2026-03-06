@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (C) 2026 Red Hat, Inc.
+ * Copyright (C) 2025 Red Hat, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,13 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
-import { MainService } from '/@/services/main-service';
-import type { ExtensionContext } from '@podman-desktop/api';
 
-let main: MainService | undefined;
+import { ContainerModule } from 'inversify';
+import { Octokit } from '@octokit/rest';
+import { OctokitDisposable } from '/@/utils/octokit-disposable';
 
-// Initialize the activation of the extension.
-export async function activate(context: ExtensionContext): Promise<void> {
-  main = new MainService();
-  return main.init(context);
-}
+const utilsModule = new ContainerModule(options => {
+  options.bind<Octokit>(Octokit).to(OctokitDisposable).inSingletonScope();
+});
 
-export async function deactivate(): Promise<void> {
-  try {
-    await main?.asyncDispose();
-  } catch (err: unknown) {
-    console.error('Something went wrong while deactivating the grype extension', err);
-  } finally {
-    main = undefined;
-  }
-}
+export { utilsModule };

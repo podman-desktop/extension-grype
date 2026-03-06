@@ -15,23 +15,37 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
+
+import { test, vi, beforeEach, expect } from 'vitest';
 import { MainService } from '/@/services/main-service';
 import type { ExtensionContext } from '@podman-desktop/api';
 
-let main: MainService | undefined;
+import { InversifyBinding } from '/@/inject/inversify-binding';
 
-// Initialize the activation of the extension.
-export async function activate(context: ExtensionContext): Promise<void> {
+vi.mock(import('/@/inject/inversify-binding'));
+
+const EXTENSION_CONTEXT_MOCK: ExtensionContext = {} as unknown as ExtensionContext;
+
+let main: MainService;
+
+beforeEach(() => {
+  vi.resetAllMocks();
+
   main = new MainService();
-  return main.init(context);
-}
+});
 
-export async function deactivate(): Promise<void> {
-  try {
-    await main?.asyncDispose();
-  } catch (err: unknown) {
-    console.error('Something went wrong while deactivating the grype extension', err);
-  } finally {
-    main = undefined;
-  }
-}
+test('expect MainService#init to init InversifyBinding', async () => {
+  await main.init(EXTENSION_CONTEXT_MOCK);
+
+  expect(InversifyBinding.prototype.init).toHaveBeenCalledOnce();
+});
+
+test('expect MainService#asyncDispose to dispose InversifyBinding', async () => {
+  await main.init(EXTENSION_CONTEXT_MOCK);
+
+  expect(InversifyBinding.prototype.asyncDispose).not.toHaveBeenCalled();
+
+  await main.asyncDispose();
+
+  expect(InversifyBinding.prototype.asyncDispose).toHaveBeenCalledOnce();
+});

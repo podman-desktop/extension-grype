@@ -15,23 +15,22 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
-import { MainService } from '/@/services/main-service';
 import type { ExtensionContext } from '@podman-desktop/api';
+import type { AsyncInit } from '/@/utils/async-init';
+import { InversifyBinding } from '/@/inject/inversify-binding';
+import type { IAsyncDisposable } from '/@/utils/async-disposable';
 
-let main: MainService | undefined;
+export class MainService implements IAsyncDisposable, AsyncInit<ExtensionContext> {
+  #inversify: InversifyBinding | undefined;
 
-// Initialize the activation of the extension.
-export async function activate(context: ExtensionContext): Promise<void> {
-  main = new MainService();
-  return main.init(context);
-}
+  constructor() {}
 
-export async function deactivate(): Promise<void> {
-  try {
-    await main?.asyncDispose();
-  } catch (err: unknown) {
-    console.error('Something went wrong while deactivating the grype extension', err);
-  } finally {
-    main = undefined;
+  async init(context: ExtensionContext): Promise<void> {
+    this.#inversify = new InversifyBinding(context);
+    await this.#inversify.init();
+  }
+
+  async asyncDispose(): Promise<void> {
+    return this.#inversify?.asyncDispose();
   }
 }

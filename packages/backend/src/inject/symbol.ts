@@ -15,23 +15,6 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
-import { MainService } from '/@/services/main-service';
-import type { ExtensionContext } from '@podman-desktop/api';
 
-let main: MainService | undefined;
-
-// Initialize the activation of the extension.
-export async function activate(context: ExtensionContext): Promise<void> {
-  main = new MainService();
-  return main.init(context);
-}
-
-export async function deactivate(): Promise<void> {
-  try {
-    await main?.asyncDispose();
-  } catch (err: unknown) {
-    console.error('Something went wrong while deactivating the grype extension', err);
-  } finally {
-    main = undefined;
-  }
-}
+export const ExtensionContextSymbol = Symbol.for('ExtensionContext');
+export const StartupSymbol = Symbol('StartupSymbol');

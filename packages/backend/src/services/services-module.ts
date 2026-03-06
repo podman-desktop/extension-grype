@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (C) 2026 Red Hat, Inc.
+ * Copyright (C) 2025 Red Hat, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,19 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
-import { MainService } from '/@/services/main-service';
-import type { ExtensionContext } from '@podman-desktop/api';
 
-let main: MainService | undefined;
+import { ContainerModule } from 'inversify';
+import { SyftService } from '/@/services/syft-service';
+import { GrypeService } from '/@/services/grype-service';
+import { StartupSymbol } from '/@/inject/symbol';
 
-// Initialize the activation of the extension.
-export async function activate(context: ExtensionContext): Promise<void> {
-  main = new MainService();
-  return main.init(context);
-}
+const servicesModule = new ContainerModule(options => {
+  options.bind<SyftService>(SyftService).toSelf().inSingletonScope();
+  options.bind<GrypeService>(GrypeService).toSelf().inSingletonScope();
 
-export async function deactivate(): Promise<void> {
-  try {
-    await main?.asyncDispose();
-  } catch (err: unknown) {
-    console.error('Something went wrong while deactivating the grype extension', err);
-  } finally {
-    main = undefined;
-  }
-}
+  // mark it as a startup service
+  options.bind(StartupSymbol).toService(GrypeService);
+  options.bind(StartupSymbol).toService(SyftService);
+});
+
+export { servicesModule };

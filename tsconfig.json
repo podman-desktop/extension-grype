@@ -18,6 +18,7 @@
   "include": [
     "**/vitest.config.ts",
     "**/vite.config.ts",
-    "vitest.workspace.ts"
+    "vitest.workspace.ts",
+    "**/__mocks__/**/*.ts"
   ]
 }

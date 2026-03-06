@@ -15,23 +15,27 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
-import { MainService } from '/@/services/main-service';
-import type { ExtensionContext } from '@podman-desktop/api';
+import { Octokit } from '@octokit/rest';
+import type { Disposable } from '@podman-desktop/api';
+import { injectable, preDestroy } from 'inversify';
 
-let main: MainService | undefined;
+@injectable()
+export class OctokitDisposable extends Octokit implements Disposable {
+  #abortController: AbortController | undefined;
 
-// Initialize the activation of the extension.
-export async function activate(context: ExtensionContext): Promise<void> {
-  main = new MainService();
-  return main.init(context);
-}
+  constructor() {
+    const abortController = new AbortController();
+    super({
+      request: {
+        signal: abortController.signal,
+      },
+    });
+    this.#abortController = abortController;
+  }
 
-export async function deactivate(): Promise<void> {
-  try {
-    await main?.asyncDispose();
-  } catch (err: unknown) {
-    console.error('Something went wrong while deactivating the grype extension', err);
-  } finally {
-    main = undefined;
+  @preDestroy()
+  dispose(): void {
+    this.#abortController?.abort('disposing octokit');
+    this.#abortController = undefined;
   }
 }

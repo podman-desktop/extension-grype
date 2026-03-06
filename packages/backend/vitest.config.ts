@@ -15,11 +15,9 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
-import { join, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import { mergeConfig } from 'vitest/config';
 import viteConfig from './vite.config';
-
-const WORKSPACE_ROOT = join(__dirname, '..', '..');
 
 export default mergeConfig(viteConfig, {
   test: {
@@ -27,8 +25,7 @@ export default mergeConfig(viteConfig, {
     environment: 'node',
     include: ['src/**/*.{test,spec}.?(c|m)[jt]s?(x)', 'vitest.setup.spec.ts'],
     alias: {
-      '@podman-desktop/api': resolve(WORKSPACE_ROOT, '__mocks__', '@podman-desktop', 'api.js'),
+      '@podman-desktop/api': resolve(__dirname, '__mocks__', '@podman-desktop', 'api.ts'),
     },
-    setupFiles: ['./vitest.setup.ts'],
   },
 });
