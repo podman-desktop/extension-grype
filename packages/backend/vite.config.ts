@@ -18,15 +18,18 @@
 import { join } from 'node:path';
 import { builtinModules } from 'node:module';
 import { defineConfig } from 'vite';
+import { syftJSONSchema } from './vite-plugins/syft-json-schema';
 
 const PACKAGE_ROOT = __dirname;
 
 export default defineConfig({
   mode: process.env.MODE,
   root: PACKAGE_ROOT,
+  plugins: [syftJSONSchema()],
   resolve: {
     alias: {
       '/@/': join(PACKAGE_ROOT, 'src') + '/',
+      '/@generated/': join(PACKAGE_ROOT, 'generated') + '/',
     },
   },
   build: {
