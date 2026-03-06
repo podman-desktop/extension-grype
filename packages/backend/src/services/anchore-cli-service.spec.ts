@@ -244,7 +244,7 @@ describe('installer', () => {
       }).rejects.toThrowError('No version selected');
     });
 
-    test('expect ', async () => {
+    test('expect selectVersion to return version without v prefix', async () => {
       const version = await installer.selectVersion();
       // we remove the `v` prefix
       expect(version).toEqual(LIST_RELEASES[0].name?.slice(1));
