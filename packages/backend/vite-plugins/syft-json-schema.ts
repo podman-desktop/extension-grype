@@ -21,7 +21,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { compileFromFile } from 'json-schema-to-typescript';
 
 const SYFT_JSON_SCHEMA_URL =
-  'https://raw.githubusercontent.com/anchore/syft/refs/heads/main/schema/json/schema-latest.json';
+  'https://raw.githubusercontent.com/anchore/syft/refs/heads/main/schema/json/schema-16.1.3.json';
 
 export function syftJSONSchema(): Plugin {
   return {
