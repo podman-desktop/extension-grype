@@ -32,6 +32,7 @@ import { inject, injectable, postConstruct, preDestroy } from 'inversify';
 import { mkdir, mkdtempDisposable, rename } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 
 @injectable()
 export class SyftService extends AnchoreCliService {
@@ -119,7 +120,8 @@ export class SyftService extends AnchoreCliService {
         });
         if (token.isCancellationRequested) throw new Error('cannot analyse image: cancellation has been requested');
 
-        await using dir = await mkdtempDisposable(image.engineId);
+        // create a tmp directory that will be disposed / removed on function exit
+        await using dir = await mkdtempDisposable(join(tmpdir(), image.engineId));
         const tarball = join(dir.path, image.Id);
 
         progress.report({ message: `Saving image ${imageName}` });

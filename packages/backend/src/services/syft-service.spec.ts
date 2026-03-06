@@ -143,6 +143,8 @@ describe('SyftService#analyse', () => {
       undefined,
     );
 
+    expect(mkdtempDisposable).toHaveBeenCalledExactlyOnceWith(join(tmpdir(), IMAGE_INFO_MOCK.engineId));
+
     const dest = join(tmpdir(), IMAGE_INFO_MOCK.engineId, 'foo.syft.json');
     const tmp = `${dest}.tmp`;
 
