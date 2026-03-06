@@ -16,11 +16,22 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import type { ExtensionContext } from '@podman-desktop/api';
+import {
+  type CancellationToken,
+  CancellationTokenSource,
+  ExtensionContext,
+  ProgressLocation,
+  window,
+} from '@podman-desktop/api';
+import { process } from '@podman-desktop/api';
 import { AnchoreCliService } from '/@/services/anchore-cli-service';
 import { Octokit } from '@octokit/rest';
 import { ExtensionContextSymbol } from '/@/inject/symbol';
 import { inject, injectable, postConstruct, preDestroy } from 'inversify';
+import { existsSync } from 'node:fs';
+import { basename, dirname, join } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { GrypeOutput, GrypeOutputSchema } from '/@/schemas/grype-output';
 
 @injectable()
 export class GrypeService extends AnchoreCliService {
@@ -57,5 +68,56 @@ export class GrypeService extends AnchoreCliService {
   }
   protected get repoName(): string {
     return 'grype';
+  }
+
+  public async analyse(
+    sbom: string,
+    options?: {
+      token?: CancellationToken;
+    },
+  ): Promise<GrypeOutput> {
+    if (!this.cliTool?.version || !this.cliTool.path)
+      throw new Error('cannot analyse image without syft binary installed');
+
+    const cancel = new CancellationTokenSource();
+    options?.token?.onCancellationRequested(() => {
+      cancel.cancel();
+    });
+    if (options?.token?.isCancellationRequested)
+      throw new Error('cannot analyse image: cancellation has been requested');
+
+    const binary = this.cliTool.path;
+
+    if (!existsSync(sbom)) throw new Error('cannot analyse image without sbom file');
+
+    const dir = dirname(sbom);
+    const [name] = basename(sbom).split('.');
+    const destination = join(dir, `${name}.grype.json`);
+
+    if (existsSync(destination)) {
+      const data = await readFile(destination, 'utf-8');
+      return GrypeOutputSchema.parse(JSON.parse(data));
+    }
+
+    return window.withProgress(
+      {
+        location: ProgressLocation.TASK_WIDGET,
+        cancellable: true,
+        title: `Analysing sbom`,
+      },
+      async (_, token) => {
+        token.onCancellationRequested(() => {
+          cancel.cancel();
+        });
+        if (token.isCancellationRequested) throw new Error('cannot analyse image: cancellation has been requested');
+
+        await process.exec(binary, [`sbom:${sbom}`, '--output=json', `--file=${destination}`], {
+          token: cancel.token,
+        });
+
+        const content = await readFile(destination, 'utf-8');
+        return GrypeOutputSchema.parse(JSON.parse(content));
+      },
+    );
   }
 }
