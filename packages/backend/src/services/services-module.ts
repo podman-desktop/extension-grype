@@ -20,14 +20,17 @@ import { ContainerModule } from 'inversify';
 import { SyftService } from '/@/services/syft-service';
 import { GrypeService } from '/@/services/grype-service';
 import { StartupSymbol } from '/@/inject/symbol';
+import { ImageCheckerProvider } from '/@/services/image-checker-provider';
 
 const servicesModule = new ContainerModule(options => {
   options.bind<SyftService>(SyftService).toSelf().inSingletonScope();
   options.bind<GrypeService>(GrypeService).toSelf().inSingletonScope();
+  options.bind<ImageCheckerProvider>(ImageCheckerProvider).toSelf().inSingletonScope();
 
   // mark it as a startup service
   options.bind(StartupSymbol).toService(GrypeService);
   options.bind(StartupSymbol).toService(SyftService);
+  options.bind(StartupSymbol).toService(ImageCheckerProvider);
 });
 
 export { servicesModule };
