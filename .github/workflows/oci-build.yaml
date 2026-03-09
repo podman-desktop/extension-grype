@@ -14,19 +14,43 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-name: next-build.yaml
+
+name: OCI Build
+
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
+  workflow_call:
+    inputs:
+      ref:
+        required: false
+        type: string
+      image:
+        required: true
+        type: string
+      tags:
+        required: true
+        type: string
+      registry:
+        required: false
+        type: string
+        default: ghcr.io
+      registry-password:
+        required: true
+        type: string
+      registry-username:
+        required: false
+        type: string
+        default: ${{ github.repository_owner }}
+      containerfile:
+        required: false
+        default: ./Containerfile
+        type: string
+    outputs:
+      image-with-tag:
+        description: 'Name of the image tagged with the first tag present'
+        value: ${{ jobs.build.outputs.image-with-tag }}
 
 permissions:
   contents: read
-
-concurrency:
-  group: ${{ github.workflow }}
-  cancel-in-progress: true
 
 jobs:
   build:
@@ -34,27 +58,28 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      image-with-tag: ${{ steps.build-image.outputs.image-with-tag }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 1
+          ref: ${{ inputs.ref }}
 
-      - name: Log in to ghcr.io
+      - name: Log in to ${{ inputs.registry }}
         uses: redhat-actions/podman-login@4934294ad0449894bcd1e9f191899d7292469603 #v1.7
         with:
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          registry: ghcr.io
+          password: ${{ inputs.registry-password }}
+          registry: ${{ inputs.registry }}
 
       - name: Build Image
         id: build-image
         uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 #v2.13
         with:
-          image: ${{ github.repository }}
-          tags: |
-            next
-            ${{ github.sha }}
-          containerfiles: ./Containerfile
+          image: ${{ inputs.image }}
+          tags: ${{ inputs.tags }}
+          containerfiles: ${{ inputs.containerfile }}
           extra-args: |
             --squash
 
@@ -63,4 +88,4 @@ jobs:
         with:
           image: ${{ steps.build-image.outputs.image }}
           tags: ${{ steps.build-image.outputs.tags }}
-          registry: ghcr.io
+          registry: ${{ inputs.registry }}
