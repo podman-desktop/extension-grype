@@ -47,6 +47,8 @@ jobs:
   report:
     needs: build-publish
     runs-on: ubuntu-24.04
+    permissions:
+      checks: write
     steps:
       - name: Create report markdown
         run: |
