@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "paths": {
+      "/@/*": ["./src/*"],
+      "/@generated/*": ["./generated/*"]
+    }
+  },
+  "include": ["src", "types/*.d.ts", "../../types/*.d.ts"],
+  "exclude": ["vite.config.ts", "vitest.config.ts", "vite-plugins/**/*.ts"]
+}
