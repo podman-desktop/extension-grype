@@ -29,4 +29,5 @@ jobs:
       ref: ${{ github.ref }}
       image: ${{ github.repository }}
       tags: next
+    secrets:
       registry-password: ${{ secrets.GITHUB_TOKEN }}

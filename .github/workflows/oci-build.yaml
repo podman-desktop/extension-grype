@@ -33,9 +33,6 @@ on:
         required: false
         type: string
         default: ghcr.io
-      registry-password:
-        required: true
-        type: string
       registry-username:
         required: false
         type: string
@@ -44,6 +41,9 @@ on:
         required: false
         default: ./Containerfile
         type: string
+    secrets:
+      registry-password:
+        required: true
     outputs:
       image-with-tag:
         description: 'Name of the image tagged with the first tag present'
@@ -70,7 +70,7 @@ jobs:
         uses: redhat-actions/podman-login@4934294ad0449894bcd1e9f191899d7292469603 #v1.7
         with:
           username: ${{ github.repository_owner }}
-          password: ${{ inputs.registry-password }}
+          password: ${{ secrets.registry-password }}
           registry: ${{ inputs.registry }}
 
       - name: Build Image

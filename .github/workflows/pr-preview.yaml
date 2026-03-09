@@ -41,4 +41,5 @@ jobs:
       ref: ${{ github.event.workflow_run.head_sha }}
       image: ${{ github.repository }}/pr
       tags: ${{ github.event.workflow_run.pull_requests[0].number }}
+    secrets:
       registry-password: ${{ secrets.GITHUB_TOKEN }}
