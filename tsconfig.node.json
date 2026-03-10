@@ -6,6 +6,7 @@
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "sourceMap": true,
+    "noEmit": true,
     "outDir": "dist",
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
