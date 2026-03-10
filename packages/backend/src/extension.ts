@@ -17,11 +17,12 @@
  ***********************************************************************/
 import { MainService } from '/@/services/main-service';
 import type { ExtensionContext } from '@podman-desktop/api';
+import type { GrypeExtensionApi } from '@podman-desktop/grype-extension-api';
 
 let main: MainService | undefined;
 
 // Initialize the activation of the extension.
-export async function activate(context: ExtensionContext): Promise<void> {
+export async function activate(context: ExtensionContext): Promise<GrypeExtensionApi> {
   main = new MainService();
   return main.init(context);
 }

@@ -19,15 +19,20 @@ import type { ExtensionContext } from '@podman-desktop/api';
 import type { AsyncInit } from '/@/utils/async-init';
 import { InversifyBinding } from '/@/inject/inversify-binding';
 import type { IAsyncDisposable } from '/@/utils/async-disposable';
+import type { GrypeExtensionApi } from '@podman-desktop/grype-extension-api';
+import { ApiService } from '/@/services/api-service';
 
-export class MainService implements IAsyncDisposable, AsyncInit<ExtensionContext> {
+export class MainService implements IAsyncDisposable, AsyncInit<ExtensionContext, GrypeExtensionApi> {
   #inversify: InversifyBinding | undefined;
 
   constructor() {}
 
-  async init(context: ExtensionContext): Promise<void> {
+  async init(context: ExtensionContext): Promise<GrypeExtensionApi> {
     this.#inversify = new InversifyBinding(context);
-    await this.#inversify.init();
+    const container = await this.#inversify.init();
+
+    const api = await container.getAsync(ApiService);
+    return api.init();
   }
 
   async asyncDispose(): Promise<void> {

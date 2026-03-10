@@ -15,6 +15,29 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
-// export syft & grype
-export type * as syft from './generated/syft-schema';
-export * as grype from './schemas/grype';
+import type * as syft from '/@generated/syft-schema';
+import * as grype from '/@/schemas/grype';
+import type { CancellationToken, ImageInfo } from '@podman-desktop/api';
+
+export interface GrypeExtensionApi {
+  sbom: {
+    analyse(
+      image: ImageInfo,
+      options?: {
+        token?: CancellationToken;
+      },
+    ): Promise<syft.Document>;
+  };
+
+  vulnerability: {
+    analyse(
+      image: ImageInfo,
+      options?: {
+        token?: CancellationToken;
+      },
+    ): Promise<grype.Document>;
+  };
+}
+
+// export syft & grype types
+export { syft, grype };

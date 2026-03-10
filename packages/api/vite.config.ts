@@ -29,10 +29,21 @@ export default defineConfig({
   plugins: [
     syftJSONSchema(),
     dts({
+      bundleTypes: true,
       root: PACKAGE_ROOT,
       tsconfigPath: join(PACKAGE_ROOT, 'tsconfig.json'),
+      aliases: {
+        '/@/': join(PACKAGE_ROOT, 'src') + '/',
+        '/@generated/': join(PACKAGE_ROOT, 'generated') + '/',
+      },
     }),
   ],
+  resolve: {
+    alias: {
+      '/@/': join(PACKAGE_ROOT, 'src') + '/',
+      '/@generated/': join(PACKAGE_ROOT, 'generated') + '/',
+    },
+  },
   build: {
     sourcemap: 'inline',
     target: 'esnext',

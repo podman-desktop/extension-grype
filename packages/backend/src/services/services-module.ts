@@ -20,12 +20,14 @@ import { ContainerModule } from 'inversify';
 import { SyftService } from '/@/services/syft-service';
 import { GrypeService } from '/@/services/grype-service';
 import { StartupSymbol } from '/@/inject/symbol';
+import { ApiService } from '/@/services/api-service';
 import { ImageCheckerProvider } from '/@/services/image-checker-provider';
 import { CacheService } from '/@/services/cache-service';
 
 const servicesModule = new ContainerModule(options => {
   options.bind<SyftService>(SyftService).toSelf().inSingletonScope();
   options.bind<GrypeService>(GrypeService).toSelf().inSingletonScope();
+  options.bind<ApiService>(ApiService).toSelf().inSingletonScope();
   options.bind<ImageCheckerProvider>(ImageCheckerProvider).toSelf().inSingletonScope();
   options.bind<CacheService>(CacheService).toSelf().inSingletonScope();
 

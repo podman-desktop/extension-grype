@@ -21,9 +21,17 @@ import { MainService } from '/@/services/main-service';
 import type { ExtensionContext } from '@podman-desktop/api';
 
 import { InversifyBinding } from '/@/inject/inversify-binding';
+import type { Container } from 'inversify';
+import { ApiService } from '/@/services/api-service';
 
 vi.mock(import('/@/inject/inversify-binding'));
 
+const INVERSIFY_CONTAINER_MOCK: Container = {
+  getAsync: vi.fn(),
+} as unknown as Container;
+const API_SERVICE_MOCK: ApiService = {
+  init: vi.fn(),
+} as unknown as ApiService;
 const EXTENSION_CONTEXT_MOCK: ExtensionContext = {} as unknown as ExtensionContext;
 
 let main: MainService;
@@ -31,6 +39,15 @@ let main: MainService;
 beforeEach(() => {
   vi.resetAllMocks();
 
+  vi.mocked(InversifyBinding.prototype.init).mockResolvedValue(INVERSIFY_CONTAINER_MOCK);
+  vi.mocked(INVERSIFY_CONTAINER_MOCK.getAsync).mockImplementation(async identifier => {
+    switch (identifier) {
+      case ApiService:
+        return API_SERVICE_MOCK;
+      default:
+        throw new Error(`unknown identifier ${String(identifier)}`);
+    }
+  });
   main = new MainService();
 });
 
