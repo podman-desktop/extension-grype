@@ -80,10 +80,16 @@ describe('check', () => {
     vi.mocked(SYFT_SERVICE_MOCK.analyse).mockResolvedValue('sbom-path');
     vi.mocked(GRYPE_SERVICE_MOCK.analyse).mockResolvedValue({ matches: [] });
 
-    const result = await check(IMAGE_INFO_MOCK);
+    const token: CancellationToken = {} as unknown as CancellationToken;
 
-    expect(SYFT_SERVICE_MOCK.analyse).toHaveBeenCalledWith(IMAGE_INFO_MOCK);
-    expect(GRYPE_SERVICE_MOCK.analyse).toHaveBeenCalledWith('sbom-path');
+    const result = await check(IMAGE_INFO_MOCK, token);
+
+    expect(SYFT_SERVICE_MOCK.analyse).toHaveBeenCalledWith(IMAGE_INFO_MOCK, {
+      token,
+    });
+    expect(GRYPE_SERVICE_MOCK.analyse).toHaveBeenCalledWith('sbom-path', {
+      token,
+    });
     expect(result).toEqual({
       checks: [
         {

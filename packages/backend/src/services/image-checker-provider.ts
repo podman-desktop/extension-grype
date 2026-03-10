@@ -39,10 +39,14 @@ export class ImageCheckerProvider implements Disposable, AsyncInit {
     this.#disposables = [];
   }
 
-  protected async check(image: ImageInfo, _token?: CancellationToken): Promise<ImageChecks | undefined> {
-    const file = await this.syft.analyse(image);
+  protected async check(image: ImageInfo, token?: CancellationToken): Promise<ImageChecks | undefined> {
+    const file = await this.syft.analyse(image, {
+      token,
+    });
 
-    const result = await this.grype.analyse(file);
+    const result = await this.grype.analyse(file, {
+      token,
+    });
 
     const vulnerabilities: Array<ImageCheck> = result.matches.map(match => ({
       name: match.vulnerability.id,
