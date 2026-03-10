@@ -1,18 +1,6 @@
 {
+  "extends": "../../tsconfig.node.json",
   "compilerOptions": {
-    "strict": true,
-    "target": "esnext",
-    "module": "esnext",
-    "moduleResolution": "Bundler",
-    "resolveJsonModule": true,
-    "sourceMap": true,
-    "outDir": "dist",
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "types": ["node"],
-    "noImplicitOverride": true,
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "paths": {

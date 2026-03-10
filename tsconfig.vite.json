@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.node.json",
+  "compilerOptions": {
+    "types": [
+      "node",
+      "vitest/globals"
+    ]
+  },
+  "include": [
+    "**/vitest.config.ts",
+    "**/vite.config.ts",
+    "**/vite-plugins/**/*.ts",
+    "vitest.workspace.ts",
+    "**/__mocks__/**/*.ts"
+  ]
+}
