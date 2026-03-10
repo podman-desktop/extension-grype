@@ -11,7 +11,9 @@
     "npm": ">=10.2.3"
   },
   "scripts": {
-    "build": "cd packages/backend && npm run build",
+    "build:api": "cd packages/api && npm run build",
+    "build:backend": "cd packages/backend && npm run build",
+    "build": "pnpm run build:api && pnpm run build:backend",
     "format:check": "prettier --check \"packages/**/*.{ts,js,json,svelte}\"",
     "format:fix": "prettier --write \"packages/**/*.{ts,js,json,svelte}\"",
     "lint:check": "eslint . --cache",
