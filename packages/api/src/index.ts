@@ -15,3 +15,5 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
+// export syft
+export type * as syft from './generated/syft-schema';

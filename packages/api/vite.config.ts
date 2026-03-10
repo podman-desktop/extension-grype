@@ -17,6 +17,7 @@
  ***********************************************************************/
 import { join } from 'node:path';
 import { defineConfig } from 'vite';
+import { syftJSONSchema } from './vite-plugins/syft-json-schema';
 import dts from 'unplugin-dts/vite';
 import { builtinModules } from 'node:module';
 
@@ -26,6 +27,7 @@ export default defineConfig({
   mode: process.env.MODE,
   root: PACKAGE_ROOT,
   plugins: [
+    syftJSONSchema(),
     dts({
       root: PACKAGE_ROOT,
       tsconfigPath: join(PACKAGE_ROOT, 'tsconfig.json'),

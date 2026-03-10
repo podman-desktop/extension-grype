@@ -28,7 +28,7 @@ export function syftJSONSchema(): Plugin {
     name: 'vite-plugin-syft-json-schema',
     enforce: 'pre',
     configResolved: async (resolved): Promise<void> => {
-      const generated = join(resolved.root, 'generated');
+      const generated = join(resolved.root, 'src', 'generated');
       await mkdir(generated, { recursive: true });
 
       const schemaPath = join(generated, 'syft-schema.json');

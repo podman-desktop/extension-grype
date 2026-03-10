@@ -4,10 +4,9 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "paths": {
-      "/@/*": ["./src/*"],
-      "/@generated/*": ["./generated/*"]
+      "/@/*": ["./src/*"]
     }
   },
   "include": ["src", "types/*.d.ts", "../../types/*.d.ts"],
-  "exclude": ["vite.config.ts", "vitest.config.ts", "vite-plugins/**/*.ts"]
+  "exclude": ["vite.config.ts", "vitest.config.ts"]
 }
