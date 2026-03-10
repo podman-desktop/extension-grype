@@ -31,7 +31,7 @@ import { inject, injectable, postConstruct, preDestroy } from 'inversify';
 import { existsSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { readFile } from 'node:fs/promises';
-import { GrypeOutput, GrypeOutputSchema } from '/@/schemas/grype-output';
+import * as grype from '/@/schemas/grype';
 
 @injectable()
 export class GrypeService extends AnchoreCliService {
@@ -75,7 +75,7 @@ export class GrypeService extends AnchoreCliService {
     options?: {
       token?: CancellationToken;
     },
-  ): Promise<GrypeOutput> {
+  ): Promise<grype.Document> {
     if (!this.cliTool?.version || !this.cliTool.path)
       throw new Error('cannot analyse sbom without grype binary installed');
 
@@ -96,7 +96,7 @@ export class GrypeService extends AnchoreCliService {
 
     if (existsSync(destination)) {
       const data = await readFile(destination, 'utf-8');
-      return GrypeOutputSchema.parse(JSON.parse(data));
+      return grype.GrypeDocumentSchema.parse(JSON.parse(data));
     }
 
     return window.withProgress(
@@ -116,7 +116,7 @@ export class GrypeService extends AnchoreCliService {
         });
 
         const content = await readFile(destination, 'utf-8');
-        return GrypeOutputSchema.parse(JSON.parse(content));
+        return grype.GrypeDocumentSchema.parse(JSON.parse(content));
       },
     );
   }

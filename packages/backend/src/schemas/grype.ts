@@ -17,37 +17,36 @@
  ***********************************************************************/
 import { z } from 'zod';
 
+function normalizeSeverity(severity?: string): 'high' | 'critical' | 'medium' | 'low' | undefined {
+  switch (severity?.toLowerCase()) {
+    case 'high':
+      return 'high';
+    case 'critical':
+      return 'critical';
+    case 'medium':
+      return 'medium';
+    case 'low':
+    case 'negligible':
+      return 'low';
+    default:
+      return undefined;
+  }
+}
+
 /**
  * No json-schema is provided for grype json output
  * Waiting on upstream https://github.com/anchore/grype/issues/214
  */
-export const GrypeOutputSchema = z.object({
+export const GrypeDocumentSchema = z.object({
   matches: z.array(
     z.object({
       vulnerability: z.object({
         id: z.string(),
-        severity: z
-          .string()
-          .optional()
-          .transform(severity => {
-            switch (severity?.toLowerCase()) {
-              case 'high':
-                return 'high';
-              case 'critical':
-                return 'critical';
-              case 'medium':
-                return 'medium';
-              case 'low':
-              case 'negligible':
-                return 'low';
-              default:
-                return undefined;
-            }
-          }),
+        severity: z.string().optional().transform(normalizeSeverity),
         description: z.string().optional(),
       }),
     }),
   ),
 });
 
-export type GrypeOutput = z.output<typeof GrypeOutputSchema>;
+export type Document = z.output<typeof GrypeDocumentSchema>;

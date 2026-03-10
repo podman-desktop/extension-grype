@@ -24,13 +24,13 @@ import { tmpdir } from 'node:os';
 import type { Octokit } from '@octokit/rest';
 import { existsSync } from 'node:fs';
 import { GrypeService } from '/@/services/grype-service';
-import type { GrypeOutput } from '/@/schemas/grype-output';
+import type * as grype from '/@/schemas/grype';
 import { readFile } from 'node:fs/promises';
 
 vi.mock(import('node:fs'));
 vi.mock(import('node:fs/promises'));
 
-const GRYPE_DOCUMENT_MOCK: GrypeOutput = {
+const GRYPE_DOCUMENT_MOCK: grype.Document = {
   matches: [],
 };
 const EXTENSION_CONTEXT_MOCK: ExtensionContext = {
@@ -69,32 +69,32 @@ const CLI_TOOL_MOCK: CliTool = {
   dispose: vi.fn(),
 };
 
-let grype: GrypeService;
+let grypeService: GrypeService;
 
 beforeEach(() => {
   vi.resetAllMocks();
 
   vi.mocked(cliApi.createCliTool).mockReturnValue(CLI_TOOL_MOCK);
-  grype = new GrypeService(OCTOKIT_MOCK, EXTENSION_CONTEXT_MOCK);
+  grypeService = new GrypeService(OCTOKIT_MOCK, EXTENSION_CONTEXT_MOCK);
 
   vi.mocked(readFile).mockResolvedValue(JSON.stringify(GRYPE_DOCUMENT_MOCK));
 });
 
 describe('GrypeService#analyse', () => {
   beforeEach(() => {
-    return grype.init();
+    return grypeService.init();
   });
 
   test('non-existent sbom should throw an error', async () => {
     await expect(async () => {
-      await grype.analyse('fake');
+      await grypeService.analyse('fake');
     }).rejects.toThrowError('cannot analyse without sbom file');
   });
 
   test('existing sbom and cached grype output should return it', async () => {
     vi.mocked(existsSync).mockReturnValue(true);
 
-    const result = await grype.analyse('foo.syft.json');
+    const result = await grypeService.analyse('foo.syft.json');
 
     expect(result).toStrictEqual(GRYPE_DOCUMENT_MOCK);
   });
@@ -102,7 +102,7 @@ describe('GrypeService#analyse', () => {
   test('should create a task', async () => {
     vi.mocked(existsSync).mockReturnValueOnce(true);
 
-    await grype.analyse('foo.syft.json');
+    await grypeService.analyse('foo.syft.json');
 
     expect(windowApi.withProgress).toHaveBeenCalledExactlyOnceWith(
       {
@@ -118,7 +118,7 @@ describe('GrypeService#analyse', () => {
     vi.mocked(existsSync).mockReturnValueOnce(true);
 
     const sbom = 'foo.syft.json';
-    await grype.analyse(sbom);
+    await grypeService.analyse(sbom);
 
     const fn = vi.mocked(windowApi.withProgress).mock.calls[0][1];
     assert(fn);
