@@ -18,7 +18,8 @@
 import type { Plugin } from 'vite';
 import { join } from 'node:path';
 import { mkdir, writeFile } from 'node:fs/promises';
-import { compileFromFile } from 'json-schema-to-typescript';
+import type { JSONSchema } from 'json-schema-to-typescript';
+import { compile } from 'json-schema-to-typescript';
 
 const SYFT_JSON_SCHEMA_URL =
   'https://raw.githubusercontent.com/anchore/syft/refs/tags/v1.42.1/schema/json/schema-16.1.3.json';
@@ -39,14 +40,15 @@ export function syftJSONSchema(): Plugin {
 
       if (!content || typeof content !== 'object' || !('$ref' in content)) throw new Error('invalid json schema');
 
+      // write the original json schema
+      await writeFile(schemaPath, JSON.stringify(content, undefined, 2), 'utf-8');
+
       // delete the root `$ref`
       // https://github.com/bcherny/json-schema-to-typescript/issues/132
       delete content['$ref'];
 
-      await writeFile(schemaPath, JSON.stringify(content, undefined, 2), 'utf-8');
-
       // compile from file
-      const output = await compileFromFile(schemaPath, {
+      const output = await compile(content as JSONSchema, 'syft', {
         unreachableDefinitions: true,
       });
 

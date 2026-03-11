@@ -15,29 +15,17 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
-import * as grype from './schemas/grype';
-import * as syft from './schemas/syft';
-import type { CancellationToken, ImageInfo } from '@podman-desktop/api';
+import { resolve } from 'node:path';
+import { mergeConfig } from 'vitest/config';
+import viteConfig from './vite.config';
 
-export interface GrypeExtensionApi {
-  sbom: {
-    analyse(
-      image: ImageInfo,
-      options?: {
-        token?: CancellationToken;
-      },
-    ): Promise<syft.Document>;
-  };
-
-  vulnerability: {
-    analyse(
-      image: ImageInfo,
-      options?: {
-        token?: CancellationToken;
-      },
-    ): Promise<grype.Document>;
-  };
-}
-
-// export syft & grype types
-export { syft, grype };
+export default mergeConfig(viteConfig, {
+  test: {
+    globals: true,
+    environment: 'node',
+    include: ['src/**/*.{test,spec}.?(c|m)[jt]s?(x)', 'vitest.setup.spec.ts'],
+    alias: {
+      '@podman-desktop/api': resolve(__dirname, '__mocks__', '@podman-desktop', 'api.ts'),
+    },
+  },
+});

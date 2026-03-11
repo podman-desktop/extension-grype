@@ -15,29 +15,29 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
-import * as grype from './schemas/grype';
-import * as syft from './schemas/syft';
-import type { CancellationToken, ImageInfo } from '@podman-desktop/api';
+import { SyftDocumentSchema } from './syft';
 
-export interface GrypeExtensionApi {
-  sbom: {
-    analyse(
-      image: ImageInfo,
-      options?: {
-        token?: CancellationToken;
-      },
-    ): Promise<syft.Document>;
-  };
+import { test, expect } from 'vitest';
+import * as helloWorld from '../fixtures/syft/hello-world.json' with { type: 'json' };
 
-  vulnerability: {
-    analyse(
-      image: ImageInfo,
-      options?: {
-        token?: CancellationToken;
-      },
-    ): Promise<grype.Document>;
-  };
+interface TestCase {
+  name: string;
+  input: unknown;
+  success: boolean;
 }
 
-// export syft & grype types
-export { syft, grype };
+test.each<TestCase>([
+  {
+    name: 'empty object should be failing',
+    success: false,
+    input: {},
+  },
+  {
+    name: 'quay.io/podman/hello result',
+    success: true,
+    input: helloWorld,
+  },
+])('$name', ({ input, success }) => {
+  const result = SyftDocumentSchema.safeParse(input);
+  expect(result.success).toEqual(success);
+});

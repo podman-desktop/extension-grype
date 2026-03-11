@@ -15,29 +15,14 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
-import * as grype from './schemas/grype';
-import * as syft from './schemas/syft';
-import type { CancellationToken, ImageInfo } from '@podman-desktop/api';
+import type { ZodType } from 'zod';
+import { z } from 'zod';
+import * as jsonSchema from '../generated/syft-schema.json' with { type: 'json' };
+import type { Document } from '../generated/syft-schema';
 
-export interface GrypeExtensionApi {
-  sbom: {
-    analyse(
-      image: ImageInfo,
-      options?: {
-        token?: CancellationToken;
-      },
-    ): Promise<syft.Document>;
-  };
+type JSONSchema = Parameters<typeof z.fromJSONSchema>[0];
 
-  vulnerability: {
-    analyse(
-      image: ImageInfo,
-      options?: {
-        token?: CancellationToken;
-      },
-    ): Promise<grype.Document>;
-  };
-}
+export const SyftDocumentSchema = z.fromJSONSchema(jsonSchema as JSONSchema) as ZodType<Document>;
 
-// export syft & grype types
-export { syft, grype };
+// export all syft generated types
+export * from '../generated/syft-schema';
