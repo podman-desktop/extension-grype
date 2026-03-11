@@ -30,7 +30,7 @@ import { ExtensionContextSymbol } from '/@/inject/symbol';
 import { inject, injectable, postConstruct, preDestroy } from 'inversify';
 import { existsSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
-import { readFile } from 'node:fs/promises';
+import { readFile, rename } from 'node:fs/promises';
 import { grype } from '@podman-desktop/grype-extension-api';
 
 @injectable()
@@ -111,9 +111,12 @@ export class GrypeService extends AnchoreCliService {
         });
         if (token.isCancellationRequested) throw new Error('cannot analyse image: cancellation has been requested');
 
-        await process.exec(binary, [`sbom:${sbom}`, '--output=json', `--file=${destination}`], {
+        const tmp = `${destination}.tmp`;
+        await process.exec(binary, [`sbom:${sbom}`, '--output=json', `--file=${tmp}`], {
           token: cancel.token,
         });
+
+        await rename(tmp, destination);
 
         const content = await readFile(destination, 'utf-8');
         return grype.GrypeDocumentSchema.parse(JSON.parse(content));
