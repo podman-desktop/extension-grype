@@ -25,7 +25,7 @@ import type { Octokit } from '@octokit/rest';
 import { existsSync } from 'node:fs';
 import { GrypeService } from '/@/services/grype-service';
 import type { grype } from '@podman-desktop/grype-extension-api';
-import { readFile } from 'node:fs/promises';
+import { readFile, rename } from 'node:fs/promises';
 
 vi.mock(import('node:fs'));
 vi.mock(import('node:fs/promises'));
@@ -127,11 +127,12 @@ describe('GrypeService#analyse', () => {
 
     expect(process.exec).toHaveBeenCalledExactlyOnceWith(
       CLI_TOOL_MOCK.path,
-      [`sbom:${sbom}`, '--output=json', '--file=foo.grype.json'],
+      [`sbom:${sbom}`, '--output=json', '--file=foo.grype.json.tmp'],
       {
         token: undefined,
       },
     );
+    expect(rename).toHaveBeenCalledExactlyOnceWith('foo.grype.json.tmp', 'foo.grype.json');
     expect(result).toStrictEqual(GRYPE_DOCUMENT_MOCK);
   });
 });
