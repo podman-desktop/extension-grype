@@ -22,6 +22,7 @@ import type { GrypeService } from '/@/services/grype-service';
 import type { SyftService } from '/@/services/syft-service';
 import type { ImageInfo } from '@podman-desktop/api';
 import { readFile } from 'node:fs/promises';
+import type { syft } from '@podman-desktop/grype-extension-api';
 
 vi.mock(import('node:fs/promises'));
 
@@ -55,7 +56,26 @@ describe('ApiService', () => {
     test('should call syftService.analyse and parse the result as JSON', async () => {
       const image: ImageInfo = { Id: 'dummy-image' } as ImageInfo;
       const dummyPath = 'dummy-sbom.json';
-      const dummySbom = { artifacts: [] };
+      const dummySbom: syft.Document = {
+        artifacts: [],
+        artifactRelationships: [],
+        source: {
+          id: '',
+          name: '',
+          version: '',
+          type: '',
+          metadata: {},
+        },
+        distro: {},
+        descriptor: {
+          name: '',
+          version: '',
+        },
+        schema: {
+          version: '',
+          url: '',
+        },
+      };
 
       vi.mocked(SYFT_SERVICE_MOCK.analyse).mockResolvedValue(dummyPath);
       vi.mocked(readFile).mockResolvedValue(JSON.stringify(dummySbom));
