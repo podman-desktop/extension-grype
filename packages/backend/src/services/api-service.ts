@@ -18,7 +18,8 @@
 import type { AsyncInit } from '/@/utils/async-init';
 import type { CancellationToken, ImageInfo } from '@podman-desktop/api';
 
-import type { GrypeExtensionApi, syft, grype } from '@podman-desktop/grype-extension-api';
+import type { GrypeExtensionApi } from '@podman-desktop/grype-extension-api';
+import { syft, grype } from '@podman-desktop/grype-extension-api';
 import { inject, injectable } from 'inversify';
 import { GrypeService } from '/@/services/grype-service';
 import { SyftService } from '/@/services/syft-service';
@@ -39,7 +40,7 @@ export class ApiService implements AsyncInit<never, GrypeExtensionApi> {
         analyse: async (image: ImageInfo, options?: { token?: CancellationToken }): Promise<syft.Document> => {
           const result = await this.syftService.analyse(image, options);
           const raw = await readFile(result, 'utf-8');
-          return JSON.parse(raw);
+          return syft.SyftDocumentSchema.parse(JSON.parse(raw));
         },
       },
       vulnerability: {

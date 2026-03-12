@@ -1,0 +1,258 @@
+{
+  "artifacts": [],
+  "artifactRelationships": [],
+  "files": [
+    {
+      "id": "f04dacd191676279",
+      "location": {
+        "path": "/usr/local/bin/podman_hello_world",
+        "layerID": "sha256:2114fc8b70586b9325dde6fd26066d9951414dcdfb3995f41d51d1995cf3bd9d"
+      },
+      "executable": {
+        "format": "elf",
+        "hasExports": false,
+        "hasEntrypoint": true,
+        "importedLibraries": [],
+        "elfSecurityFeatures": {
+          "symbolTableStripped": true,
+          "nx": true,
+          "relRO": "partial",
+          "pie": false,
+          "dso": false
+        }
+      },
+      "unknowns": ["unknowns-labeler: no package identified in executable file"]
+    }
+  ],
+  "source": {
+    "id": "3dffe72b1da5cfb4ce32b278f8da0a1553665d2ef620439257d0b35ec7d5ac5a",
+    "name": "sha256:5dd467fce50b56951185da365b5feee75409968cbab5767b9b59e325fb2ecbc0",
+    "version": "sha256:3dffe72b1da5cfb4ce32b278f8da0a1553665d2ef620439257d0b35ec7d5ac5a",
+    "type": "image",
+    "metadata": {
+      "userInput": "sha256:5dd467fce50b56951185da365b5feee75409968cbab5767b9b59e325fb2ecbc0",
+      "imageID": "sha256:5dd467fce50b56951185da365b5feee75409968cbab5767b9b59e325fb2ecbc0",
+      "manifestDigest": "sha256:3dffe72b1da5cfb4ce32b278f8da0a1553665d2ef620439257d0b35ec7d5ac5a",
+      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+      "tags": [],
+      "imageSize": 778568,
+      "layers": [
+        {
+          "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+          "digest": "sha256:2114fc8b70586b9325dde6fd26066d9951414dcdfb3995f41d51d1995cf3bd9d",
+          "size": 778568
+        }
+      ],
+      "manifest": "eyJzY2hlbWFWZXJzaW9uIjoyLCJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQuZG9ja2VyLmRpc3RyaWJ1dGlvbi5tYW5pZmVzdC52Mitqc29uIiwiY29uZmlnIjp7Im1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5kb2NrZXIuY29udGFpbmVyLmltYWdlLnYxK2pzb24iLCJzaXplIjozMzE5LCJkaWdlc3QiOiJzaGEyNTY6NWRkNDY3ZmNlNTBiNTY5NTExODVkYTM2NWI1ZmVlZTc1NDA5OTY4Y2JhYjU3NjdiOWI1OWUzMjVmYjJlY2JjMCJ9LCJsYXllcnMiOlt7Im1lZGlhVHlwZSI6ImFwcGxpY2F0aW9uL3ZuZC5kb2NrZXIuaW1hZ2Uucm9vdGZzLmRpZmYudGFyLmd6aXAiLCJzaXplIjo3ODE4MjQsImRpZ2VzdCI6InNoYTI1NjoyMTE0ZmM4YjcwNTg2YjkzMjVkZGU2ZmQyNjA2NmQ5OTUxNDE0ZGNkZmIzOTk1ZjQxZDUxZDE5OTVjZjNiZDlkIn1dfQ==",
+      "config": "eyJjcmVhdGVkIjoiMjAyNC0wNS0yNlQwMjoxNzo0Ny4wMDcxMTE0OTVaIiwiY29udGFpbmVyIjoiOGJlNjVjOTM0MDdjZjMyM2Q3YzMzYzliODBhMTE0NDZhMzVkZDU4Y2E0MGM4MjcwMTRmMDVhMmQ5OTRjYzA2ZSIsImNvbnRhaW5lcl9jb25maWciOnsiSG9zdG5hbWUiOiJjNTE1OTQ5NTg5MzUiLCJEb21haW5uYW1lIjoiIiwiVXNlciI6IiIsIkF0dGFjaFN0ZGluIjpmYWxzZSwiQXR0YWNoU3Rkb3V0IjpmYWxzZSwiQXR0YWNoU3RkZXJyIjpmYWxzZSwiVHR5IjpmYWxzZSwiT3BlblN0ZGluIjpmYWxzZSwiU3RkaW5PbmNlIjpmYWxzZSwiRW52IjpbIlBBVEg9L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluIl0sIkNtZCI6WyIvdXNyL2xvY2FsL2Jpbi9wb2RtYW5faGVsbG9fd29ybGQiXSwiSW1hZ2UiOiIiLCJWb2x1bWVzIjp7fSwiV29ya2luZ0RpciI6IiIsIkVudHJ5cG9pbnQiOltdLCJPbkJ1aWxkIjpbXSwiTGFiZWxzIjp7ImFydGlzdCI6Ik3DoWlyw61uIE7DrSDhuIp14biD4bmrYWnEoSwgWC9Ud2l0dGVyOkBtYWlyaW4iLCJpby5idWlsZGFoLnZlcnNpb24iOiIxLjIzLjEiLCJpby5jb250YWluZXJzLmNhcGFiaWxpdGllcyI6InN5c19jaHJvb3QiLCJtYWludGFpbmVyIjoiUG9kbWFuIE1haW50YWluZXJzIiwib3JnLm9wZW5jb250YWluZXJzLmltYWdlLmRlc2NyaXB0aW9uIjoiSGVsbG8gd29ybGQgaW1hZ2Ugd2l0aCBhc2NpaSBhcnQiLCJvcmcub3BlbmNvbnRhaW5lcnMuaW1hZ2UuZG9jdW1lbnRhdGlvbiI6Imh0dHBzOi8vZ2l0aHViLmNvbS9jb250YWluZXJzL1BvZG1hbkhlbGxvL2Jsb2IvNzZiMjYyMDU2ZWFlMDk4NTFkMGE5NTJkMGY0MmI1YmJlZWRkZTQ3MS9SRUFETUUubWQiLCJvcmcub3BlbmNvbnRhaW5lcnMuaW1hZ2UucmV2aXNpb24iOiI3NmIyNjIwNTZlYWUwOTg1MWQwYTk1MmQwZjQyYjViYmVlZGRlNDcxIiwib3JnLm9wZW5jb250YWluZXJzLmltYWdlLnNvdXJjZSI6Imh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9jb250YWluZXJzL1BvZG1hbkhlbGxvLzc2YjI2MjA1NmVhZTA5ODUxZDBhOTUyZDBmNDJiNWJiZWVkZGU0NzEvQ29udGFpbmVyZmlsZSIsIm9yZy5vcGVuY29udGFpbmVycy5pbWFnZS50aXRsZSI6ImhlbGxvIGltYWdlIiwib3JnLm9wZW5jb250YWluZXJzLmltYWdlLnVybCI6Imh0dHBzOi8vZ2l0aHViLmNvbS9jb250YWluZXJzL1BvZG1hbkhlbGxvL2FjdGlvbnMvcnVucy85MjM5OTM0NjE3In19LCJjb25maWciOnsiSG9zdG5hbWUiOiJjNTE1OTQ5NTg5MzUiLCJEb21haW5uYW1lIjoiIiwiVXNlciI6IiIsIkF0dGFjaFN0ZGluIjpmYWxzZSwiQXR0YWNoU3Rkb3V0IjpmYWxzZSwiQXR0YWNoU3RkZXJyIjpmYWxzZSwiVHR5IjpmYWxzZSwiT3BlblN0ZGluIjpmYWxzZSwiU3RkaW5PbmNlIjpmYWxzZSwiRW52IjpbIlBBVEg9L3Vzci9sb2NhbC9zYmluOi91c3IvbG9jYWwvYmluOi91c3Ivc2JpbjovdXNyL2Jpbjovc2JpbjovYmluIl0sIkNtZCI6WyIvdXNyL2xvY2FsL2Jpbi9wb2RtYW5faGVsbG9fd29ybGQiXSwiSW1hZ2UiOiIiLCJWb2x1bWVzIjp7fSwiV29ya2luZ0RpciI6IiIsIkVudHJ5cG9pbnQiOltdLCJPbkJ1aWxkIjpbXSwiTGFiZWxzIjp7ImFydGlzdCI6Ik3DoWlyw61uIE7DrSDhuIp14biD4bmrYWnEoSwgWC9Ud2l0dGVyOkBtYWlyaW4iLCJpby5idWlsZGFoLnZlcnNpb24iOiIxLjIzLjEiLCJpby5jb250YWluZXJzLmNhcGFiaWxpdGllcyI6InN5c19jaHJvb3QiLCJtYWludGFpbmVyIjoiUG9kbWFuIE1haW50YWluZXJzIiwib3JnLm9wZW5jb250YWluZXJzLmltYWdlLmRlc2NyaXB0aW9uIjoiSGVsbG8gd29ybGQgaW1hZ2Ugd2l0aCBhc2NpaSBhcnQiLCJvcmcub3BlbmNvbnRhaW5lcnMuaW1hZ2UuZG9jdW1lbnRhdGlvbiI6Imh0dHBzOi8vZ2l0aHViLmNvbS9jb250YWluZXJzL1BvZG1hbkhlbGxvL2Jsb2IvNzZiMjYyMDU2ZWFlMDk4NTFkMGE5NTJkMGY0MmI1YmJlZWRkZTQ3MS9SRUFETUUubWQiLCJvcmcub3BlbmNvbnRhaW5lcnMuaW1hZ2UucmV2aXNpb24iOiI3NmIyNjIwNTZlYWUwOTg1MWQwYTk1MmQwZjQyYjViYmVlZGRlNDcxIiwib3JnLm9wZW5jb250YWluZXJzLmltYWdlLnNvdXJjZSI6Imh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9jb250YWluZXJzL1BvZG1hbkhlbGxvLzc2YjI2MjA1NmVhZTA5ODUxZDBhOTUyZDBmNDJiNWJiZWVkZGU0NzEvQ29udGFpbmVyZmlsZSIsIm9yZy5vcGVuY29udGFpbmVycy5pbWFnZS50aXRsZSI6ImhlbGxvIGltYWdlIiwib3JnLm9wZW5jb250YWluZXJzLmltYWdlLnVybCI6Imh0dHBzOi8vZ2l0aHViLmNvbS9jb250YWluZXJzL1BvZG1hbkhlbGxvL2FjdGlvbnMvcnVucy85MjM5OTM0NjE3In19LCJhcmNoaXRlY3R1cmUiOiJhbWQ2NCIsIm9zIjoibGludXgiLCJyb290ZnMiOnsidHlwZSI6ImxheWVycyIsImRpZmZfaWRzIjpbInNoYTI1NjoyMTE0ZmM4YjcwNTg2YjkzMjVkZGU2ZmQyNjA2NmQ5OTUxNDE0ZGNkZmIzOTk1ZjQxZDUxZDE5OTVjZjNiZDlkIl19LCJoaXN0b3J5IjpbeyJjcmVhdGVkIjoiMjAyNC0wNS0yNlQwMjoxNzo0Ni44OTUyOTQ5MTRaIiwiY3JlYXRlZF9ieSI6Ii9iaW4vc2ggLWMgIyhub3ApIExBQkVMIG1haW50YWluZXI9XCJQb2RtYW4gTWFpbnRhaW5lcnNcIiIsImVtcHR5X2xheWVyIjp0cnVlfSx7ImNyZWF0ZWQiOiIyMDI0LTA1LTI2VDAyOjE3OjQ2Ljg5NTMwNjk4NloiLCJjcmVhdGVkX2J5IjoiL2Jpbi9zaCAtYyAjKG5vcCkgTEFCRUwgYXJ0aXN0PVwiTcOhaXLDrW4gTsOtIOG4inXhuIPhuathacShLCBYL1R3aXR0ZXI6QG1haXJpblwiIiwiZW1wdHlfbGF5ZXIiOnRydWV9LHsiY3JlYXRlZCI6IjIwMjQtMDUtMjZUMDI6MTc6NDYuODk1MzE4MDU3WiIsImNyZWF0ZWRfYnkiOiIvYmluL3NoIC1jICMobm9wKSBMQUJFTCBpby5jb250YWluZXJzLmNhcGFiaWxpdGllcz1cInN5c19jaHJvb3RcIiIsImVtcHR5X2xheWVyIjp0cnVlfSx7ImNyZWF0ZWQiOiIyMDI0LTA1LTI2VDAyOjE3OjQ3LjAwNjM3Mzg5WiIsImNyZWF0ZWRfYnkiOiIvYmluL3NoIC1jICMobm9wKSBDT1BZIGZpbGU6ZGNkMGVjOGM4MjY2NmU0OGQzYzVjZmE5NTU1YzJiOWM2MWE1MzVjNzY5N2FjMjViZWI2NWNjOTkxZDMzODMzYyBpbiAvdXNyL2xvY2FsL2Jpbi9wb2RtYW5faGVsbG9fd29ybGQgIiwiZW1wdHlfbGF5ZXIiOnRydWV9LHsiY3JlYXRlZCI6IjIwMjQtMDUtMjZUMDI6MTc6NDcuMDExMDA1MDQ0WiIsImNyZWF0ZWRfYnkiOiIvYmluL3NoIC1jICMobm9wKSBDTUQgW1wiL3Vzci9sb2NhbC9iaW4vcG9kbWFuX2hlbGxvX3dvcmxkXCJdIn1dfQ==",
+      "repoDigests": [],
+      "architecture": "",
+      "os": "",
+      "labels": {
+        "artist": "Máirín Ní Ḋuḃṫaiġ, X/Twitter:@mairin",
+        "io.buildah.version": "1.23.1",
+        "io.containers.capabilities": "sys_chroot",
+        "maintainer": "Podman Maintainers",
+        "org.opencontainers.image.description": "Hello world image with ascii art",
+        "org.opencontainers.image.documentation": "https://github.com/containers/PodmanHello/blob/76b262056eae09851d0a952d0f42b5bbeedde471/README.md",
+        "org.opencontainers.image.revision": "76b262056eae09851d0a952d0f42b5bbeedde471",
+        "org.opencontainers.image.source": "https://raw.githubusercontent.com/containers/PodmanHello/76b262056eae09851d0a952d0f42b5bbeedde471/Containerfile",
+        "org.opencontainers.image.title": "hello image",
+        "org.opencontainers.image.url": "https://github.com/containers/PodmanHello/actions/runs/9239934617"
+      }
+    }
+  },
+  "distro": {},
+  "descriptor": {
+    "name": "syft",
+    "version": "1.42.1",
+    "configuration": {
+      "catalogers": {
+        "requested": {
+          "default": ["image", "file"]
+        },
+        "used": [
+          "alpm-db-cataloger",
+          "apk-db-cataloger",
+          "binary-classifier-cataloger",
+          "bitnami-cataloger",
+          "cargo-auditable-binary-cataloger",
+          "conan-info-cataloger",
+          "dotnet-deps-binary-cataloger",
+          "dotnet-packages-lock-cataloger",
+          "dpkg-db-cataloger",
+          "elf-binary-package-cataloger",
+          "file-content-cataloger",
+          "file-digest-cataloger",
+          "file-executable-cataloger",
+          "file-metadata-cataloger",
+          "gguf-cataloger",
+          "go-module-binary-cataloger",
+          "graalvm-native-image-cataloger",
+          "homebrew-cataloger",
+          "java-archive-cataloger",
+          "java-jvm-cataloger",
+          "javascript-package-cataloger",
+          "linux-kernel-cataloger",
+          "lua-rock-cataloger",
+          "nix-cataloger",
+          "pe-binary-package-cataloger",
+          "php-composer-installed-cataloger",
+          "php-interpreter-cataloger",
+          "php-pear-serialized-cataloger",
+          "portage-cataloger",
+          "python-installed-package-cataloger",
+          "r-package-cataloger",
+          "rpm-db-cataloger",
+          "ruby-installed-gemspec-cataloger",
+          "snap-cataloger",
+          "wordpress-plugins-cataloger"
+        ]
+      },
+      "data-generation": {
+        "generate-cpes": true
+      },
+      "files": {
+        "content": {
+          "globs": null,
+          "skip-files-above-size": 0
+        },
+        "hashers": ["sha-1", "sha-256"],
+        "selection": "owned-by-package"
+      },
+      "licenses": {
+        "coverage": 75,
+        "include-content": "none"
+      },
+      "packages": {
+        "binary": [
+          "python-binary",
+          "python-binary-lib",
+          "pypy-binary-lib",
+          "go-binary",
+          "julia-binary",
+          "helm",
+          "redis-binary",
+          "valkey-binary",
+          "nodejs-binary",
+          "busybox-binary",
+          "util-linux-binary",
+          "haproxy-binary",
+          "perl-binary",
+          "php-composer-binary",
+          "httpd-binary",
+          "memcached-binary",
+          "traefik-binary",
+          "arangodb-binary",
+          "postgresql-binary",
+          "mysql-binary",
+          "mysql-binary",
+          "mysql-binary",
+          "xtrabackup-binary",
+          "mariadb-binary",
+          "rust-standard-library-linux",
+          "rust-standard-library-macos",
+          "ruby-binary",
+          "erlang-binary",
+          "erlang-alpine-binary",
+          "erlang-library",
+          "swipl-binary",
+          "dart-binary",
+          "haskell-ghc-binary",
+          "haskell-cabal-binary",
+          "haskell-stack-binary",
+          "consul-binary",
+          "hashicorp-vault-binary",
+          "nginx-binary",
+          "bash-binary",
+          "openssl-binary",
+          "qt-qtbase-lib",
+          "gcc-binary",
+          "fluent-bit-binary",
+          "wordpress-cli-binary",
+          "curl-binary",
+          "lighttpd-binary",
+          "proftpd-binary",
+          "zstd-binary",
+          "xz-binary",
+          "gzip-binary",
+          "sqlcipher-binary",
+          "jq-binary",
+          "chrome-binary",
+          "ffmpeg-binary",
+          "ffmpeg-library",
+          "ffmpeg-library",
+          "elixir-binary",
+          "elixir-library",
+          "istio-binary",
+          "istio-binary",
+          "grafana-binary",
+          "grafana-binary",
+          "envoy-binary",
+          "mongodb-binary",
+          "java-binary",
+          "java-jdb-binary"
+        ],
+        "dotnet": {
+          "dep-packages-must-claim-dll": true,
+          "dep-packages-must-have-dll": false,
+          "exclude-project-references": true,
+          "propagate-dll-claims-to-parents": true,
+          "relax-dll-claims-when-bundling-detected": true
+        },
+        "golang": {
+          "local-mod-cache-dir": "C:\\Users\\go\\pkg\\mod",
+          "local-vendor-dir": "",
+          "main-module-version": {
+            "from-build-settings": true,
+            "from-contents": false,
+            "from-ld-flags": true
+          },
+          "proxies": ["https://proxy.golang.org", "direct"],
+          "search-local-mod-cache-licenses": false,
+          "search-local-vendor-licenses": false,
+          "search-remote-licenses": false,
+          "use-packages-lib": true
+        },
+        "java-archive": {
+          "include-indexed-archives": true,
+          "include-unindexed-archives": false,
+          "maven-base-url": "https://repo1.maven.org/maven2",
+          "maven-localrepository-dir": "C:\\Users\\.m2\\repository",
+          "max-parent-recursive-depth": 0,
+          "resolve-transitive-dependencies": false,
+          "use-maven-localrepository": false,
+          "use-network": false
+        },
+        "javascript": {
+          "include-dev-dependencies": false,
+          "npm-base-url": "https://registry.npmjs.org",
+          "search-remote-licenses": false
+        },
+        "linux-kernel": {
+          "catalog-modules": true
+        },
+        "nix": {
+          "capture-owned-files": false
+        },
+        "python": {
+          "guess-unpinned-requirements": false,
+          "pypi-base-url": "https://pypi.org/pypi",
+          "search-remote-licenses": false
+        }
+      },
+      "relationships": {
+        "exclude-binary-packages-with-file-ownership-overlap": true,
+        "package-file-ownership": true,
+        "package-file-ownership-overlap": true
+      },
+      "search": {
+        "scope": "squashed"
+      }
+    }
+  },
+  "schema": {
+    "version": "16.1.3",
+    "url": "https://raw.githubusercontent.com/anchore/syft/main/schema/json/schema-16.1.3.json"
+  }
+}

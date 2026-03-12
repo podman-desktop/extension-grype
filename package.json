@@ -20,7 +20,7 @@
     "lint:fix": "eslint . --cache --fix",
     "typecheck:configs": "tsc --noEmit --project tsconfig.vite.json",
     "typecheck": "pnpm run typecheck:configs && pnpm run --recursive --parallel typecheck",
-    "test:unit": "pnpm run --recursive --parallel test:unit"
+    "test:unit": "vitest --run"
   },
   "resolutions": {
     "string-width": "^4.2.0",
