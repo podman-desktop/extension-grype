@@ -78,7 +78,9 @@ const plugin = {
     withProgress: vi.fn(),
   } as unknown as typeof podmanDesktopApi.window,
   navigation: {} as unknown as typeof podmanDesktopApi.navigation,
-  commands: {} as unknown as typeof podmanDesktopApi.commands,
+  commands: {
+    registerCommand: vi.fn(),
+  } as unknown as typeof podmanDesktopApi.commands,
   extensions: {} as unknown as typeof podmanDesktopApi.extensions,
   provider: {} as unknown as typeof podmanDesktopApi.provider,
   containerEngine: {

@@ -15,13 +15,17 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
-import { inject, injectable } from 'inversify';
+import { inject, injectable, postConstruct, preDestroy } from 'inversify';
 import { ExtensionContextSymbol } from '/@/inject/symbol';
-import { ExtensionContext } from '@podman-desktop/api';
+import { commands, Disposable, ExtensionContext, ProgressLocation, window } from '@podman-desktop/api';
 import { join } from 'node:path';
+import { rm } from 'node:fs/promises';
+import { AsyncInit } from '/@/utils/async-init';
 
 @injectable()
-export class CacheService {
+export class CacheService implements Disposable, AsyncInit {
+  #disposables: Disposable[] = [];
+
   constructor(
     @inject(ExtensionContextSymbol)
     protected readonly context: ExtensionContext,
@@ -29,5 +33,27 @@ export class CacheService {
 
   public getCacheDirectory(): string {
     return join(this.context.storagePath, 'cache');
+  }
+
+  protected async clearCache(): Promise<void> {
+    await window.withProgress(
+      {
+        location: ProgressLocation.TASK_WIDGET,
+        title: 'Grype: clearing cache',
+      },
+      async () => {
+        await rm(this.getCacheDirectory(), { recursive: true });
+      },
+    );
+  }
+
+  @postConstruct()
+  async init(): Promise<void> {
+    this.#disposables.push(commands.registerCommand('grype:clear-cache', this.clearCache.bind(this)));
+  }
+
+  @preDestroy()
+  dispose(): void {
+    this.#disposables.forEach(disposable => disposable.dispose());
   }
 }

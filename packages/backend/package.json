@@ -20,7 +20,14 @@
     "watch": "vite --mode development build -w",
     "typecheck": "tsc --noEmit"
   },
-  "contributes": {},
+  "contributes": {
+    "commands": [
+      {
+        "command": "grype:clear-cache",
+        "title": "Grype: clear cache"
+      }
+    ]
+  },
   "devDependencies": {
     "@podman-desktop/api": "^1.25.1",
     "@types/adm-zip": "^0.5.7",
