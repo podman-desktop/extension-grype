@@ -30,8 +30,10 @@ import { ExtensionContextSymbol } from '/@/inject/symbol';
 import { inject, injectable, postConstruct, preDestroy } from 'inversify';
 import { existsSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
-import { readFile, rename } from 'node:fs/promises';
+import { readFile, rename, stat } from 'node:fs/promises';
 import { grype } from '@podman-desktop/grype-extension-api';
+
+export const MAX_CACHE_AGE = 1000 * 60 * 60 * 24; // 1 day
 
 @injectable()
 export class GrypeService extends AnchoreCliService {
@@ -70,6 +72,12 @@ export class GrypeService extends AnchoreCliService {
     return 'grype';
   }
 
+  protected async isExpired(path: string): Promise<boolean> {
+    const stats = await stat(path);
+
+    return Date.now() - stats.mtimeMs > MAX_CACHE_AGE;
+  }
+
   public async analyse(
     sbom: string,
     options?: {
@@ -94,7 +102,8 @@ export class GrypeService extends AnchoreCliService {
     const [name] = basename(sbom).split('.');
     const destination = join(dir, `${name}.grype.json`);
 
-    if (existsSync(destination)) {
+    // if we have an existing entry and is not expired we use it
+    if (existsSync(destination) && !(await this.isExpired(destination))) {
       const data = await readFile(destination, 'utf-8');
       return grype.GrypeDocumentSchema.parse(JSON.parse(data));
     }
