@@ -87,6 +87,21 @@ jobs:
       - name: Execute pnpm
         run: pnpm install
 
+      - name: Set version
+        working-directory: packages/api
+        run: |
+          CURRENT_DAY=$(date +'%Y%m%d')
+          SHORT_SHA1=$(git rev-parse --short HEAD)
+          # grab the version from the package.json
+          API_VERSION=$(jq -r '.version' package.json)
+          # remove the -next from the version
+          STRIPPED_VERSION=${API_VERSION%-next}
+          # Concat everything to get the new version
+          TAG_PATTERN=${STRIPPED_VERSION}-$(date +'%Y%m%d%H%M')-${SHORT_SHA1}
+          
+          # replace the version in the package.json
+          sed -i  "s#\"version\": \"\(.*\)\",#\"version\": \"${TAG_PATTERN}\",#g" package.json
+
       - name: Run build
         run: pnpm build
 
