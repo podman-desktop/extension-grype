@@ -18,14 +18,15 @@
 
 import { test, vi, beforeEach, describe, expect, assert } from 'vitest';
 import type { ExtensionContext, CliTool } from '@podman-desktop/api';
-import { cli as cliApi, ProgressLocation, process, window as windowApi } from '@podman-desktop/api';
+import { window, cli as cliApi, ProgressLocation, process, window as windowApi } from '@podman-desktop/api';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import type { Octokit } from '@octokit/rest';
+import type { Stats } from 'node:fs';
 import { existsSync } from 'node:fs';
-import { GrypeService } from '/@/services/grype-service';
+import { GrypeService, MAX_CACHE_AGE } from '/@/services/grype-service';
 import type { grype } from '@podman-desktop/grype-extension-api';
-import { readFile, rename } from 'node:fs/promises';
+import { readFile, rename, stat } from 'node:fs/promises';
 
 vi.mock(import('node:fs'));
 vi.mock(import('node:fs/promises'));
@@ -78,6 +79,10 @@ beforeEach(() => {
   grypeService = new GrypeService(OCTOKIT_MOCK, EXTENSION_CONTEXT_MOCK);
 
   vi.mocked(readFile).mockResolvedValue(JSON.stringify(GRYPE_DOCUMENT_MOCK));
+
+  vi.mocked(stat).mockResolvedValue({
+    mtimeMs: Date.now(),
+  } as unknown as Stats);
 });
 
 describe('GrypeService#analyse', () => {
@@ -96,7 +101,21 @@ describe('GrypeService#analyse', () => {
 
     const result = await grypeService.analyse('foo.syft.json');
 
+    expect(readFile).toHaveBeenCalledExactlyOnceWith('foo.grype.json', 'utf-8');
     expect(result).toStrictEqual(GRYPE_DOCUMENT_MOCK);
+    expect(window.withProgress).not.toHaveBeenCalled();
+  });
+
+  test('expired grype cache should ignore it', async () => {
+    vi.mocked(existsSync).mockReturnValue(true);
+
+    vi.mocked(stat).mockResolvedValue({
+      mtimeMs: Date.now() - 2 * MAX_CACHE_AGE,
+    } as unknown as Stats);
+
+    await grypeService.analyse('foo.syft.json');
+
+    expect(window.withProgress).toHaveBeenCalled();
   });
 
   test('should create a task', async () => {
