@@ -22,6 +22,7 @@ import type { CancellationToken, ExtensionContext } from '@podman-desktop/api';
 import { commands, ProgressLocation, window } from '@podman-desktop/api';
 import { contributes } from '../../package.json';
 import { rm } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 
 vi.mock(import('node:fs'));
 vi.mock(import('node:fs/promises'));
@@ -79,6 +80,7 @@ describe('grype:clear-cache command', () => {
   });
 
   test('full workflow should call rm with recursive option', async () => {
+    vi.mocked(existsSync).mockReturnValue(true);
     vi.mocked(window.withProgress).mockImplementation((_, fn) => {
       return fn({ report: vi.fn() }, {} as CancellationToken);
     });

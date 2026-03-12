@@ -20,6 +20,7 @@ import { ExtensionContextSymbol } from '/@/inject/symbol';
 import { commands, Disposable, ExtensionContext, ProgressLocation, window } from '@podman-desktop/api';
 import { join } from 'node:path';
 import { rm } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { AsyncInit } from '/@/utils/async-init';
 
 @injectable()
@@ -42,7 +43,10 @@ export class CacheService implements Disposable, AsyncInit {
         title: 'Grype: clearing cache',
       },
       async () => {
-        await rm(this.getCacheDirectory(), { recursive: true });
+        const cache = this.getCacheDirectory();
+        if (existsSync(cache)) {
+          await rm(cache, { recursive: true });
+        }
       },
     );
   }
