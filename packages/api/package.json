@@ -1,11 +1,12 @@
 {
   "name": "@podman-desktop/grype-extension-api",
-  "version": "0.0.1",
+  "version": "0.1.0-next",
   "description": "API for Podman Desktop Grype extension",
   "repository": "https://github.com/podman-desktop/extension-grype",
   "publishConfig": {
     "provenance": true,
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "license": "Apache-2.0",
   "main": "./dist/index.cjs",
@@ -18,7 +19,7 @@
     "build": "vite build",
     "watch": "vite --mode development build -w",
     "typecheck": "tsc --noEmit",
-    "publish:next": "pnpm publish  --registry=https://registry.npmjs.org/ --no-git-tag-version --new-version 0.0.1-\"$(date +%s)\""
+    "publish:next": "pnpm publish --tag next"
   },
   "devDependencies": {
     "json-schema-to-typescript": "^15.0.4",
