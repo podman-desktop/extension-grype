@@ -18,7 +18,7 @@
 
 import { test, vi, beforeEach, expect, describe, assert } from 'vitest';
 import { CacheService } from '/@/services/cache-service';
-import type { CancellationToken, ExtensionContext} from '@podman-desktop/api';
+import type { CancellationToken, ExtensionContext } from '@podman-desktop/api';
 import { commands, ProgressLocation, window } from '@podman-desktop/api';
 import { contributes } from '../../package.json';
 import { rm } from 'node:fs/promises';
