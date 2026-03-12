@@ -19,7 +19,7 @@
     "build": "vite build",
     "watch": "vite --mode development build -w",
     "typecheck": "tsc --noEmit",
-    "publish:next": "npm publish --tag next --no-git-checks"
+    "publish:next": "pnpm publish --tag next --no-git-checks"
   },
   "devDependencies": {
     "json-schema-to-typescript": "^15.0.4",
