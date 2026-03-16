@@ -18,7 +18,6 @@
 import {
   containerEngine,
   ExtensionContext,
-  ImageInfo,
   ProgressLocation,
   window,
   process,
@@ -82,9 +81,10 @@ export class SyftService extends AnchoreCliService {
   }
 
   public async analyse(
-    image: ImageInfo,
+    image: { engineId: string; Id: string },
     options?: {
       token?: CancellationToken;
+      task?: { title?: string };
     },
   ): Promise<string> {
     if (!this.cliTool?.version || !this.cliTool.path)
@@ -108,12 +108,11 @@ export class SyftService extends AnchoreCliService {
       return destination;
     }
 
-    const imageName = image.RepoTags?.[0] ?? image.Id;
     return window.withProgress(
       {
         location: ProgressLocation.TASK_WIDGET,
         cancellable: true,
-        title: `Analysing image ${imageName}`,
+        title: options?.task?.title ?? `Analysing image ${image.Id}`,
       },
       async (progress, token) => {
         if (!this.cliTool?.path) throw new Error('syft is not installed.');
@@ -127,14 +126,14 @@ export class SyftService extends AnchoreCliService {
         await using dir = await mkdtempDisposable(join(tmpdir(), image.engineId));
         const tarball = join(dir.path, image.Id);
 
-        progress.report({ message: `Saving image ${imageName}` });
+        progress.report({ message: `Saving image ${image.Id}` });
         await containerEngine.saveImage(image.engineId, image.Id, tarball, cancel.token);
 
         await mkdir(dirname(destination), { recursive: true });
 
         const tmp = `${destination}.tmp`;
 
-        progress.report({ message: `Analysing image ${imageName}` });
+        progress.report({ message: `Analysing image ${image.Id}` });
         await process.exec(binary, ['scan', tarball, `--output=json=${tmp}`], {
           token: cancel.token,
         });

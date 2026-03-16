@@ -86,9 +86,15 @@ describe('check', () => {
 
     expect(SYFT_SERVICE_MOCK.analyse).toHaveBeenCalledWith(IMAGE_INFO_MOCK, {
       token,
+      task: {
+        title: 'Analysing image image-id',
+      },
     });
     expect(GRYPE_SERVICE_MOCK.analyse).toHaveBeenCalledWith('sbom-path', {
       token,
+      task: {
+        title: 'Scanning SBOM of image image-id',
+      },
     });
     expect(result).toEqual({
       checks: [

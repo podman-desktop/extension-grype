@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 import type { AsyncInit } from '/@/utils/async-init';
-import type { CancellationToken, ImageInfo } from '@podman-desktop/api';
+import type { CancellationToken } from '@podman-desktop/api';
 
 import type { GrypeExtensionApi } from '@podman-desktop/grype-extension-api';
 import { syft, grype } from '@podman-desktop/grype-extension-api';
@@ -38,7 +38,10 @@ export class ApiService implements AsyncInit<never, GrypeExtensionApi> {
   async init(): Promise<GrypeExtensionApi> {
     return {
       sbom: {
-        analyse: async (image: ImageInfo, options?: { token?: CancellationToken }): Promise<syft.Document> => {
+        analyse: async (
+          image: { engineId: string; Id: string },
+          options?: { token?: CancellationToken; task?: { title?: string } },
+        ): Promise<syft.Document> => {
           const result = await this.syftService.analyse(image, options);
           const raw = await readFile(result, 'utf-8');
 
@@ -51,7 +54,10 @@ export class ApiService implements AsyncInit<never, GrypeExtensionApi> {
         },
       },
       vulnerability: {
-        analyse: async (image: ImageInfo, options?: { token?: CancellationToken }): Promise<grype.Document> => {
+        analyse: async (
+          image: { engineId: string; Id: string },
+          options?: { token?: CancellationToken; task?: { title?: string } },
+        ): Promise<grype.Document> => {
           const result = await this.syftService.analyse(image, options);
           return this.grypeService.analyse(result, options);
         },
