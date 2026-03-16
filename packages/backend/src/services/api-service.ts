@@ -40,7 +40,7 @@ export class ApiService implements AsyncInit<never, GrypeExtensionApi> {
       sbom: {
         analyse: async (
           image: { engineId: string; Id: string },
-          options?: { token?: CancellationToken },
+          options?: { token?: CancellationToken, task?: { title?: string; } },
         ): Promise<syft.Document> => {
           const result = await this.syftService.analyse(image, options);
           const raw = await readFile(result, 'utf-8');
@@ -56,7 +56,7 @@ export class ApiService implements AsyncInit<never, GrypeExtensionApi> {
       vulnerability: {
         analyse: async (
           image: { engineId: string; Id: string },
-          options?: { token?: CancellationToken },
+          options?: { token?: CancellationToken, task?: { title?: string; } },
         ): Promise<grype.Document> => {
           const result = await this.syftService.analyse(image, options);
           return this.grypeService.analyse(result, options);

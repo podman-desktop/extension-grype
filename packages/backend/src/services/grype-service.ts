@@ -82,6 +82,7 @@ export class GrypeService extends AnchoreCliService {
     sbom: string,
     options?: {
       token?: CancellationToken;
+      task?: { title?: string; }
     },
   ): Promise<grype.Document> {
     if (!this.cliTool?.version || !this.cliTool.path)
@@ -112,7 +113,7 @@ export class GrypeService extends AnchoreCliService {
       {
         location: ProgressLocation.TASK_WIDGET,
         cancellable: true,
-        title: `Analysing sbom`,
+        title: options?.task?.title ?? `Analysing sbom`,
       },
       async (_, token) => {
         token.onCancellationRequested(() => {

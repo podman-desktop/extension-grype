@@ -40,12 +40,20 @@ export class ImageCheckerProvider implements Disposable, AsyncInit {
   }
 
   protected async check(image: ImageInfo, token?: CancellationToken): Promise<ImageChecks | undefined> {
+    const imageName = image.RepoTags?.[0] ?? image.Id;
+
     const file = await this.syft.analyse(image, {
       token,
+      task: {
+        title: `Analysing image ${imageName}`,
+      },
     });
 
     const result = await this.grype.analyse(file, {
       token,
+      task: {
+        title: `Scanning SBOM of image ${imageName}`,
+      },
     });
 
     const vulnerabilities: Array<ImageCheck> = result.matches.map(match => ({

@@ -25,6 +25,7 @@ export interface GrypeExtensionApi {
       image: { engineId: string; Id: string },
       options?: {
         token?: CancellationToken;
+        task?: { title?: string; }
       },
     ): Promise<syft.Document>;
   };
@@ -34,6 +35,7 @@ export interface GrypeExtensionApi {
       image: { engineId: string; Id: string },
       options?: {
         token?: CancellationToken;
+        task?: { title?: string; }
       },
     ): Promise<grype.Document>;
   };
