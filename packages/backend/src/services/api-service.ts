@@ -24,6 +24,7 @@ import { inject, injectable } from 'inversify';
 import { GrypeService } from '/@/services/grype-service';
 import { SyftService } from '/@/services/syft-service';
 import { readFile } from 'node:fs/promises';
+import { z } from 'zod';
 
 @injectable()
 export class ApiService implements AsyncInit<never, GrypeExtensionApi> {
@@ -40,7 +41,13 @@ export class ApiService implements AsyncInit<never, GrypeExtensionApi> {
         analyse: async (image: ImageInfo, options?: { token?: CancellationToken }): Promise<syft.Document> => {
           const result = await this.syftService.analyse(image, options);
           const raw = await readFile(result, 'utf-8');
-          return syft.SyftDocumentSchema.parse(JSON.parse(raw));
+
+          const { success, data, error } = syft.SyftDocumentSchema.safeParse(JSON.parse(raw));
+          if (success) {
+            return data;
+          } else {
+            throw new Error(`cannot parse syft SBOM document: ${z.prettifyError(error)}`);
+          }
         },
       },
       vulnerability: {

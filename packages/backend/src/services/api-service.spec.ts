@@ -53,9 +53,14 @@ describe('ApiService', () => {
   });
 
   describe('sbom.analyse', () => {
+    const IMAGE_INFO_MOCK: ImageInfo = { Id: 'dummy-image' } as ImageInfo;
+    const SBOM_PATH_MOCK = 'dummy-sbom.json';
+
+    beforeEach(() => {
+      vi.mocked(SYFT_SERVICE_MOCK.analyse).mockResolvedValue(SBOM_PATH_MOCK);
+    });
+
     test('should call syftService.analyse and parse the result as JSON', async () => {
-      const image: ImageInfo = { Id: 'dummy-image' } as ImageInfo;
-      const dummyPath = 'dummy-sbom.json';
       const dummySbom: syft.Document = {
         artifacts: [],
         artifactRelationships: [],
@@ -77,15 +82,25 @@ describe('ApiService', () => {
         },
       };
 
-      vi.mocked(SYFT_SERVICE_MOCK.analyse).mockResolvedValue(dummyPath);
       vi.mocked(readFile).mockResolvedValue(JSON.stringify(dummySbom));
 
       const api = await apiService.init();
-      const result = await api.sbom.analyse(image);
+      const result = await api.sbom.analyse(IMAGE_INFO_MOCK);
 
-      expect(SYFT_SERVICE_MOCK.analyse).toHaveBeenCalledWith(image, undefined);
-      expect(readFile).toHaveBeenCalledWith(dummyPath, 'utf-8');
+      expect(SYFT_SERVICE_MOCK.analyse).toHaveBeenCalledWith(IMAGE_INFO_MOCK, undefined);
+      expect(readFile).toHaveBeenCalledWith(SBOM_PATH_MOCK, 'utf-8');
       expect(result).toEqual(dummySbom);
+    });
+
+    test('parsing error should be reflected in throwed error', async () => {
+      const invalidSyftSBOM: syft.Document = { foo: 'bar' } as unknown as syft.Document;
+      vi.mocked(readFile).mockResolvedValue(JSON.stringify(invalidSyftSBOM));
+
+      const api = await apiService.init();
+
+      await expect(async () => {
+        return api.sbom.analyse(IMAGE_INFO_MOCK);
+      }).rejects.toThrowError('cannot parse syft SBOM document:');
     });
   });
 
