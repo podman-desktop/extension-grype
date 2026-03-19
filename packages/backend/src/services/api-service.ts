@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 import type { AsyncInit } from '/@/utils/async-init';
-import type { CancellationToken } from '@podman-desktop/api';
+import type { CancellationToken, TelemetryLogger } from '@podman-desktop/api';
 
 import type { GrypeExtensionApi } from '@podman-desktop/grype-extension-api';
 import { syft, grype } from '@podman-desktop/grype-extension-api';
@@ -25,6 +25,8 @@ import { GrypeService } from '/@/services/grype-service';
 import { SyftService } from '/@/services/syft-service';
 import { readFile } from 'node:fs/promises';
 import { z } from 'zod';
+import { TelemetryLoggerSymbol } from '/@/inject/symbol';
+import { TELEMETRY_EVENTS } from '/@/utils/telemetry';
 
 @injectable()
 export class ApiService implements AsyncInit<never, GrypeExtensionApi> {
@@ -33,6 +35,8 @@ export class ApiService implements AsyncInit<never, GrypeExtensionApi> {
     private readonly grypeService: GrypeService,
     @inject(SyftService)
     private readonly syftService: SyftService,
+    @inject(TelemetryLoggerSymbol)
+    private readonly telemetryLogger: TelemetryLogger,
   ) {}
 
   async init(): Promise<GrypeExtensionApi> {
@@ -42,14 +46,25 @@ export class ApiService implements AsyncInit<never, GrypeExtensionApi> {
           image: { engineId: string; Id: string },
           options?: { token?: CancellationToken; task?: { title?: string } },
         ): Promise<syft.Document> => {
-          const result = await this.syftService.analyse(image, options);
-          const raw = await readFile(result, 'utf-8');
+          const telemetry: Record<string, unknown> = {};
+          const start = performance.now();
 
-          const { success, data, error } = syft.SyftDocumentSchema.safeParse(JSON.parse(raw));
-          if (success) {
-            return data;
-          } else {
-            throw new Error(`cannot parse syft SBOM document: ${z.prettifyError(error)}`);
+          try {
+            const result = await this.syftService.analyse(image, options);
+            const raw = await readFile(result, 'utf-8');
+
+            const { success, data, error } = syft.SyftDocumentSchema.safeParse(JSON.parse(raw));
+            if (success) {
+              return data;
+            } else {
+              throw new Error(`cannot parse syft SBOM document: ${z.prettifyError(error)}`);
+            }
+          } catch (err: unknown) {
+            telemetry['error'] = err;
+            throw err;
+          } finally {
+            telemetry['duration'] = performance.now() - start;
+            this.telemetryLogger.logUsage(TELEMETRY_EVENTS.SYFT_ANALYSE, telemetry);
           }
         },
       },
@@ -58,8 +73,19 @@ export class ApiService implements AsyncInit<never, GrypeExtensionApi> {
           image: { engineId: string; Id: string },
           options?: { token?: CancellationToken; task?: { title?: string } },
         ): Promise<grype.Document> => {
-          const result = await this.syftService.analyse(image, options);
-          return this.grypeService.analyse(result, options);
+          const telemetry: Record<string, unknown> = {};
+          const start = performance.now();
+
+          try {
+            const result = await this.syftService.analyse(image, options);
+            return this.grypeService.analyse(result, options);
+          } catch (err: unknown) {
+            telemetry['error'] = err;
+            throw err;
+          } finally {
+            telemetry['duration'] = performance.now() - start;
+            this.telemetryLogger.logUsage(TELEMETRY_EVENTS.GRYPE_ANALYSE, telemetry);
+          }
         },
       },
     };

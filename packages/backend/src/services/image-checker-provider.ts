@@ -15,12 +15,21 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
-import type { Disposable, ImageInfo, CancellationToken, ImageChecks, ImageCheck } from '@podman-desktop/api';
+import type {
+  Disposable,
+  ImageInfo,
+  CancellationToken,
+  ImageChecks,
+  ImageCheck,
+  TelemetryLogger,
+} from '@podman-desktop/api';
 import { imageChecker } from '@podman-desktop/api';
 import type { AsyncInit } from '../utils/async-init';
 import { SyftService } from './syft-service';
 import { GrypeService } from './grype-service';
 import { inject, injectable, postConstruct, preDestroy } from 'inversify';
+import { TelemetryLoggerSymbol } from '/@/inject/symbol';
+import { TELEMETRY_EVENTS } from '/@/utils/telemetry';
 
 @injectable()
 export class ImageCheckerProvider implements Disposable, AsyncInit {
@@ -31,6 +40,8 @@ export class ImageCheckerProvider implements Disposable, AsyncInit {
     protected syft: SyftService,
     @inject(GrypeService)
     protected grype: GrypeService,
+    @inject(TelemetryLoggerSymbol)
+    protected readonly telemetryLogger: TelemetryLogger,
   ) {}
 
   @preDestroy()
@@ -41,39 +52,68 @@ export class ImageCheckerProvider implements Disposable, AsyncInit {
 
   protected async check(image: ImageInfo, token?: CancellationToken): Promise<ImageChecks | undefined> {
     const imageName = image.RepoTags?.[0] ?? image.Id;
+    const telemetry: Record<string, unknown> = {};
+    const start = performance.now();
 
-    const file = await this.syft.analyse(image, {
-      token,
-      task: {
-        title: `Analysing image ${imageName}`,
-      },
-    });
+    try {
+      const file = await this.syft.analyse(image, {
+        token,
+        task: {
+          title: `Analysing image ${imageName}`,
+        },
+      });
 
-    const result = await this.grype.analyse(file, {
-      token,
-      task: {
-        title: `Scanning SBOM of image ${imageName}`,
-      },
-    });
+      const result = await this.grype.analyse(file, {
+        token,
+        task: {
+          title: `Scanning SBOM of image ${imageName}`,
+        },
+      });
 
-    const vulnerabilities: Array<ImageCheck> = result.matches.map(match => ({
-      name: match.vulnerability.id,
-      status: 'failed',
-      severity: match.vulnerability.severity,
-      markdownDescription: match.vulnerability.description,
-    }));
+      const count = {
+        low: 0,
+        medium: 0,
+        high: 0,
+        critical: 0,
+        unknown: 0,
+      };
 
-    return {
-      checks:
-        vulnerabilities.length > 0
-          ? vulnerabilities
-          : [
-              {
-                status: 'success',
-                name: 'No vulnerabilities found',
-              },
-            ],
-    };
+      const vulnerabilities: Array<ImageCheck> = result.matches.map(match => {
+        count[match.vulnerability.severity ?? 'unknown']++;
+
+        return {
+          name: match.vulnerability.id,
+          status: 'failed',
+          severity: match.vulnerability.severity,
+          markdownDescription: match.vulnerability.description,
+        };
+      });
+
+      telemetry['vulnerabilities-total'] = vulnerabilities.length;
+      telemetry['vulnerabilities-low'] = count.low;
+      telemetry['vulnerabilities-medium'] = count.medium;
+      telemetry['vulnerabilities-high'] = count.high;
+      telemetry['vulnerabilities-critical'] = count.critical;
+      telemetry['vulnerabilities-unknown'] = count.unknown;
+
+      return {
+        checks:
+          vulnerabilities.length > 0
+            ? vulnerabilities
+            : [
+                {
+                  status: 'success',
+                  name: 'No vulnerabilities found',
+                },
+              ],
+      };
+    } catch (err: unknown) {
+      telemetry['error'] = err;
+      throw err;
+    } finally {
+      telemetry['duration'] = performance.now() - start;
+      this.telemetryLogger.logUsage(TELEMETRY_EVENTS.IMAGE_CHECKER, telemetry);
+    }
   }
 
   @postConstruct()

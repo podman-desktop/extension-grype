@@ -16,7 +16,14 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import type { CliTool, Disposable, ExtensionContext, Logger, QuickPickItem } from '@podman-desktop/api';
+import type {
+  CliTool,
+  Disposable,
+  ExtensionContext,
+  Logger,
+  QuickPickItem,
+  TelemetryLogger,
+} from '@podman-desktop/api';
 import { cli as cliApi, env as envApi, process as processApi, window as windowApi } from '@podman-desktop/api';
 import type { AsyncInit } from '/@/utils/async-init';
 import type { Octokit } from '@octokit/rest';
@@ -26,6 +33,7 @@ import AdmZip from 'adm-zip';
 import * as tar from 'tar';
 import { chmod, mkdir, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { TELEMETRY_EVENTS } from '/@/utils/telemetry';
 
 export interface GithubReleaseMetadata extends QuickPickItem {
   tag: string;
@@ -40,6 +48,7 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
   constructor(
     protected octokit: Octokit,
     protected context: ExtensionContext,
+    protected telemetryLogger: TelemetryLogger,
   ) {}
 
   // Abstracts to be provided by concrete tools
@@ -112,20 +121,33 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
       doInstall: async (logger: Logger) => {
         if (!selected) throw new Error('No version selected');
 
-        const assetPath = await this.download(selected);
-        logger.log(`Downloaded ${this.toolId} to ${assetPath}`);
+        const telemetry: Record<string, unknown> = {
+          toolId: this.toolId,
+          tag: selected.tag,
+        };
+        const start = performance.now();
 
         try {
-          const binPath = await this.extract(assetPath, this.storageDir);
-          logger.log(`Extracted ${this.toolId} to ${binPath}`);
+          const assetPath = await this.download(selected);
+          logger.log(`Downloaded ${this.toolId} to ${assetPath}`);
 
-          this.cliTool?.updateVersion({
-            version: selected.tag.slice(1),
-            path: binPath,
-            installationSource: 'extension',
-          });
+          try {
+            const binPath = await this.extract(assetPath, this.storageDir);
+            logger.log(`Extracted ${this.toolId} to ${binPath}`);
+
+            this.cliTool?.updateVersion({
+              version: selected.tag.slice(1),
+              path: binPath,
+              installationSource: 'extension',
+            });
+          } finally {
+            await rm(assetPath).catch(() => undefined);
+          }
+        } catch (err: unknown) {
+          telemetry['error'] = err;
         } finally {
-          await rm(assetPath).catch(() => undefined);
+          telemetry['duration'] = performance.now() - start;
+          this.telemetryLogger.logUsage(TELEMETRY_EVENTS.CLI_INSTALL, telemetry);
         }
       },
       selectVersion: async (_?: boolean) => {
