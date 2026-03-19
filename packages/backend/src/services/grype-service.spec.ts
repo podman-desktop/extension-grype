@@ -17,7 +17,7 @@
  ***********************************************************************/
 
 import { test, vi, beforeEach, describe, expect, assert } from 'vitest';
-import type { ExtensionContext, CliTool } from '@podman-desktop/api';
+import type { ExtensionContext, CliTool, TelemetryLogger } from '@podman-desktop/api';
 import { window, cli as cliApi, ProgressLocation, process, window as windowApi } from '@podman-desktop/api';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -69,6 +69,11 @@ const CLI_TOOL_MOCK: CliTool = {
   state: 'registered',
   dispose: vi.fn(),
 };
+const TELEMETRY_LOGGER_MOCK: TelemetryLogger = {
+  logUsage: vi.fn(),
+  logError: vi.fn(),
+  dispose: vi.fn(),
+} as unknown as TelemetryLogger;
 
 let grypeService: GrypeService;
 
@@ -76,7 +81,7 @@ beforeEach(() => {
   vi.resetAllMocks();
 
   vi.mocked(cliApi.createCliTool).mockReturnValue(CLI_TOOL_MOCK);
-  grypeService = new GrypeService(OCTOKIT_MOCK, EXTENSION_CONTEXT_MOCK);
+  grypeService = new GrypeService(OCTOKIT_MOCK, EXTENSION_CONTEXT_MOCK, TELEMETRY_LOGGER_MOCK);
 
   vi.mocked(readFile).mockResolvedValue(JSON.stringify(GRYPE_DOCUMENT_MOCK));
 

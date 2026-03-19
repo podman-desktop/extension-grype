@@ -15,7 +15,8 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
-import type { ExtensionContext } from '@podman-desktop/api';
+import type { ExtensionContext, TelemetryLogger } from '@podman-desktop/api';
+import { env } from '@podman-desktop/api';
 import type { AsyncInit } from '/@/utils/async-init';
 import { InversifyBinding } from '/@/inject/inversify-binding';
 import type { IAsyncDisposable } from '/@/utils/async-disposable';
@@ -24,11 +25,13 @@ import { ApiService } from '/@/services/api-service';
 
 export class MainService implements IAsyncDisposable, AsyncInit<ExtensionContext, GrypeExtensionApi> {
   #inversify: InversifyBinding | undefined;
+  #telemetry: TelemetryLogger | undefined;
 
   constructor() {}
 
   async init(context: ExtensionContext): Promise<GrypeExtensionApi> {
-    this.#inversify = new InversifyBinding(context);
+    this.#telemetry = env.createTelemetryLogger();
+    this.#inversify = new InversifyBinding(context, this.#telemetry);
     const container = await this.#inversify.init();
 
     const api = await container.getAsync(ApiService);
@@ -36,6 +39,7 @@ export class MainService implements IAsyncDisposable, AsyncInit<ExtensionContext
   }
 
   async asyncDispose(): Promise<void> {
+    this.#telemetry?.dispose();
     return this.#inversify?.asyncDispose();
   }
 }

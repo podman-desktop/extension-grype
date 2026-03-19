@@ -66,7 +66,9 @@ const plugin = {
   } as unknown as typeof podmanDesktopApi.Uri,
   apiVersion: version,
   version: version,
-  env: {} as unknown as typeof podmanDesktopApi.env,
+  env: {
+    createTelemetryLogger: vi.fn(),
+  } as unknown as typeof podmanDesktopApi.env,
   process: {
     exec: vi.fn(),
   } as unknown as typeof podmanDesktopApi.process,

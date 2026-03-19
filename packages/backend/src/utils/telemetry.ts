@@ -1,4 +1,4 @@
-/**********************************************************************
+/*********************************************************************
  * Copyright (C) 2026 Red Hat, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +14,12 @@
  * limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
- ***********************************************************************/
+ ********************************************************************/
 
-export const ExtensionContextSymbol = Symbol.for('ExtensionContext');
-export const TelemetryLoggerSymbol = Symbol.for('TelemetryLogger');
-export const StartupSymbol = Symbol('StartupSymbol');
+export const TELEMETRY_EVENTS = {
+  SYFT_ANALYSE: 'syft-analyse',
+  GRYPE_ANALYSE: 'grype-analyse',
+  CACHE_CLEARED: 'cache-cleared',
+  CLI_INSTALL: 'cli-install',
+  IMAGE_CHECKER: 'image-checker',
+} as const;

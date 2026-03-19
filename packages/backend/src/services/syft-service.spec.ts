@@ -18,7 +18,7 @@
 
 import { test, vi, beforeEach, describe, expect, assert } from 'vitest';
 import { SyftService } from '/@/services/syft-service';
-import type { ExtensionContext, CliTool, ImageInfo } from '@podman-desktop/api';
+import type { ExtensionContext, CliTool, ImageInfo, TelemetryLogger } from '@podman-desktop/api';
 import { cli as cliApi, containerEngine, ProgressLocation, process, window as windowApi } from '@podman-desktop/api';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -83,6 +83,11 @@ const CLI_TOOL_MOCK: CliTool = {
 const CACHE_SERVICE_MOCK: CacheService = {
   getCacheDirectory: vi.fn(),
 } as unknown as CacheService;
+const TELEMETRY_LOGGER_MOCK: TelemetryLogger = {
+  logUsage: vi.fn(),
+  logError: vi.fn(),
+  dispose: vi.fn(),
+} as unknown as TelemetryLogger;
 
 let syft: SyftService;
 
@@ -90,7 +95,7 @@ beforeEach(() => {
   vi.resetAllMocks();
 
   vi.mocked(cliApi.createCliTool).mockReturnValue(CLI_TOOL_MOCK);
-  syft = new SyftService(OCTOKIT_MOCK, EXTENSION_CONTEXT_MOCK, CACHE_SERVICE_MOCK);
+  syft = new SyftService(OCTOKIT_MOCK, EXTENSION_CONTEXT_MOCK, CACHE_SERVICE_MOCK, TELEMETRY_LOGGER_MOCK);
 
   vi.mocked(CACHE_SERVICE_MOCK.getCacheDirectory).mockReturnValue(join(EXTENSION_CONTEXT_MOCK.storagePath, 'cache'));
   vi.mocked(mkdtempDisposable).mockResolvedValue({

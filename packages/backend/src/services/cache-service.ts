@@ -16,12 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 import { inject, injectable, postConstruct, preDestroy } from 'inversify';
-import { ExtensionContextSymbol } from '/@/inject/symbol';
-import { commands, Disposable, ExtensionContext, ProgressLocation, window } from '@podman-desktop/api';
+import { ExtensionContextSymbol, TelemetryLoggerSymbol } from '/@/inject/symbol';
+import { commands, Disposable, ExtensionContext, ProgressLocation, TelemetryLogger, window } from '@podman-desktop/api';
 import { join } from 'node:path';
 import { rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { AsyncInit } from '/@/utils/async-init';
+import { TELEMETRY_EVENTS } from '/@/utils/telemetry';
 
 @injectable()
 export class CacheService implements Disposable, AsyncInit {
@@ -30,6 +31,8 @@ export class CacheService implements Disposable, AsyncInit {
   constructor(
     @inject(ExtensionContextSymbol)
     protected readonly context: ExtensionContext,
+    @inject(TelemetryLoggerSymbol)
+    protected telemetryLogger: TelemetryLogger,
   ) {}
 
   public getCacheDirectory(): string {
@@ -37,18 +40,22 @@ export class CacheService implements Disposable, AsyncInit {
   }
 
   protected async clearCache(): Promise<void> {
-    await window.withProgress(
-      {
-        location: ProgressLocation.TASK_WIDGET,
-        title: 'Grype: clearing cache',
-      },
-      async () => {
-        const cache = this.getCacheDirectory();
-        if (existsSync(cache)) {
-          await rm(cache, { recursive: true });
-        }
-      },
-    );
+    await window
+      .withProgress(
+        {
+          location: ProgressLocation.TASK_WIDGET,
+          title: 'Grype: clearing cache',
+        },
+        async () => {
+          const cache = this.getCacheDirectory();
+          if (existsSync(cache)) {
+            await rm(cache, { recursive: true });
+          }
+        },
+      )
+      .finally(() => {
+        this.telemetryLogger.logUsage(TELEMETRY_EVENTS.CACHE_CLEARED);
+      });
   }
 
   @postConstruct()

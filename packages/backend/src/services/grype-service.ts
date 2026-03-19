@@ -21,12 +21,13 @@ import {
   CancellationTokenSource,
   ExtensionContext,
   ProgressLocation,
+  TelemetryLogger,
   window,
 } from '@podman-desktop/api';
 import { process } from '@podman-desktop/api';
 import { AnchoreCliService } from '/@/services/anchore-cli-service';
 import { Octokit } from '@octokit/rest';
-import { ExtensionContextSymbol } from '/@/inject/symbol';
+import { ExtensionContextSymbol, TelemetryLoggerSymbol } from '/@/inject/symbol';
 import { inject, injectable, postConstruct, preDestroy } from 'inversify';
 import { existsSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
@@ -42,8 +43,10 @@ export class GrypeService extends AnchoreCliService {
     octokit: Octokit,
     @inject(ExtensionContextSymbol)
     context: ExtensionContext,
+    @inject(TelemetryLoggerSymbol)
+    telemetryLogger: TelemetryLogger,
   ) {
-    super(octokit, context);
+    super(octokit, context, telemetryLogger);
   }
 
   @postConstruct()

@@ -19,6 +19,7 @@
 import { test, vi, beforeEach, expect } from 'vitest';
 import { MainService } from '/@/services/main-service';
 import type { ExtensionContext } from '@podman-desktop/api';
+import { env } from '@podman-desktop/api';
 
 import { InversifyBinding } from '/@/inject/inversify-binding';
 import type { Container } from 'inversify';
@@ -38,6 +39,15 @@ let main: MainService;
 
 beforeEach(() => {
   vi.resetAllMocks();
+
+  vi.mocked(env.createTelemetryLogger).mockReturnValue({
+    logUsage: vi.fn(),
+    logError: vi.fn(),
+    dispose: vi.fn(),
+    isErrorsEnabled: false,
+    isUsageEnabled: true,
+    onDidChangeEnableStates: vi.fn(),
+  });
 
   vi.mocked(InversifyBinding.prototype.init).mockResolvedValue(INVERSIFY_CONTAINER_MOCK);
   vi.mocked(INVERSIFY_CONTAINER_MOCK.getAsync).mockImplementation(async identifier => {

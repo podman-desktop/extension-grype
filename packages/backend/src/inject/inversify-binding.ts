@@ -16,10 +16,10 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import type { ExtensionContext as PodmanDesktopExtensionContext } from '@podman-desktop/api';
+import type { ExtensionContext as PodmanDesktopExtensionContext, TelemetryLogger } from '@podman-desktop/api';
 import { Container } from 'inversify';
 
-import { ExtensionContextSymbol, StartupSymbol } from '/@/inject/symbol';
+import { ExtensionContextSymbol, StartupSymbol, TelemetryLoggerSymbol } from '/@/inject/symbol';
 import type { AsyncInit } from '/@/utils/async-init';
 import { servicesModule } from '/@/services/services-module';
 import type { IAsyncDisposable } from '/@/utils/async-disposable';
@@ -28,12 +28,16 @@ import { utilsModule } from '/@/utils/utils-module';
 export class InversifyBinding implements AsyncInit<never, Container>, IAsyncDisposable {
   #container: Container | undefined;
 
-  constructor(protected extensionContext: PodmanDesktopExtensionContext) {}
+  constructor(
+    protected extensionContext: PodmanDesktopExtensionContext,
+    protected telemetryLogger: TelemetryLogger,
+  ) {}
 
   public async init(): Promise<Container> {
     this.#container = new Container();
 
     this.#container.bind(ExtensionContextSymbol).toConstantValue(this.extensionContext);
+    this.#container.bind(TelemetryLoggerSymbol).toConstantValue(this.telemetryLogger);
 
     await this.#container.load(servicesModule);
     await this.#container.load(utilsModule);

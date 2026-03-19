@@ -23,10 +23,11 @@ import {
   process,
   type CancellationToken,
   CancellationTokenSource,
+  TelemetryLogger,
 } from '@podman-desktop/api';
 import { AnchoreCliService } from '/@/services/anchore-cli-service';
 import { Octokit } from '@octokit/rest';
-import { ExtensionContextSymbol } from '/@/inject/symbol';
+import { ExtensionContextSymbol, TelemetryLoggerSymbol } from '/@/inject/symbol';
 import { inject, injectable, postConstruct, preDestroy } from 'inversify';
 import { mkdir, mkdtempDisposable, rename } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
@@ -43,8 +44,10 @@ export class SyftService extends AnchoreCliService {
     context: ExtensionContext,
     @inject(CacheService)
     protected readonly cache: CacheService,
+    @inject(TelemetryLoggerSymbol)
+    telemetryLogger: TelemetryLogger,
   ) {
-    super(octokit, context);
+    super(octokit, context, telemetryLogger);
   }
 
   @postConstruct()

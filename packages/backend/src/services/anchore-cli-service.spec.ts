@@ -22,13 +22,14 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import type { Octokit } from '@octokit/rest';
 import { cli as cliApi, process as processApi, window as windowApi } from '@podman-desktop/api';
-import type { CliToolInstaller, CliTool, Logger, ExtensionContext } from '@podman-desktop/api';
+import type { CliToolInstaller, CliTool, Logger, ExtensionContext, TelemetryLogger } from '@podman-desktop/api';
 import type { Endpoints } from '@octokit/types';
 import { existsSync } from 'node:fs';
 import { rm } from 'node:fs/promises';
 import AdmZip from 'adm-zip';
 import * as tar from 'tar';
 import { platform as nodePlatform } from 'node:process';
+import { TELEMETRY_EVENTS } from '/@/utils/telemetry';
 
 vi.mock(import('node:fs'));
 vi.mock(import('node:fs/promises'));
@@ -52,6 +53,12 @@ const OCTOKIT_MOCK: Octokit = {
     getReleaseAsset: vi.fn(),
   },
 } as unknown as Octokit;
+
+const TELEMETRY_LOGGER_MOCK: TelemetryLogger = {
+  logUsage: vi.fn(),
+  logError: vi.fn(),
+  dispose: vi.fn(),
+} as unknown as TelemetryLogger;
 
 class TestCli extends AnchoreCliService {
   public override get icon(): string {
@@ -132,7 +139,7 @@ let cli: TestCli;
 beforeEach(() => {
   vi.resetAllMocks();
 
-  cli = new TestCli(OCTOKIT_MOCK, EXTENSION_CONTEXT_MOCK);
+  cli = new TestCli(OCTOKIT_MOCK, EXTENSION_CONTEXT_MOCK, TELEMETRY_LOGGER_MOCK);
 
   // mock fs
   vi.mocked(rm).mockResolvedValue(undefined);
@@ -295,6 +302,32 @@ describe('installer', () => {
         });
       },
     );
+
+    test('expect telemetry to be sent', async () => {
+      await installer.doInstall(LOGGER_MOCK);
+
+      expect(TELEMETRY_LOGGER_MOCK.logUsage).toHaveBeenCalledExactlyOnceWith(TELEMETRY_EVENTS.CLI_INSTALL, {
+        duration: expect.any(Number),
+        tag: LIST_RELEASES[0].tag_name,
+        toolId: cli.toolId,
+      });
+    });
+
+    test('expect error to be included in telemetry', async () => {
+      const HTTP_ERROR_MOCK = new Error('dummy http error');
+      vi.mocked(OCTOKIT_MOCK.repos.listReleaseAssets).mockRejectedValue(HTTP_ERROR_MOCK);
+
+      await expect(async () => {
+        await installer.doInstall(LOGGER_MOCK);
+      }).rejects.toThrowError(HTTP_ERROR_MOCK);
+
+      expect(TELEMETRY_LOGGER_MOCK.logUsage).toHaveBeenCalledExactlyOnceWith(
+        TELEMETRY_EVENTS.CLI_INSTALL,
+        expect.objectContaining({
+          error: HTTP_ERROR_MOCK,
+        }),
+      );
+    });
   });
 });
 

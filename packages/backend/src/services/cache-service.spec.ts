@@ -18,11 +18,12 @@
 
 import { test, vi, beforeEach, expect, describe, assert } from 'vitest';
 import { CacheService } from '/@/services/cache-service';
-import type { CancellationToken, ExtensionContext } from '@podman-desktop/api';
+import type { CancellationToken, ExtensionContext, TelemetryLogger } from '@podman-desktop/api';
 import { commands, ProgressLocation, window } from '@podman-desktop/api';
 import { contributes } from '../../package.json';
 import { rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { TELEMETRY_EVENTS } from '/@/utils/telemetry';
 
 vi.mock(import('node:fs'));
 vi.mock(import('node:fs/promises'));
@@ -31,11 +32,18 @@ const EXTENSION_CONTEXT_MOCK: ExtensionContext = {
   storagePath: 'foo',
 } as unknown as ExtensionContext;
 
+const TELEMETRY_LOGGER_MOCK: TelemetryLogger = {
+  logUsage: vi.fn(),
+  logError: vi.fn(),
+  dispose: vi.fn(),
+} as unknown as TelemetryLogger;
+
 let cache: CacheService;
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.mocked(window.withProgress).mockResolvedValue(undefined);
 
-  cache = new CacheService(EXTENSION_CONTEXT_MOCK);
+  cache = new CacheService(EXTENSION_CONTEXT_MOCK, TELEMETRY_LOGGER_MOCK);
 });
 
 test('CacheService#getCacheDirectory', () => {
@@ -88,5 +96,11 @@ describe('grype:clear-cache command', () => {
     await listener();
 
     expect(rm).toHaveBeenCalledExactlyOnceWith(cache.getCacheDirectory(), { recursive: true });
+  });
+
+  test('expect telemetry event', async () => {
+    await listener();
+
+    expect(TELEMETRY_LOGGER_MOCK.logUsage).toHaveBeenCalledExactlyOnceWith(TELEMETRY_EVENTS.CACHE_CLEARED);
   });
 });

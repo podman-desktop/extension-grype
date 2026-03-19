@@ -20,9 +20,10 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { ApiService } from '/@/services/api-service';
 import type { GrypeService } from '/@/services/grype-service';
 import type { SyftService } from '/@/services/syft-service';
-import type { ImageInfo } from '@podman-desktop/api';
+import type { ImageInfo, TelemetryLogger } from '@podman-desktop/api';
 import { readFile } from 'node:fs/promises';
 import type { syft } from '@podman-desktop/grype-extension-api';
+import { TELEMETRY_EVENTS } from '/@/utils/telemetry';
 
 vi.mock(import('node:fs/promises'));
 
@@ -34,12 +35,18 @@ const SYFT_SERVICE_MOCK: SyftService = {
   analyse: vi.fn(),
 } as unknown as SyftService;
 
+const TELEMETRY_LOGGER_MOCK: TelemetryLogger = {
+  logUsage: vi.fn(),
+  logError: vi.fn(),
+  dispose: vi.fn(),
+} as unknown as TelemetryLogger;
+
 describe('ApiService', () => {
   let apiService: ApiService;
 
   beforeEach(() => {
     vi.resetAllMocks();
-    apiService = new ApiService(GRYPE_SERVICE_MOCK, SYFT_SERVICE_MOCK);
+    apiService = new ApiService(GRYPE_SERVICE_MOCK, SYFT_SERVICE_MOCK, TELEMETRY_LOGGER_MOCK);
   });
 
   describe('init', () => {
@@ -90,6 +97,10 @@ describe('ApiService', () => {
       expect(SYFT_SERVICE_MOCK.analyse).toHaveBeenCalledWith(IMAGE_INFO_MOCK, undefined);
       expect(readFile).toHaveBeenCalledWith(SBOM_PATH_MOCK, 'utf-8');
       expect(result).toEqual(dummySbom);
+
+      expect(TELEMETRY_LOGGER_MOCK.logUsage).toHaveBeenCalledExactlyOnceWith(TELEMETRY_EVENTS.SYFT_ANALYSE, {
+        duration: expect.any(Number),
+      });
     });
 
     test('parsing error should be reflected in throwed error', async () => {
@@ -101,6 +112,13 @@ describe('ApiService', () => {
       await expect(async () => {
         return api.sbom.analyse(IMAGE_INFO_MOCK);
       }).rejects.toThrowError('cannot parse syft SBOM document:');
+
+      expect(TELEMETRY_LOGGER_MOCK.logUsage).toHaveBeenCalledExactlyOnceWith(
+        TELEMETRY_EVENTS.SYFT_ANALYSE,
+        expect.objectContaining({
+          error: expect.any(Error),
+        }),
+      );
     });
   });
 
@@ -119,6 +137,10 @@ describe('ApiService', () => {
       expect(SYFT_SERVICE_MOCK.analyse).toHaveBeenCalledWith(image, undefined);
       expect(GRYPE_SERVICE_MOCK.analyse).toHaveBeenCalledWith(dummyPath, undefined);
       expect(result).toEqual(dummyVulnerabilities);
+
+      expect(TELEMETRY_LOGGER_MOCK.logUsage).toHaveBeenCalledExactlyOnceWith(TELEMETRY_EVENTS.GRYPE_ANALYSE, {
+        duration: expect.any(Number),
+      });
     });
   });
 });
