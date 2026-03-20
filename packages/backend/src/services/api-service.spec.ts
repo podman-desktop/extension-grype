@@ -111,7 +111,7 @@ describe('ApiService', () => {
 
       await expect(async () => {
         return api.sbom.analyse(IMAGE_INFO_MOCK);
-      }).rejects.toThrowError('cannot parse syft SBOM document:');
+      }).rejects.toThrow('cannot parse syft SBOM document:');
 
       expect(TELEMETRY_LOGGER_MOCK.logUsage).toHaveBeenCalledExactlyOnceWith(
         TELEMETRY_EVENTS.SYFT_ANALYSE,

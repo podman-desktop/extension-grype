@@ -221,7 +221,7 @@ describe('installer', () => {
   test('doUninstall is not implemented', async () => {
     await expect(async () => {
       return await installer.doUninstall(LOGGER_MOCK);
-    }).rejects.toThrowError('Not implemented');
+    }).rejects.toThrow('Not implemented');
   });
 
   describe('selectVersion', () => {
@@ -248,7 +248,7 @@ describe('installer', () => {
 
       await expect(async () => {
         return await installer.selectVersion();
-      }).rejects.toThrowError('No version selected');
+      }).rejects.toThrow('No version selected');
     });
 
     test('expect selectVersion to return version without v prefix', async () => {
@@ -319,7 +319,7 @@ describe('installer', () => {
 
       await expect(async () => {
         await installer.doInstall(LOGGER_MOCK);
-      }).rejects.toThrowError(HTTP_ERROR_MOCK);
+      }).rejects.toThrow(HTTP_ERROR_MOCK);
 
       expect(TELEMETRY_LOGGER_MOCK.logUsage).toHaveBeenCalledExactlyOnceWith(
         TELEMETRY_EVENTS.CLI_INSTALL,
