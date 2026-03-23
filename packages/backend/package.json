@@ -31,7 +31,7 @@
   "devDependencies": {
     "@podman-desktop/api": "^1.25.1",
     "@types/adm-zip": "^0.5.8",
-    "@types/tar": "^6.1.13",
+    "@types/tar": "^7.0.87",
     "@types/node": "^24",
     "vite": "^8.0.1",
     "vitest": "^4.0.16",
@@ -42,7 +42,7 @@
     "@podman-desktop/grype-extension-api": "workspace:^",
     "@octokit/rest": "^22.0.1",
     "adm-zip": "^0.5.12",
-    "tar": "^7.4.3",
+    "tar": "^7.5.12",
     "inversify": "^7.11.0",
     "zod": "^4.3.6"
   }
