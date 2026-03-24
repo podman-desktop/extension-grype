@@ -42,7 +42,7 @@
     "@podman-desktop/grype-extension-api": "workspace:^",
     "@octokit/rest": "^22.0.1",
     "adm-zip": "^0.5.12",
-    "tar": "^7.5.12",
+    "tar": "^7.5.13",
     "inversify": "^7.11.0",
     "zod": "^4.3.6"
   }
