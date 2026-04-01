@@ -18,7 +18,14 @@
 
 import { test, vi, beforeEach, describe, expect, assert } from 'vitest';
 import type { ExtensionContext, CliTool, TelemetryLogger } from '@podman-desktop/api';
-import { window, cli as cliApi, ProgressLocation, process, window as windowApi } from '@podman-desktop/api';
+import {
+  CancellationTokenSource,
+  window,
+  cli as cliApi,
+  ProgressLocation,
+  process,
+  window as windowApi,
+} from '@podman-desktop/api';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import type { Octokit } from '@octokit/rest';
@@ -153,10 +160,32 @@ describe('GrypeService#analyse', () => {
       CLI_TOOL_MOCK.path,
       [`sbom:${sbom}`, '--output=json', '--file=foo.grype.json.tmp'],
       {
-        token: undefined,
+        token: {
+          isCancellationRequested: false,
+          onCancellationRequested: expect.any(Function),
+        },
       },
     );
     expect(rename).toHaveBeenCalledExactlyOnceWith('foo.grype.json.tmp', 'foo.grype.json');
     expect(result).toStrictEqual(GRYPE_DOCUMENT_MOCK);
+  });
+});
+
+describe('GrypeService#dispose', () => {
+  beforeEach(() => {
+    vi.mocked(existsSync).mockReturnValue(true);
+    return grypeService.init();
+  });
+
+  test('should cancel pending task', async () => {
+    await grypeService.analyse('foo.syft.json');
+
+    expect(CancellationTokenSource).toHaveBeenCalledOnce();
+    const source = vi.mocked(CancellationTokenSource).mock.instances[0];
+    expect(source.cancel).not.toHaveBeenCalled();
+
+    grypeService.dispose();
+
+    expect(source.cancel).toHaveBeenCalledOnce();
   });
 });

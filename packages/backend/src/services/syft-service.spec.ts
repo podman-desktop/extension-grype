@@ -19,7 +19,14 @@
 import { test, vi, beforeEach, describe, expect, assert } from 'vitest';
 import { SyftService } from '/@/services/syft-service';
 import type { ExtensionContext, CliTool, ImageInfo, TelemetryLogger } from '@podman-desktop/api';
-import { cli as cliApi, containerEngine, ProgressLocation, process, window as windowApi } from '@podman-desktop/api';
+import {
+  CancellationTokenSource,
+  cli as cliApi,
+  containerEngine,
+  ProgressLocation,
+  process,
+  window as windowApi,
+} from '@podman-desktop/api';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import type { Octokit } from '@octokit/rest';
@@ -150,7 +157,10 @@ describe('SyftService#analyse', () => {
       IMAGE_INFO_MOCK.engineId,
       IMAGE_INFO_MOCK.Id,
       join(tmpdir(), IMAGE_INFO_MOCK.Id),
-      undefined,
+      {
+        isCancellationRequested: false,
+        onCancellationRequested: expect.any(Function),
+      },
     );
 
     expect(mkdtempDisposable).toHaveBeenCalledExactlyOnceWith(join(tmpdir(), IMAGE_INFO_MOCK.engineId));
@@ -162,10 +172,32 @@ describe('SyftService#analyse', () => {
       CLI_TOOL_MOCK.path,
       ['scan', join(tmpdir(), IMAGE_INFO_MOCK.Id), `--output=json=${tmp}`],
       {
-        token: undefined,
+        token: {
+          isCancellationRequested: false,
+          onCancellationRequested: expect.any(Function),
+        },
       },
     );
 
     expect(rename).toHaveBeenCalledExactlyOnceWith(tmp, dest);
+  });
+});
+
+describe('SyftService#dispose', () => {
+  beforeEach(() => {
+    vi.mocked(existsSync).mockReturnValue(true);
+    return syft.init();
+  });
+
+  test('should cancel pending task', async () => {
+    await syft.analyse(IMAGE_INFO_MOCK);
+
+    expect(CancellationTokenSource).toHaveBeenCalledOnce();
+    const source = vi.mocked(CancellationTokenSource).mock.instances[0];
+    expect(source.cancel).not.toHaveBeenCalled();
+
+    syft.dispose();
+
+    expect(source.cancel).toHaveBeenCalledOnce();
   });
 });

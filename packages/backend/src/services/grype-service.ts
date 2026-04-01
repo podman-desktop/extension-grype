@@ -38,6 +38,8 @@ export const MAX_CACHE_AGE = 1000 * 60 * 60 * 24; // 1 day
 
 @injectable()
 export class GrypeService extends AnchoreCliService {
+  #cancellationTokens: Array<CancellationTokenSource> = [];
+
   constructor(
     @inject(Octokit)
     octokit: Octokit,
@@ -57,6 +59,8 @@ export class GrypeService extends AnchoreCliService {
   @preDestroy()
   override dispose(): void {
     super.dispose();
+
+    this.cancelAll();
   }
 
   protected override get icon(): string {
@@ -73,6 +77,11 @@ export class GrypeService extends AnchoreCliService {
   }
   protected get repoName(): string {
     return 'grype';
+  }
+
+  protected override cancelAll(): void {
+    this.#cancellationTokens.forEach(token => token.cancel());
+    this.#cancellationTokens = [];
   }
 
   protected async isExpired(path: string): Promise<boolean> {
@@ -92,6 +101,7 @@ export class GrypeService extends AnchoreCliService {
       throw new Error('cannot analyse sbom without grype binary installed');
 
     const cancel = new CancellationTokenSource();
+    this.#cancellationTokens.push(cancel);
     options?.token?.onCancellationRequested(() => {
       cancel.cancel();
     });
