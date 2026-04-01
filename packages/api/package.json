@@ -1,6 +1,6 @@
 {
   "name": "@podman-desktop/grype-extension-api",
-  "version": "0.1.0-next",
+  "version": "0.2.0-next",
   "description": "API for Podman Desktop Grype extension",
   "repository": "https://github.com/podman-desktop/extension-grype",
   "publishConfig": {
