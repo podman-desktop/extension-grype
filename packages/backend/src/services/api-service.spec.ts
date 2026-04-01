@@ -20,19 +20,32 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { ApiService } from '/@/services/api-service';
 import type { GrypeService } from '/@/services/grype-service';
 import type { SyftService } from '/@/services/syft-service';
-import type { ImageInfo, TelemetryLogger } from '@podman-desktop/api';
+import type { CancellationToken, ImageInfo, TelemetryLogger } from '@podman-desktop/api';
+import { window, ProgressLocation } from '@podman-desktop/api';
 import { readFile } from 'node:fs/promises';
 import type { syft } from '@podman-desktop/grype-extension-api';
 import { TELEMETRY_EVENTS } from '/@/utils/telemetry';
+import type { AnchoreCliService } from '/@/services/anchore-cli-service';
 
 vi.mock(import('node:fs/promises'));
+vi.mock(import('@podman-desktop/api'));
+
+class TestApiService extends ApiService {
+  public override async assertInstalled(): Promise<void> {
+    return super.assertInstalled();
+  }
+}
 
 const GRYPE_SERVICE_MOCK: GrypeService = {
   analyse: vi.fn(),
+  isInstalled: vi.fn(),
+  install: vi.fn(),
 } as unknown as GrypeService;
 
 const SYFT_SERVICE_MOCK: SyftService = {
   analyse: vi.fn(),
+  isInstalled: vi.fn(),
+  install: vi.fn(),
 } as unknown as SyftService;
 
 const TELEMETRY_LOGGER_MOCK: TelemetryLogger = {
@@ -42,11 +55,18 @@ const TELEMETRY_LOGGER_MOCK: TelemetryLogger = {
 } as unknown as TelemetryLogger;
 
 describe('ApiService', () => {
-  let apiService: ApiService;
+  let apiService: TestApiService;
 
   beforeEach(() => {
     vi.resetAllMocks();
-    apiService = new ApiService(GRYPE_SERVICE_MOCK, SYFT_SERVICE_MOCK, TELEMETRY_LOGGER_MOCK);
+    apiService = new TestApiService(GRYPE_SERVICE_MOCK, SYFT_SERVICE_MOCK, TELEMETRY_LOGGER_MOCK);
+
+    vi.mocked(SYFT_SERVICE_MOCK.isInstalled).mockReturnValue(true);
+    vi.mocked(GRYPE_SERVICE_MOCK.isInstalled).mockReturnValue(true);
+
+    vi.mocked(window.withProgress).mockImplementation((_, fn) => {
+      return fn({ report: vi.fn() }, {} as CancellationToken);
+    });
   });
 
   describe('init', () => {
@@ -141,6 +161,61 @@ describe('ApiService', () => {
       expect(TELEMETRY_LOGGER_MOCK.logUsage).toHaveBeenCalledExactlyOnceWith(TELEMETRY_EVENTS.GRYPE_ANALYSE, {
         duration: expect.any(Number),
       });
+    });
+  });
+
+  describe('assertInstalled', () => {
+    test.each<{
+      name: string;
+      service: AnchoreCliService;
+    }>([
+      {
+        name: 'syft',
+        service: SYFT_SERVICE_MOCK,
+      },
+      {
+        name: 'grype',
+        service: GRYPE_SERVICE_MOCK,
+      },
+    ])('$name not installed should prompt user', async ({ service }) => {
+      vi.mocked(service.isInstalled).mockReturnValue(false);
+
+      await expect(async () => {
+        await apiService.assertInstalled();
+      }).rejects.toThrow('user cancelled the installation');
+
+      expect(window.showInformationMessage).toHaveBeenCalledExactlyOnceWith(
+        'Grype extension requires to install Syft and Grype binaries to scan images, do you want to install them?',
+        'Yes',
+        'Cancel',
+      );
+    });
+
+    test('withProgress should be called with the correct parameters', async () => {
+      vi.mocked(SYFT_SERVICE_MOCK.isInstalled).mockReturnValue(false);
+      vi.mocked(GRYPE_SERVICE_MOCK.isInstalled).mockReturnValue(false);
+      vi.mocked(window.showInformationMessage).mockResolvedValue('Yes');
+
+      await apiService.assertInstalled();
+
+      expect(window.withProgress).toHaveBeenCalledWith(
+        expect.objectContaining({
+          location: ProgressLocation.TASK_WIDGET,
+          title: 'Installing Grype binaries',
+        }),
+        expect.any(Function),
+      );
+    });
+
+    test('should call install on GrypeService and SyftService', async () => {
+      vi.mocked(SYFT_SERVICE_MOCK.isInstalled).mockReturnValue(false);
+      vi.mocked(GRYPE_SERVICE_MOCK.isInstalled).mockReturnValue(false);
+      vi.mocked(window.showInformationMessage).mockResolvedValue('Yes');
+
+      await apiService.assertInstalled();
+
+      expect(SYFT_SERVICE_MOCK.install).toHaveBeenCalledOnce();
+      expect(GRYPE_SERVICE_MOCK.install).toHaveBeenCalledOnce();
     });
   });
 });
