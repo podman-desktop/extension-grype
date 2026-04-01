@@ -60,7 +60,16 @@ const plugin = {
   Disposable: {
     create: (fn: () => void): podmanDesktopApi.Disposable => ({ dispose: fn }),
   } as unknown as typeof podmanDesktopApi.Disposable,
-  CancellationTokenSource: vi.fn(),
+  CancellationTokenSource: vi.fn(
+    class {
+      dispose = vi.fn();
+      token = {
+        isCancellationRequested: false,
+        onCancellationRequested: vi.fn(),
+      };
+      cancel = vi.fn();
+    },
+  ),
   Uri: {
     joinPath: vi.fn(),
   } as unknown as typeof podmanDesktopApi.Uri,

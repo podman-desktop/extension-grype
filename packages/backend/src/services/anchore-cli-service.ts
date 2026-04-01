@@ -58,6 +58,12 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
   protected abstract get repoName(): string; // e.g. 'syft' | 'grype'
   protected abstract get icon(): string;
 
+  /**
+   * Cancel all task related to the binary
+   * This function is called before removing the installed binary.
+   */
+  protected abstract cancelAll(): void;
+
   protected get storageDir(): string {
     return join(this.context.storagePath, this.toolId);
   }
@@ -114,9 +120,14 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
 
     let selected: GithubReleaseMetadata | undefined = undefined;
     this.cliTool.registerInstaller({
-      doUninstall(_: Logger): Promise<void> {
-        // We could remove the binary and keep cache; keep not implemented for now
-        throw new Error('Not implemented');
+      doUninstall: async (_: Logger): Promise<void> => {
+        try {
+          this.cancelAll();
+        } catch (err: unknown) {
+          console.error('Something went wrong while trying to cancel pending tasks', err);
+        }
+
+        await rm(this.storageDir, { recursive: true, force: true, maxRetries: 2, retryDelay: 5_000 });
       },
       doInstall: async (logger: Logger) => {
         if (!selected) throw new Error('No version selected');

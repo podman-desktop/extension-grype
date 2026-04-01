@@ -37,6 +37,8 @@ import { CacheService } from '/@/services/cache-service';
 
 @injectable()
 export class SyftService extends AnchoreCliService {
+  #cancellationTokens: Array<CancellationTokenSource> = [];
+
   constructor(
     @inject(Octokit)
     octokit: Octokit,
@@ -58,6 +60,8 @@ export class SyftService extends AnchoreCliService {
   @preDestroy()
   override dispose(): void {
     super.dispose();
+
+    this.cancelAll();
   }
 
   protected override get icon(): string {
@@ -74,6 +78,11 @@ export class SyftService extends AnchoreCliService {
   }
   protected get repoName(): string {
     return 'syft';
+  }
+
+  protected override cancelAll(): void {
+    this.#cancellationTokens.forEach(token => token.cancel());
+    this.#cancellationTokens = [];
   }
 
   protected sanitizeImageId(imageId: string): string {
@@ -94,6 +103,7 @@ export class SyftService extends AnchoreCliService {
       throw new Error('cannot analyse image without syft binary installed');
 
     const cancel = new CancellationTokenSource();
+    this.#cancellationTokens.push(cancel);
     options?.token?.onCancellationRequested(() => {
       cancel.cancel();
     });

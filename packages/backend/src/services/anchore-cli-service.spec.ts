@@ -61,6 +61,7 @@ const TELEMETRY_LOGGER_MOCK: TelemetryLogger = {
 } as unknown as TelemetryLogger;
 
 class TestCli extends AnchoreCliService {
+  protected override async cancelAll(): Promise<void> {}
   public override get icon(): string {
     return 'dummy.png';
   }
@@ -219,9 +220,14 @@ describe('installer', () => {
   });
 
   test('doUninstall is not implemented', async () => {
-    await expect(async () => {
-      return await installer.doUninstall(LOGGER_MOCK);
-    }).rejects.toThrow('Not implemented');
+    await installer.doUninstall(LOGGER_MOCK);
+
+    expect(rm).toHaveBeenCalledExactlyOnceWith(join(EXTENSION_CONTEXT_MOCK.storagePath, cli.toolId), {
+      force: true,
+      maxRetries: 2,
+      recursive: true,
+      retryDelay: 5_000,
+    });
   });
 
   describe('selectVersion', () => {
