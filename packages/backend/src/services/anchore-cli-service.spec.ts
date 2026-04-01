@@ -61,7 +61,7 @@ const TELEMETRY_LOGGER_MOCK: TelemetryLogger = {
 } as unknown as TelemetryLogger;
 
 class TestCli extends AnchoreCliService {
-  protected override async cancelAll(): Promise<void> {}
+  protected override cancelAll(): void {}
   public override get icon(): string {
     return 'dummy.png';
   }
