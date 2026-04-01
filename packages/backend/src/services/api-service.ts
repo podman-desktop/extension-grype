@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 import type { AsyncInit } from '/@/utils/async-init';
-import type { CancellationToken, TelemetryLogger } from '@podman-desktop/api';
+import { CancellationToken, ProgressLocation, TelemetryLogger, window } from '@podman-desktop/api';
 
 import type { GrypeExtensionApi } from '@podman-desktop/grype-extension-api';
 import { syft, grype } from '@podman-desktop/grype-extension-api';
@@ -39,6 +39,31 @@ export class ApiService implements AsyncInit<never, GrypeExtensionApi> {
     private readonly telemetryLogger: TelemetryLogger,
   ) {}
 
+  protected async assertInstalled(): Promise<void> {
+    if (this.syftService.isInstalled() && this.grypeService.isInstalled()) {
+      return;
+    }
+
+    const result = await window.showInformationMessage(
+      'Grype extension requires to install Syft and Grype binaries to scan images, do you want to install them?',
+      'Yes',
+      'Cancel',
+    );
+    if (result !== 'Yes') {
+      throw new Error('user cancelled the installation');
+    }
+
+    await window.withProgress(
+      {
+        location: ProgressLocation.TASK_WIDGET,
+        title: 'Installing Grype binaries',
+      },
+      async () => {
+        await Promise.all([this.syftService.install(), this.grypeService.install()]);
+      },
+    );
+  }
+
   async init(): Promise<GrypeExtensionApi> {
     return {
       sbom: {
@@ -50,6 +75,8 @@ export class ApiService implements AsyncInit<never, GrypeExtensionApi> {
           const start = performance.now();
 
           try {
+            await this.assertInstalled();
+
             const result = await this.syftService.analyse(image, options);
             const raw = await readFile(result, 'utf-8');
 
@@ -77,6 +104,8 @@ export class ApiService implements AsyncInit<never, GrypeExtensionApi> {
           const start = performance.now();
 
           try {
+            await this.assertInstalled();
+
             const result = await this.syftService.analyse(image, options);
             return this.grypeService.analyse(result, options);
           } catch (err: unknown) {
