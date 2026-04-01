@@ -157,7 +157,10 @@ describe('SyftService#analyse', () => {
       IMAGE_INFO_MOCK.engineId,
       IMAGE_INFO_MOCK.Id,
       join(tmpdir(), IMAGE_INFO_MOCK.Id),
-      undefined,
+      {
+        isCancellationRequested: false,
+        onCancellationRequested: expect.any(Function),
+      },
     );
 
     expect(mkdtempDisposable).toHaveBeenCalledExactlyOnceWith(join(tmpdir(), IMAGE_INFO_MOCK.engineId));
@@ -169,7 +172,10 @@ describe('SyftService#analyse', () => {
       CLI_TOOL_MOCK.path,
       ['scan', join(tmpdir(), IMAGE_INFO_MOCK.Id), `--output=json=${tmp}`],
       {
-        token: undefined,
+        token: {
+          isCancellationRequested: false,
+          onCancellationRequested: expect.any(Function),
+        },
       },
     );
 

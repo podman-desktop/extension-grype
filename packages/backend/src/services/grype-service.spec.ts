@@ -160,7 +160,10 @@ describe('GrypeService#analyse', () => {
       CLI_TOOL_MOCK.path,
       [`sbom:${sbom}`, '--output=json', '--file=foo.grype.json.tmp'],
       {
-        token: undefined,
+        token: {
+          isCancellationRequested: false,
+          onCancellationRequested: expect.any(Function),
+        },
       },
     );
     expect(rename).toHaveBeenCalledExactlyOnceWith('foo.grype.json.tmp', 'foo.grype.json');
