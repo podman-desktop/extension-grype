@@ -127,7 +127,7 @@ export class SyftService extends AnchoreCliService {
         cancellable: true,
         title: options?.task?.title ?? `Analysing image ${image.Id}`,
       },
-      async (progress, token) => {
+      async (_, token) => {
         if (!this.cliTool?.path) throw new Error('syft is not installed.');
 
         token.onCancellationRequested(() => {
@@ -139,14 +139,12 @@ export class SyftService extends AnchoreCliService {
         await using dir = await mkdtempDisposable(join(tmpdir(), image.engineId));
         const tarball = join(dir.path, image.Id);
 
-        progress.report({ message: `Saving image ${image.Id}` });
         await containerEngine.saveImage(image.engineId, image.Id, tarball, cancel.token);
 
         await mkdir(dirname(destination), { recursive: true });
 
         const tmp = `${destination}.tmp`;
 
-        progress.report({ message: `Analysing image ${image.Id}` });
         await process.exec(binary, ['scan', tarball, `--output=json=${tmp}`], {
           token: cancel.token,
         });
