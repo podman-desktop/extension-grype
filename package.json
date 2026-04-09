@@ -27,7 +27,7 @@
     "wrap-ansi": "^7.0.0"
   },
   "devDependencies": {
-    "@eslint/compat": "^2.0.4",
+    "@eslint/compat": "^2.0.5",
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^9.39.4",
     "@podman-desktop/api": "^1.26.1",
