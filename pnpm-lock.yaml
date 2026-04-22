@@ -154,9 +154,6 @@ importers:
       '@types/node':
         specifier: ^24
         version: 24.12.2
-      '@types/tar':
-        specifier: ^7.0.87
-        version: 7.0.87
       json-schema-to-typescript:
         specifier: ^15.0.4
         version: 15.0.4
@@ -884,10 +881,6 @@ packages:
 
   '@types/semver@7.7.1':
     resolution: {integrity: sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==}
-
-  '@types/tar@7.0.87':
-    resolution: {integrity: sha512-3IxNBV8LeY5oi2ZFpvAhOtW1+mHswkzM7BuisVrwJgPv67GBO2rkLPQlEKtzfHuLdhDDczhkCZeT+RuizMay4A==}
-    deprecated: This is a stub types definition. tar provides its own type definitions, so you do not need this installed.
 
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
@@ -3640,10 +3633,6 @@ snapshots:
       undici-types: 7.16.0
 
   '@types/semver@7.7.1': {}
-
-  '@types/tar@7.0.87':
-    dependencies:
-      tar: 7.5.13
 
   '@types/trusted-types@2.0.7': {}
 
