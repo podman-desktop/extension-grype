@@ -50,7 +50,7 @@
     "globals": "^17.6.0",
     "prettier": "^3.8.3",
     "prettier-plugin-svelte": "^3.5.0",
-    "svelte-eslint-parser": "^1.6.0",
+    "svelte-eslint-parser": "^1.6.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.10",
