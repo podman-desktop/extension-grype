@@ -159,8 +159,8 @@ importers:
         specifier: ^15.0.4
         version: 15.0.4
       semver:
-        specifier: ^7.7.4
-        version: 7.7.4
+        specifier: ^7.8.0
+        version: 7.8.0
       vite:
         specifier: ^8.0.11
         version: 8.0.11(@types/node@24.12.2)(esbuild@0.27.3)
@@ -1300,6 +1300,10 @@ packages:
 
   brace-expansion@5.0.5:
     resolution: {integrity: sha512-VZznLgtwhn+Mact9tfiwx64fA9erHH/MCXEUfB/0bX/6Fz6ny5EGTXYltMocqg4xFAQZtnO3DHWWXi8RiuN7cQ==}
+    engines: {node: 18 || 20 || >=22}
+
+  brace-expansion@5.0.6:
+    resolution: {integrity: sha512-kLpxurY4Z4r9sgMsyG0Z9uzsBlgiU/EFKhj/h91/8yHu0edo7XuixOIH3VcJ8kkxs6/jPzoI6U9Vj3WqbMQ94g==}
     engines: {node: 18 || 20 || >=22}
 
   braces@3.0.3:
@@ -2549,8 +2553,8 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  semver@7.7.4:
-    resolution: {integrity: sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA==}
+  semver@7.8.0:
+    resolution: {integrity: sha512-AcM7dV/5ul4EekoQ29Agm5vri8JNqRyj39o0qpX6vDF2GZrtutZl5RwgD1XnZjiTAfncsJhMI48QQH3sN87YNA==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -3707,7 +3711,7 @@ snapshots:
       debug: 4.4.3
       globby: 11.1.0
       is-glob: 4.0.3
-      semver: 7.7.4
+      semver: 7.8.0
       tsutils: 3.21.0(typescript@6.0.3)
     optionalDependencies:
       typescript: 6.0.3
@@ -3722,7 +3726,7 @@ snapshots:
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.7
-      semver: 7.7.4
+      semver: 7.8.0
       ts-api-utils: 1.4.3(typescript@6.0.3)
     optionalDependencies:
       typescript: 6.0.3
@@ -3737,7 +3741,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.59.2
       debug: 4.4.3
       minimatch: 10.2.5
-      semver: 7.7.4
+      semver: 7.8.0
       tinyglobby: 0.2.16
       ts-api-utils: 2.5.0(typescript@6.0.3)
       typescript: 6.0.3
@@ -3754,7 +3758,7 @@ snapshots:
       '@typescript-eslint/typescript-estree': 5.62.0(typescript@6.0.3)
       eslint: 10.3.0
       eslint-scope: 5.1.1
-      semver: 7.7.4
+      semver: 7.8.0
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -3768,7 +3772,7 @@ snapshots:
       '@typescript-eslint/types': 6.21.0
       '@typescript-eslint/typescript-estree': 6.21.0(typescript@6.0.3)
       eslint: 10.3.0
-      semver: 7.7.4
+      semver: 7.8.0
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -4085,6 +4089,11 @@ snapshots:
   brace-expansion@5.0.5:
     dependencies:
       balanced-match: 4.0.4
+
+  brace-expansion@5.0.6:
+    dependencies:
+      balanced-match: 4.0.4
+    optional: true
 
   braces@3.0.3:
     dependencies:
@@ -4486,7 +4495,7 @@ snapshots:
       lodash.merge: 4.6.2
       minimatch: 10.2.5
       scslre: 0.3.0
-      semver: 7.7.4
+      semver: 7.8.0
       ts-api-utils: 2.5.0(typescript@6.0.3)
       typescript: 6.0.3
 
@@ -4501,7 +4510,7 @@ snapshots:
       postcss: 8.5.12
       postcss-load-config: 3.1.4(postcss@8.5.12)
       postcss-safe-parser: 7.0.1(postcss@8.5.12)
-      semver: 7.7.4
+      semver: 7.8.0
       svelte-eslint-parser: 1.6.1(svelte@5.53.7(@typescript-eslint/types@8.59.2))
     optionalDependencies:
       svelte: 5.53.7(@typescript-eslint/types@8.59.2)
@@ -4525,7 +4534,7 @@ snapshots:
       pluralize: 8.0.0
       regexp-tree: 0.1.27
       regjsparser: 0.13.0
-      semver: 7.7.4
+      semver: 7.8.0
       strip-indent: 4.1.1
 
   eslint-scope@5.1.1:
@@ -4863,7 +4872,7 @@ snapshots:
 
   is-bun-module@2.0.0:
     dependencies:
-      semver: 7.7.4
+      semver: 7.8.0
 
   is-callable@1.2.7: {}
 
@@ -5122,7 +5131,7 @@ snapshots:
 
   make-dir@4.0.0:
     dependencies:
-      semver: 7.7.4
+      semver: 7.8.0
 
   math-intrinsics@1.1.0: {}
 
@@ -5135,7 +5144,7 @@ snapshots:
 
   minimatch@10.2.3:
     dependencies:
-      brace-expansion: 5.0.5
+      brace-expansion: 5.0.6
     optional: true
 
   minimatch@10.2.5:
@@ -5477,7 +5486,7 @@ snapshots:
       lru-cache: 6.0.0
     optional: true
 
-  semver@7.7.4: {}
+  semver@7.8.0: {}
 
   set-function-length@1.2.2:
     dependencies:
@@ -5619,7 +5628,7 @@ snapshots:
       postcss: 8.5.14
       postcss-scss: 4.0.9(postcss@8.5.14)
       postcss-selector-parser: 7.1.1
-      semver: 7.7.4
+      semver: 7.8.0
     optionalDependencies:
       svelte: 5.53.7(@typescript-eslint/types@8.59.2)
 
