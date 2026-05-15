@@ -24,7 +24,7 @@
   "devDependencies": {
     "json-schema-to-typescript": "^15.0.4",
     "@podman-desktop/api": "^1.26.2",
-    "vite": "^8.0.12",
+    "vite": "^8.0.13",
     "vitest": "^4.1.6",
     "unplugin-dts": "^1.0.0"
   },
