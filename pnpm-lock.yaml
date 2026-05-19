@@ -116,8 +116,8 @@ importers:
         specifier: ^15.0.4
         version: 15.0.4
       unplugin-dts:
-        specifier: ^1.0.0
-        version: 1.0.0(@microsoft/api-extractor@7.57.7(@types/node@24.12.4))(esbuild@0.27.3)(rolldown@1.0.1)(rollup@4.59.0)(typescript@6.0.3)(vite@8.0.13(@types/node@24.12.4)(esbuild@0.27.3))
+        specifier: ^1.0.1
+        version: 1.0.1(@microsoft/api-extractor@7.57.7(@types/node@24.12.4))(esbuild@0.27.3)(rolldown@1.0.1)(rollup@4.59.0)(typescript@6.0.3)(vite@8.0.13(@types/node@24.12.4)(esbuild@0.27.3))
       vite:
         specifier: ^8.0.13
         version: 8.0.13(@types/node@24.12.4)(esbuild@0.27.3)
@@ -2835,8 +2835,8 @@ packages:
     resolution: {integrity: sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==}
     engines: {node: '>= 10.0.0'}
 
-  unplugin-dts@1.0.0:
-    resolution: {integrity: sha512-qz+U1lCscwq+t8Mkaxy5Esa7IQ5wWV18b4mnioOXSdnPaNiJ0+qgE3I+KL6UkXYZWxxGo2qdGone8LEQ52Sfkw==}
+  unplugin-dts@1.0.1:
+    resolution: {integrity: sha512-EdJZxdWP4Tm/xhe58/zAge3Tu0OKDYygm8rucRrcCZ4XzgA31jexUKhaJuEMddOPBDs9ONnq6vwigbjeBqkfuw==}
     peerDependencies:
       '@microsoft/api-extractor': '>=7'
       '@rspack/core': ^1
@@ -5861,7 +5861,7 @@ snapshots:
   universalify@2.0.1:
     optional: true
 
-  unplugin-dts@1.0.0(@microsoft/api-extractor@7.57.7(@types/node@24.12.4))(esbuild@0.27.3)(rolldown@1.0.1)(rollup@4.59.0)(typescript@6.0.3)(vite@8.0.13(@types/node@24.12.4)(esbuild@0.27.3)):
+  unplugin-dts@1.0.1(@microsoft/api-extractor@7.57.7(@types/node@24.12.4))(esbuild@0.27.3)(rolldown@1.0.1)(rollup@4.59.0)(typescript@6.0.3)(vite@8.0.13(@types/node@24.12.4)(esbuild@0.27.3)):
     dependencies:
       '@rollup/pluginutils': 5.3.0(rollup@4.59.0)
       '@volar/typescript': 2.4.28
