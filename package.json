@@ -33,7 +33,7 @@
     "@podman-desktop/api": "^1.26.2",
     "@typescript-eslint/eslint-plugin": "^8.59.4",
     "@typescript-eslint/parser": "^8.59.4",
-    "@vitest/coverage-v8": "^4.1.6",
+    "@vitest/coverage-v8": "^4.1.7",
     "@vitest/eslint-plugin": "^1.6.17",
     "autoprefixer": "^10.5.0",
     "eslint": "^10.4.0",
@@ -54,7 +54,7 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.4",
     "vite": "^8.0.13",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.7"
   },
   "workspaces": {
     "packages": [
