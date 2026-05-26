@@ -1,5 +1,7 @@
 {
   "name": "grype",
+  "repository": "https://github.com/podman-desktop/extension-grype",
+  "homepage": "https://github.com/podman-desktop/extension-grype#readme",
   "displayName": "Grype",
   "description": "Unofficial grype & syft integration for Podman Desktop",
   "version": "0.2.0-next",
