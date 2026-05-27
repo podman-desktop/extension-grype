@@ -28,8 +28,8 @@ importers:
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.4.0)
       '@podman-desktop/api':
-        specifier: ^1.27.1
-        version: 1.27.1
+        specifier: ^1.27.2
+        version: 1.27.2
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.60.0
         version: 8.60.0(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3)
@@ -110,8 +110,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@podman-desktop/api':
-        specifier: ^1.27.1
-        version: 1.27.1
+        specifier: ^1.27.2
+        version: 1.27.2
       json-schema-to-typescript:
         specifier: ^15.0.4
         version: 15.0.4
@@ -147,8 +147,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@podman-desktop/api':
-        specifier: ^1.27.1
-        version: 1.27.1
+        specifier: ^1.27.2
+        version: 1.27.2
       '@types/adm-zip':
         specifier: ^0.5.8
         version: 0.5.8
@@ -571,8 +571,8 @@ packages:
     peerDependencies:
       typescript: ^3 || ^4 || ^5
 
-  '@podman-desktop/api@1.27.1':
-    resolution: {integrity: sha512-nyli20LEpfti1LllIkQV56SgivZZtA+LBdP3iFND75vE1+njvfNhluCOC4eZaBoea0E0OlgIq828Ro1DZtlBFw==}
+  '@podman-desktop/api@1.27.2':
+    resolution: {integrity: sha512-Vd47yX6EInOmrm+ci6tywIhZzmBbzuipJvIXuZ9PIIXfy1Zkog9YFLviOZz/o5wLQovZVBS0c0/jyJe1GlK+6g==}
 
   '@rolldown/binding-android-arm64@1.0.2':
     resolution: {integrity: sha512-ZS4D1JPGn/MYQN/SYDWftIE/nVsM8j/AFOYEzAoOE2O3NktQOZru+/vYXGbR/qtdLdIfGCP0lcoJiYVzsEz+iQ==}
@@ -3422,7 +3422,7 @@ snapshots:
       esquery: 1.7.0
       typescript: 6.0.3
 
-  '@podman-desktop/api@1.27.1': {}
+  '@podman-desktop/api@1.27.2': {}
 
   '@rolldown/binding-android-arm64@1.0.2':
     optional: true
