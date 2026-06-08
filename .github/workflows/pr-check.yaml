@@ -19,6 +19,9 @@ name: pr-check
 
 on: [pull_request]
 
+permissions:
+  contents: read
+
 jobs:
   lint-format-unit:
     name: linter, formatter, and tests / ${{ matrix.os }}
