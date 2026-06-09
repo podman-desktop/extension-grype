@@ -117,8 +117,8 @@ importers:
         specifier: ^15.0.4
         version: 15.0.4
       unplugin-dts:
-        specifier: ^1.0.1
-        version: 1.0.1(@microsoft/api-extractor@7.57.7(@types/node@24.12.4))(esbuild@0.27.3)(rolldown@1.0.3)(rollup@4.59.0)(typescript@6.0.3)(vite@8.0.15(@types/node@24.12.4)(esbuild@0.27.3))
+        specifier: ^1.0.2
+        version: 1.0.2(@microsoft/api-extractor@7.57.7(@types/node@24.12.4))(esbuild@0.27.3)(rolldown@1.0.3)(rollup@4.59.0)(typescript@6.0.3)(vite@8.0.15(@types/node@24.12.4)(esbuild@0.27.3))
       vite:
         specifier: ^8.0.15
         version: 8.0.15(@types/node@24.12.4)(esbuild@0.27.3)
@@ -664,8 +664,8 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@rollup/pluginutils@5.3.0':
-    resolution: {integrity: sha512-5EdhGZtnu3V88ces7s53hhfK5KSASnJZv8Lulpc04cWO3REESroJXg73DFsOmgbU2BhwV0E20bu2IDZb3VKW4Q==}
+  '@rollup/pluginutils@5.4.0':
+    resolution: {integrity: sha512-MfPp06CjRLfXQ3wY0R8vJDYBy/MvVcc9OulEfR0B8Iv9ko+GCNaRZ+EpJYFl27LhKsZK0o420sYCRHCjfCgeUg==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
@@ -2203,8 +2203,8 @@ packages:
     resolution: {integrity: sha512-utWOt/GHzuUxnLKxB6dk81RoOeoNeHgbrXiuGk4yyF5qlRz+iIVWu56E2fqGHFrXz0QNUhLB/8nKqvRH66JKGQ==}
     engines: {node: '>=10'}
 
-  local-pkg@1.1.2:
-    resolution: {integrity: sha512-arhlxbFRmoQHl33a0Zkle/YWlmNwoyt6QNZEIJcqNbdrsix5Lvc4HyyI3EnwxTYlZYc32EbYrQ8SzEZ7dqgg9A==}
+  local-pkg@1.2.1:
+    resolution: {integrity: sha512-++gUqRDEvcnN6Zhqrr+y/CkVEHhlrR96vZn3nZZPYzMcBUyBtTKzB9NadClFIsIVSsu+3i9tfk/erqy9kAmt7Q==}
     engines: {node: '>=14'}
 
   locate-character@3.0.0:
@@ -2804,8 +2804,8 @@ packages:
     resolution: {integrity: sha512-gptHNQghINnc/vTGIk0SOFGFNXw7JVrlRUtConJRlvaw6DuX0wO5Jeko9sWrMBhh+PsYAZ7oXAiOnf/UKogyiw==}
     engines: {node: '>= 10.0.0'}
 
-  unplugin-dts@1.0.1:
-    resolution: {integrity: sha512-EdJZxdWP4Tm/xhe58/zAge3Tu0OKDYygm8rucRrcCZ4XzgA31jexUKhaJuEMddOPBDs9ONnq6vwigbjeBqkfuw==}
+  unplugin-dts@1.0.2:
+    resolution: {integrity: sha512-VbNiMD0LMl/t6nJueGtrCp79N7ZO1nquxj/FUybJDnKwZGsnW2wjdwBSzA3QEHujoxmxZIptsG43hL7LzXE96w==}
     peerDependencies:
       '@microsoft/api-extractor': '>=7'
       '@rspack/core': ^1
@@ -3432,7 +3432,7 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@rollup/pluginutils@5.3.0(rollup@4.59.0)':
+  '@rollup/pluginutils@5.4.0(rollup@4.59.0)':
     dependencies:
       '@types/estree': 1.0.9
       estree-walker: 2.0.2
@@ -5095,7 +5095,7 @@ snapshots:
 
   lilconfig@2.1.0: {}
 
-  local-pkg@1.1.2:
+  local-pkg@1.2.1:
     dependencies:
       mlly: 1.8.2
       pkg-types: 2.3.1
@@ -5775,14 +5775,14 @@ snapshots:
   universalify@2.0.1:
     optional: true
 
-  unplugin-dts@1.0.1(@microsoft/api-extractor@7.57.7(@types/node@24.12.4))(esbuild@0.27.3)(rolldown@1.0.3)(rollup@4.59.0)(typescript@6.0.3)(vite@8.0.15(@types/node@24.12.4)(esbuild@0.27.3)):
+  unplugin-dts@1.0.2(@microsoft/api-extractor@7.57.7(@types/node@24.12.4))(esbuild@0.27.3)(rolldown@1.0.3)(rollup@4.59.0)(typescript@6.0.3)(vite@8.0.15(@types/node@24.12.4)(esbuild@0.27.3)):
     dependencies:
-      '@rollup/pluginutils': 5.3.0(rollup@4.59.0)
+      '@rollup/pluginutils': 5.4.0(rollup@4.59.0)
       '@volar/typescript': 2.4.28
       compare-versions: 6.1.1
       debug: 4.4.3
       kolorist: 1.8.0
-      local-pkg: 1.1.2
+      local-pkg: 1.2.1
       magic-string: 0.30.21
       typescript: 6.0.3
       unplugin: 2.3.11
