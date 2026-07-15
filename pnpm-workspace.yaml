@@ -3,3 +3,5 @@ packages:
   - 'tests/*'
 onlyBuiltDependencies:
   - esbuild
+
+minimumReleaseAge: 1440
