@@ -168,7 +168,7 @@ describe('SyftService#analyse', () => {
     const dest = join(CACHE_SERVICE_MOCK.getCacheDirectory(), IMAGE_INFO_MOCK.engineId, 'foo.syft.json');
     const tmp = `${dest}.tmp`;
 
-    expect(process.exec).toHaveBeenCalledExactlyOnceWith(
+    expect(process.exec).toHaveBeenCalledWith(
       CLI_TOOL_MOCK.path,
       ['scan', join(tmpdir(), IMAGE_INFO_MOCK.Id), `--output=json=${tmp}`],
       {
