@@ -16,6 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
+/* eslint-disable sonarjs/publicly-writable-directories */
+
 import { test, vi, beforeEach, expect, describe } from 'vitest';
 import {
   ANCHORE_GITHUB_ORG,
@@ -212,13 +214,11 @@ describe('TestCli#init', () => {
   test('registered cli should have version when existing version is found', async () => {
     vi.mocked(existsSync).mockReturnValue(true);
     // where() throws → falls back to internalBinaryPath
-    vi.mocked(processApi.exec)
-      .mockRejectedValueOnce(new Error('not found'))
-      .mockResolvedValueOnce({
-        stdout: 'cli 1.41.2',
-        command: 'version',
-        stderr: '',
-      });
+    vi.mocked(processApi.exec).mockRejectedValueOnce(new Error('not found')).mockResolvedValueOnce({
+      stdout: 'cli 1.41.2',
+      command: 'version',
+      stderr: '',
+    });
 
     await cli.init();
     expect(cliApi.createCliTool).toHaveBeenCalledExactlyOnceWith(
@@ -578,10 +578,7 @@ describe('install system-wide prompt', () => {
   test('should prompt user for system-wide install', async () => {
     vi.mocked(windowApi.showInformationMessage).mockResolvedValue('Cancel');
 
-    await cli.install(
-      { label: 'v1.0.0', tag: 'v1.0.0', id: 0 },
-      { logger: LOGGER_MOCK },
-    );
+    await cli.install({ label: 'v1.0.0', tag: 'v1.0.0', id: 0 }, { logger: LOGGER_MOCK });
 
     expect(windowApi.showInformationMessage).toHaveBeenCalledWith(
       'Do you want to install dummy system-wide?',
@@ -596,10 +593,7 @@ describe('install system-wide prompt', () => {
     vi.mocked(existsSync).mockReturnValue(true);
     vi.mocked(processApi.exec).mockResolvedValue({ stdout: '', command: 'cp', stderr: '' });
 
-    await cli.install(
-      { label: 'v1.0.0', tag: 'v1.0.0', id: 0 },
-      { logger: LOGGER_MOCK },
-    );
+    await cli.install({ label: 'v1.0.0', tag: 'v1.0.0', id: 0 }, { logger: LOGGER_MOCK });
 
     expect(processApi.exec).toHaveBeenCalledWith(
       'cp',
@@ -616,10 +610,7 @@ describe('install system-wide prompt', () => {
   test('should skip system-wide install when user cancels', async () => {
     vi.mocked(windowApi.showInformationMessage).mockResolvedValue('Cancel');
 
-    await cli.install(
-      { label: 'v1.0.0', tag: 'v1.0.0', id: 0 },
-      { logger: LOGGER_MOCK },
-    );
+    await cli.install({ label: 'v1.0.0', tag: 'v1.0.0', id: 0 }, { logger: LOGGER_MOCK });
 
     expect(CLI_TOOL_MOCK.updateVersion).toHaveBeenCalledWith(
       expect.objectContaining({

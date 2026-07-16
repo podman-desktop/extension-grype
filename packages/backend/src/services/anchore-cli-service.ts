@@ -16,15 +16,16 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import  {
-  CliTool, CliToolInstallationSource,
+import type {
+  CliTool,
+  CliToolInstallationSource,
   Disposable,
   ExtensionContext,
   Logger,
   QuickPickItem,
   TelemetryLogger,
 } from '@podman-desktop/api';
-import { cli as cliApi, env as envApi, process as processApi, window as windowApi } from '@podman-desktop/api';
+import extensionApi, { cli as cliApi, env as envApi, process as processApi, window as windowApi } from '@podman-desktop/api';
 import type { AsyncInit } from '/@/utils/async-init';
 import type { Octokit } from '@octokit/rest';
 import { arch as nodeArch, platform as nodePlatform } from 'node:process';
@@ -34,8 +35,7 @@ import * as tar from 'tar';
 import { chmod, mkdir, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { TELEMETRY_EVENTS } from '/@/utils/telemetry';
-import {homedir} from "node:os";
-import extensionApi from "@podman-desktop/api";
+import { homedir } from 'node:os';
 
 export interface GithubReleaseMetadata extends QuickPickItem {
   tag: string;
@@ -43,7 +43,9 @@ export interface GithubReleaseMetadata extends QuickPickItem {
 }
 
 export interface InstallationInfo {
-  path: string; version: string; source: CliToolInstallationSource
+  path: string;
+  version: string;
+  source: CliToolInstallationSource;
 }
 
 export const ANCHORE_GITHUB_ORG = 'anchore';
@@ -67,14 +69,14 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
   protected getSystemBinaryPath(): string {
     const binary = this.toolId;
 
-    if(envApi.isWindows) {
+    if (envApi.isWindows) {
       return join(
-          homedir(),
-          'AppData',
-          'Local',
-          'Microsoft',
-          'WindowsApps',
-          binary.endsWith('.exe') ? binary : `${binary}.exe`,
+        homedir(),
+        'AppData',
+        'Local',
+        'Microsoft',
+        'WindowsApps',
+        binary.endsWith('.exe') ? binary : `${binary}.exe`,
       );
     } else {
       return join('/usr', 'local', 'bin', binary);
@@ -157,10 +159,14 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
         let binPath = await this.extract(assetPath, this.storageDir);
         options?.logger?.log(`Extracted ${this.toolId} to ${binPath}`);
 
-        const res = await windowApi.showInformationMessage(`Do you want to install ${this.toolId} system-wide?`, 'Cancel', 'Confirm');
-        if(res === 'Confirm') {
+        const res = await windowApi.showInformationMessage(
+          `Do you want to install ${this.toolId} system-wide?`,
+          'Cancel',
+          'Confirm',
+        );
+        if (res === 'Confirm') {
           const systemWidePath = await this.installSystemWide(binPath);
-          if(systemWidePath) {
+          if (systemWidePath) {
             binPath = systemWidePath;
           }
         }
@@ -200,7 +206,7 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
 
   protected async where(): Promise<string | undefined> {
     try {
-      if(envApi.isWindows) {
+      if (envApi.isWindows) {
         const { stdout: path } = await extensionApi.process.exec('where', [this.toolId]);
         // remove all line break/carriage return characters from full path
         return path.replace(/(\r\n|\n|\r)/gm, '');
@@ -219,11 +225,11 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
     let source: CliToolInstallationSource;
 
     let binaryPath: string;
-    if(systemBinaryPath) {
+    if (systemBinaryPath) {
       binaryPath = systemBinaryPath;
       source = this.getSystemBinaryPath() === binaryPath ? 'extension' : 'external';
     } else {
-      binaryPath = this.internalBinaryPath
+      binaryPath = this.internalBinaryPath;
       source = 'extension';
     }
 
@@ -235,8 +241,8 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
     return {
       path: binaryPath,
       version: version ?? text,
-      source
-    }
+      source,
+    };
   }
 
   async init(): Promise<void> {
@@ -279,7 +285,7 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
 
         await rm(this.storageDir, { recursive: true, force: true, maxRetries: 2, retryDelay: 5_000 });
 
-        if(this.cliTool?.path === this.getSystemBinaryPath()) {
+        if (this.cliTool?.path === this.getSystemBinaryPath()) {
           const command = extensionApi.env.isWindows ? 'del' : 'rm';
 
           try {
@@ -287,7 +293,7 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
             await extensionApi.process.exec(command, [this.cliTool.path], { isAdmin: true });
           } catch (error) {
             console.error(`Failed to uninstall '${this.cliTool.path}'`, {
-              error
+              error,
             });
             throw error;
           }
