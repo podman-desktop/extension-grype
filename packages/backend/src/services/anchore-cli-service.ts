@@ -25,7 +25,12 @@ import type {
   QuickPickItem,
   TelemetryLogger,
 } from '@podman-desktop/api';
-import extensionApi, { cli as cliApi, env as envApi, process as processApi, window as windowApi } from '@podman-desktop/api';
+import extensionApi, {
+  cli as cliApi,
+  env as envApi,
+  process as processApi,
+  window as windowApi,
+} from '@podman-desktop/api';
 import type { AsyncInit } from '/@/utils/async-init';
 import type { Octokit } from '@octokit/rest';
 import { arch as nodeArch, platform as nodePlatform } from 'node:process';
