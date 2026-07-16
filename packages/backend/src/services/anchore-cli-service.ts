@@ -18,13 +18,19 @@
 
 import type {
   CliTool,
+  CliToolInstallationSource,
   Disposable,
   ExtensionContext,
   Logger,
   QuickPickItem,
   TelemetryLogger,
 } from '@podman-desktop/api';
-import { cli as cliApi, env as envApi, process as processApi, window as windowApi } from '@podman-desktop/api';
+import extensionApi, {
+  cli as cliApi,
+  env as envApi,
+  process as processApi,
+  window as windowApi,
+} from '@podman-desktop/api';
 import type { AsyncInit } from '/@/utils/async-init';
 import type { Octokit } from '@octokit/rest';
 import { arch as nodeArch, platform as nodePlatform } from 'node:process';
@@ -34,10 +40,17 @@ import * as tar from 'tar';
 import { chmod, mkdir, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { TELEMETRY_EVENTS } from '/@/utils/telemetry';
+import { homedir } from 'node:os';
 
 export interface GithubReleaseMetadata extends QuickPickItem {
   tag: string;
   id: number;
+}
+
+export interface InstallationInfo {
+  path: string;
+  version: string;
+  source: CliToolInstallationSource;
 }
 
 export const ANCHORE_GITHUB_ORG = 'anchore';
@@ -57,6 +70,57 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
   protected abstract get markdownDescription(): string;
   protected abstract get repoName(): string; // e.g. 'syft' | 'grype'
   protected abstract get icon(): string;
+
+  protected getSystemBinaryPath(): string {
+    const binary = this.toolId;
+
+    if (envApi.isWindows) {
+      return join(
+        homedir(),
+        'AppData',
+        'Local',
+        'Microsoft',
+        'WindowsApps',
+        binary.endsWith('.exe') ? binary : `${binary}.exe`,
+      );
+    } else {
+      return join('/usr', 'local', 'bin', binary);
+    }
+  }
+
+  protected async installSystemWide(binaryPath: string): Promise<string | undefined> {
+    // Create the appropriate destination path (Windows uses AppData/Local, Linux and Mac use /usr/local/bin)
+    // and the appropriate command to move the binary to the destination path
+    const destinationPath: string = this.getSystemBinaryPath();
+    let command: string;
+    let args: string[];
+    if (envApi.isWindows) {
+      command = 'copy';
+      args = [`"${binaryPath}"`, `"${destinationPath}"`];
+    } else {
+      command = 'cp';
+      args = [binaryPath, destinationPath];
+    }
+
+    // If on macOS or Linux, check to see if the /usr/local/bin directory exists,
+    // if it does not, then add mkdir -p /usr/local/bin to the start of the command when moving the binary.
+    const localBinDir = '/usr/local/bin';
+    if ((envApi.isLinux || envApi.isMac) && !existsSync(localBinDir)) {
+      await processApi.exec('mkdir', ['-p', localBinDir], { isAdmin: true });
+    }
+
+    try {
+      // Use admin prileges / ask for password for copying to /usr/local/bin
+      await processApi.exec(command, args, { isAdmin: true });
+      console.log(`Successfully installed '${this.toolId}' binary.`);
+      return destinationPath;
+    } catch (error) {
+      console.error(`Failed to copy ${binaryPath} to ${destinationPath}`, {
+        error,
+      });
+      throw error;
+    }
+  }
 
   /**
    * Cancel all task related to the binary
@@ -97,8 +161,20 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
       options?.logger?.log(`Downloaded ${this.toolId} to ${assetPath}`);
 
       try {
-        const binPath = await this.extract(assetPath, this.storageDir);
+        let binPath = await this.extract(assetPath, this.storageDir);
         options?.logger?.log(`Extracted ${this.toolId} to ${binPath}`);
+
+        const res = await windowApi.showInformationMessage(
+          `Do you want to install ${this.toolId} system-wide?`,
+          'Cancel',
+          'Confirm',
+        );
+        if (res === 'Confirm') {
+          const systemWidePath = await this.installSystemWide(binPath);
+          if (systemWidePath) {
+            binPath = systemWidePath;
+          }
+        }
 
         this.cliTool?.updateVersion({
           version: selected.tag.slice(1),
@@ -125,7 +201,7 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
     return this.toolId;
   }
 
-  protected get binaryPath(): string {
+  protected get internalBinaryPath(): string {
     return join(this.storageDir, envApi.isWindows ? `${this.binaryBaseName}.exe` : this.binaryBaseName);
   }
 
@@ -133,26 +209,55 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
     this.cliTool?.dispose();
   }
 
-  protected async getInstalledVersion(): Promise<string> {
+  protected async where(): Promise<string | undefined> {
+    try {
+      const command = envApi.isWindows ? 'where' : 'which';
+      const { stdout } = await processApi.exec(command, [this.toolId]);
+      return stdout
+        .split(/\r?\n/)
+        .map(path => path.trim())
+        .find(Boolean);
+      // eslint-disable-next-line sonarjs/no-ignored-exceptions
+    } catch (_: unknown) {
+      return undefined;
+    }
+  }
+
+  protected async getInstalledInfo(): Promise<InstallationInfo> {
+    const systemBinaryPath = await this.where();
+
+    let source: CliToolInstallationSource;
+
+    let binaryPath: string;
+    if (systemBinaryPath) {
+      binaryPath = systemBinaryPath;
+      source = this.getSystemBinaryPath() === binaryPath ? 'extension' : 'external';
+    } else {
+      binaryPath = this.internalBinaryPath;
+      source = 'extension';
+    }
+
     // default parse: '<tool> <semver>' from '--version'
-    const { stdout } = await processApi.exec(this.binaryPath, ['--version']);
+    const { stdout } = await processApi.exec(binaryPath, ['--version']);
     // example: 'syft 1.41.2' or 'grype 0.109.0'
     const text = stdout.trim();
     const [, version] = text.split(/\s+/);
-    return version ?? text;
+    return {
+      path: binaryPath,
+      version: version ?? text,
+      source,
+    };
   }
 
   async init(): Promise<void> {
-    let version: string | undefined;
+    let info: InstallationInfo | undefined;
 
-    if (existsSync(this.binaryPath)) {
-      try {
-        version = await this.getInstalledVersion();
-      } catch (err) {
-        console.warn('Unable to determine installed version', err);
-        // if unable to determine version, keep undefined and let user reinstall
-        version = undefined;
-      }
+    try {
+      info = await this.getInstalledInfo();
+    } catch (err) {
+      console.warn('Unable to determine installed version', err);
+      // if unable to determine version, keep undefined and let user reinstall
+      info = undefined;
     }
 
     // Ensure tool-specific storage folder exists early
@@ -166,9 +271,9 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
         icon: this.icon,
         logo: this.icon,
       },
-      version,
-      installationSource: 'extension',
-      path: version ? this.binaryPath : undefined,
+      version: info?.version,
+      installationSource: info?.source,
+      path: info?.path,
     });
 
     let selected: GithubReleaseMetadata | undefined = undefined;
@@ -181,13 +286,27 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
         }
 
         await rm(this.storageDir, { recursive: true, force: true, maxRetries: 2, retryDelay: 5_000 });
+
+        if (this.cliTool?.path === this.getSystemBinaryPath()) {
+          const command = extensionApi.env.isWindows ? 'del' : 'rm';
+
+          try {
+            // Use admin prileges
+            await extensionApi.process.exec(command, [this.cliTool.path], { isAdmin: true });
+          } catch (error) {
+            console.error(`Failed to uninstall '${this.cliTool.path}'`, {
+              error,
+            });
+            throw error;
+          }
+        }
       },
       doInstall: async (logger: Logger) => {
         if (!selected) throw new Error('No version selected');
         return this.install(selected, { logger });
       },
       selectVersion: async (_?: boolean) => {
-        const current = version; // already resolved above
+        const current = info; // already resolved above
         selected = await this.promptUserForVersion(current ? `v${current}` : undefined);
         return selected.tag.slice(1);
       },

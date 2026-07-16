@@ -77,6 +77,9 @@ const plugin = {
   version: version,
   env: {
     createTelemetryLogger: vi.fn(),
+    isWindows: false,
+    isLinux: false,
+    isMac: false,
   } as unknown as typeof podmanDesktopApi.env,
   process: {
     exec: vi.fn(),

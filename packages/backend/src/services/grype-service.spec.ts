@@ -156,7 +156,7 @@ describe('GrypeService#analyse', () => {
 
     const result = await fn({ report: vi.fn() }, { isCancellationRequested: false, onCancellationRequested: vi.fn() });
 
-    expect(process.exec).toHaveBeenCalledExactlyOnceWith(
+    expect(process.exec).toHaveBeenCalledWith(
       CLI_TOOL_MOCK.path,
       [`sbom:${sbom}`, '--output=json', '--file=foo.grype.json.tmp'],
       {
