@@ -211,14 +211,13 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
 
   protected async where(): Promise<string | undefined> {
     try {
-      if (envApi.isWindows) {
-        const { stdout: path } = await extensionApi.process.exec('where', [this.toolId]);
-        // remove all line break/carriage return characters from full path
-        return path.replace(/(\r\n|\n|\r)/gm, '');
-      } else {
-        const { stdout: path } = await extensionApi.process.exec('which', [this.toolId]);
-        return path;
-      }
+      const command = envApi.isWindows ? 'where' : 'which';
+      const { stdout } = await processApi.exec(command, [this.toolId]);
+      return stdout
+        .split(/\r?\n/)
+        .map(path => path.trim())
+        .find(Boolean);
+      // eslint-disable-next-line sonarjs/no-ignored-exceptions
     } catch (_: unknown) {
       return undefined;
     }
@@ -253,14 +252,12 @@ export abstract class AnchoreCliService implements Disposable, AsyncInit {
   async init(): Promise<void> {
     let info: InstallationInfo | undefined;
 
-    if (existsSync(this.internalBinaryPath)) {
-      try {
-        info = await this.getInstalledInfo();
-      } catch (err) {
-        console.warn('Unable to determine installed version', err);
-        // if unable to determine version, keep undefined and let user reinstall
-        info = undefined;
-      }
+    try {
+      info = await this.getInstalledInfo();
+    } catch (err) {
+      console.warn('Unable to determine installed version', err);
+      // if unable to determine version, keep undefined and let user reinstall
+      info = undefined;
     }
 
     // Ensure tool-specific storage folder exists early
