@@ -17,11 +17,16 @@
  ***********************************************************************/
 
 import { test, vi, beforeEach, expect, describe } from 'vitest';
-import { ANCHORE_GITHUB_ORG, AnchoreCliService, type GithubReleaseMetadata } from '/@/services/anchore-cli-service';
+import {
+  ANCHORE_GITHUB_ORG,
+  AnchoreCliService,
+  type GithubReleaseMetadata,
+  type InstallationInfo,
+} from '/@/services/anchore-cli-service';
 import { join } from 'node:path';
-import { tmpdir } from 'node:os';
+import { homedir } from 'node:os';
 import type { Octokit } from '@octokit/rest';
-import { cli as cliApi, process as processApi, window as windowApi } from '@podman-desktop/api';
+import { cli as cliApi, env as envApi, process as processApi, window as windowApi } from '@podman-desktop/api';
 import type { CliToolInstaller, CliTool, Logger, ExtensionContext, TelemetryLogger } from '@podman-desktop/api';
 import type { Endpoints } from '@octokit/types';
 import { existsSync } from 'node:fs';
@@ -33,6 +38,7 @@ import { TELEMETRY_EVENTS } from '/@/utils/telemetry';
 
 vi.mock(import('node:fs'));
 vi.mock(import('node:fs/promises'));
+vi.mock(import('node:os'));
 vi.mock(import('@octokit/rest'));
 vi.mock(import('adm-zip'), () => ({
   default: vi.fn(
@@ -44,7 +50,7 @@ vi.mock(import('adm-zip'), () => ({
 vi.mock(import('tar'));
 
 const EXTENSION_CONTEXT_MOCK: ExtensionContext = {
-  storagePath: join(tmpdir()),
+  storagePath: join('/tmp'),
 } as unknown as ExtensionContext;
 const OCTOKIT_MOCK: Octokit = {
   repos: {
@@ -76,6 +82,18 @@ class TestCli extends AnchoreCliService {
   }
   public get repoName(): string {
     return 'dummy';
+  }
+  public override getSystemBinaryPath(): string {
+    return super.getSystemBinaryPath();
+  }
+  public override where(): Promise<string | undefined> {
+    return super.where();
+  }
+  public override getInstalledInfo(): Promise<InstallationInfo> {
+    return super.getInstalledInfo();
+  }
+  public override installSystemWide(binaryPath: string): Promise<string | undefined> {
+    return super.installSystemWide(binaryPath);
   }
 }
 
@@ -142,6 +160,13 @@ beforeEach(() => {
 
   cli = new TestCli(OCTOKIT_MOCK, EXTENSION_CONTEXT_MOCK, TELEMETRY_LOGGER_MOCK);
 
+  // reset non-mock properties on shared CliTool object
+  CLI_TOOL_MOCK.path = undefined;
+  CLI_TOOL_MOCK.version = undefined;
+
+  // mock homedir
+  vi.mocked(homedir).mockReturnValue('/home/testuser');
+
   // mock fs
   vi.mocked(rm).mockResolvedValue(undefined);
 
@@ -176,7 +201,7 @@ describe('TestCli#init', () => {
         icon: CLI_TOOL_MOCK.images.icon,
         logo: CLI_TOOL_MOCK.images.logo,
       },
-      installationSource: 'extension',
+      installationSource: undefined,
       markdownDescription: CLI_TOOL_MOCK.markdownDescription,
       name: CLI_TOOL_MOCK.name,
       path: undefined,
@@ -186,17 +211,21 @@ describe('TestCli#init', () => {
 
   test('registered cli should have version when existing version is found', async () => {
     vi.mocked(existsSync).mockReturnValue(true);
-    vi.mocked(processApi.exec).mockResolvedValue({
-      stdout: 'cli 1.41.2',
-      command: 'version',
-      stderr: '',
-    });
+    // where() throws → falls back to internalBinaryPath
+    vi.mocked(processApi.exec)
+      .mockRejectedValueOnce(new Error('not found'))
+      .mockResolvedValueOnce({
+        stdout: 'cli 1.41.2',
+        command: 'version',
+        stderr: '',
+      });
 
     await cli.init();
     expect(cliApi.createCliTool).toHaveBeenCalledExactlyOnceWith(
       expect.objectContaining({
         path: join(EXTENSION_CONTEXT_MOCK.storagePath, cli.toolId, 'dummy'),
         version: '1.41.2',
+        installationSource: 'extension',
       }),
     );
   });
@@ -379,4 +408,263 @@ test('TestCli#dispose should dispose CliTool', async () => {
   cli.dispose();
 
   expect(CLI_TOOL_MOCK.dispose).toHaveBeenCalledOnce();
+});
+
+describe('getSystemBinaryPath', () => {
+  test('should return /usr/local/bin path on Linux/Mac', () => {
+    Object.defineProperty(envApi, 'isWindows', { value: false, configurable: true });
+
+    expect(cli.getSystemBinaryPath()).toBe(join('/usr', 'local', 'bin', 'dummy'));
+  });
+
+  test('should return Windows AppData path with .exe on Windows', () => {
+    Object.defineProperty(envApi, 'isWindows', { value: true, configurable: true });
+
+    expect(cli.getSystemBinaryPath()).toBe(
+      join(homedir(), 'AppData', 'Local', 'Microsoft', 'WindowsApps', 'dummy.exe'),
+    );
+  });
+});
+
+describe('where', () => {
+  test('should return path from which on non-Windows', async () => {
+    Object.defineProperty(envApi, 'isWindows', { value: false, configurable: true });
+    vi.mocked(processApi.exec).mockResolvedValue({
+      stdout: '/usr/local/bin/dummy',
+      command: 'which',
+      stderr: '',
+    });
+
+    const result = await cli.where();
+    expect(result).toBe('/usr/local/bin/dummy');
+    expect(processApi.exec).toHaveBeenCalledWith('which', ['dummy']);
+  });
+
+  test('should return cleaned path from where on Windows', async () => {
+    Object.defineProperty(envApi, 'isWindows', { value: true, configurable: true });
+    vi.mocked(processApi.exec).mockResolvedValue({
+      stdout: 'C:\\Users\\test\\dummy.exe\r\n',
+      command: 'where',
+      stderr: '',
+    });
+
+    const result = await cli.where();
+    expect(result).toBe('C:\\Users\\test\\dummy.exe');
+    expect(processApi.exec).toHaveBeenCalledWith('where', ['dummy']);
+  });
+
+  test('should return undefined when exec throws', async () => {
+    vi.mocked(processApi.exec).mockRejectedValue(new Error('not found'));
+
+    const result = await cli.where();
+    expect(result).toBeUndefined();
+  });
+});
+
+describe('getInstalledInfo', () => {
+  test('should return source extension when where() finds binary at system binary path', async () => {
+    Object.defineProperty(envApi, 'isWindows', { value: false, configurable: true });
+    const systemPath = cli.getSystemBinaryPath();
+
+    vi.mocked(processApi.exec)
+      .mockResolvedValueOnce({ stdout: systemPath, command: 'which', stderr: '' })
+      .mockResolvedValueOnce({ stdout: 'dummy 1.2.3', command: 'version', stderr: '' });
+
+    const info = await cli.getInstalledInfo();
+    expect(info).toEqual({
+      path: systemPath,
+      version: '1.2.3',
+      source: 'extension',
+    });
+  });
+
+  test('should return source external when where() finds binary at different path', async () => {
+    Object.defineProperty(envApi, 'isWindows', { value: false, configurable: true });
+
+    vi.mocked(processApi.exec)
+      .mockResolvedValueOnce({ stdout: '/custom/path/dummy', command: 'which', stderr: '' })
+      .mockResolvedValueOnce({ stdout: 'dummy 2.0.0', command: 'version', stderr: '' });
+
+    const info = await cli.getInstalledInfo();
+    expect(info).toEqual({
+      path: '/custom/path/dummy',
+      version: '2.0.0',
+      source: 'external',
+    });
+  });
+
+  test('should fallback to internalBinaryPath when where() returns undefined', async () => {
+    vi.mocked(processApi.exec)
+      .mockRejectedValueOnce(new Error('not found'))
+      .mockResolvedValueOnce({ stdout: 'dummy 3.0.0', command: 'version', stderr: '' });
+
+    const info = await cli.getInstalledInfo();
+    expect(info).toEqual({
+      path: join(EXTENSION_CONTEXT_MOCK.storagePath, 'dummy', 'dummy'),
+      version: '3.0.0',
+      source: 'extension',
+    });
+  });
+
+  test('should use full stdout when version cannot be parsed', async () => {
+    vi.mocked(processApi.exec)
+      .mockRejectedValueOnce(new Error('not found'))
+      .mockResolvedValueOnce({ stdout: 'unparseable', command: 'version', stderr: '' });
+
+    const info = await cli.getInstalledInfo();
+    expect(info.version).toBe('unparseable');
+  });
+});
+
+describe('installSystemWide', () => {
+  test('should use cp with admin privileges on Linux/Mac', async () => {
+    Object.defineProperty(envApi, 'isWindows', { value: false, configurable: true });
+    vi.mocked(existsSync).mockReturnValue(true);
+    vi.mocked(processApi.exec).mockResolvedValue({ stdout: '', command: 'cp', stderr: '' });
+
+    const result = await cli.installSystemWide('/tmp/dummy');
+    expect(result).toBe(join('/usr', 'local', 'bin', 'dummy'));
+    expect(processApi.exec).toHaveBeenCalledWith('cp', ['/tmp/dummy', join('/usr', 'local', 'bin', 'dummy')], {
+      isAdmin: true,
+    });
+  });
+
+  test('should use copy with quoted paths on Windows', async () => {
+    Object.defineProperty(envApi, 'isWindows', { value: true, configurable: true });
+    Object.defineProperty(envApi, 'isLinux', { value: false, configurable: true });
+    Object.defineProperty(envApi, 'isMac', { value: false, configurable: true });
+    vi.mocked(processApi.exec).mockResolvedValue({ stdout: '', command: 'copy', stderr: '' });
+
+    const destPath = join(homedir(), 'AppData', 'Local', 'Microsoft', 'WindowsApps', 'dummy.exe');
+    const result = await cli.installSystemWide('C:\\tmp\\dummy.exe');
+    expect(result).toBe(destPath);
+    expect(processApi.exec).toHaveBeenCalledWith('copy', [`"C:\\tmp\\dummy.exe"`, `"${destPath}"`], {
+      isAdmin: true,
+    });
+  });
+
+  test('should create /usr/local/bin when it does not exist on Linux', async () => {
+    Object.defineProperty(envApi, 'isWindows', { value: false, configurable: true });
+    Object.defineProperty(envApi, 'isLinux', { value: true, configurable: true });
+    vi.mocked(existsSync).mockReturnValue(false);
+    vi.mocked(processApi.exec).mockResolvedValue({ stdout: '', command: '', stderr: '' });
+
+    await cli.installSystemWide('/tmp/dummy');
+
+    expect(processApi.exec).toHaveBeenCalledWith('mkdir', ['-p', '/usr/local/bin'], { isAdmin: true });
+  });
+
+  test('should rethrow on copy failure', async () => {
+    Object.defineProperty(envApi, 'isWindows', { value: false, configurable: true });
+    vi.mocked(existsSync).mockReturnValue(true);
+    const error = new Error('permission denied');
+    vi.mocked(processApi.exec).mockRejectedValue(error);
+
+    await expect(cli.installSystemWide('/tmp/dummy')).rejects.toThrow('permission denied');
+  });
+});
+
+describe('install system-wide prompt', () => {
+  beforeEach(async () => {
+    await cli.init();
+
+    vi.mocked(windowApi.showQuickPick).mockResolvedValue({
+      label: LIST_RELEASES[0].name,
+      tag: LIST_RELEASES[0].tag_name,
+      id: LIST_RELEASES[0].id,
+    } as GithubReleaseMetadata);
+  });
+
+  test('should prompt user for system-wide install', async () => {
+    vi.mocked(windowApi.showInformationMessage).mockResolvedValue('Cancel');
+
+    await cli.install(
+      { label: 'v1.0.0', tag: 'v1.0.0', id: 0 },
+      { logger: LOGGER_MOCK },
+    );
+
+    expect(windowApi.showInformationMessage).toHaveBeenCalledWith(
+      'Do you want to install dummy system-wide?',
+      'Cancel',
+      'Confirm',
+    );
+  });
+
+  test('should install system-wide and use returned path when user confirms', async () => {
+    vi.mocked(windowApi.showInformationMessage).mockResolvedValue('Confirm');
+    Object.defineProperty(envApi, 'isWindows', { value: false, configurable: true });
+    vi.mocked(existsSync).mockReturnValue(true);
+    vi.mocked(processApi.exec).mockResolvedValue({ stdout: '', command: 'cp', stderr: '' });
+
+    await cli.install(
+      { label: 'v1.0.0', tag: 'v1.0.0', id: 0 },
+      { logger: LOGGER_MOCK },
+    );
+
+    expect(processApi.exec).toHaveBeenCalledWith(
+      'cp',
+      expect.arrayContaining([join('/usr', 'local', 'bin', 'dummy')]),
+      { isAdmin: true },
+    );
+    expect(CLI_TOOL_MOCK.updateVersion).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: join('/usr', 'local', 'bin', 'dummy'),
+      }),
+    );
+  });
+
+  test('should skip system-wide install when user cancels', async () => {
+    vi.mocked(windowApi.showInformationMessage).mockResolvedValue('Cancel');
+
+    await cli.install(
+      { label: 'v1.0.0', tag: 'v1.0.0', id: 0 },
+      { logger: LOGGER_MOCK },
+    );
+
+    expect(CLI_TOOL_MOCK.updateVersion).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: join(EXTENSION_CONTEXT_MOCK.storagePath, 'dummy', 'dummy'),
+      }),
+    );
+  });
+});
+
+describe('doUninstall system binary removal', () => {
+  let installer: CliToolInstaller;
+
+  beforeEach(async () => {
+    await cli.init();
+    installer = vi.mocked(CLI_TOOL_MOCK.registerInstaller).mock.calls[0][0];
+  });
+
+  test('should remove system binary with admin when cliTool.path matches system path', async () => {
+    Object.defineProperty(envApi, 'isWindows', { value: false, configurable: true });
+    const systemPath = cli.getSystemBinaryPath();
+    CLI_TOOL_MOCK.path = systemPath;
+    vi.mocked(processApi.exec).mockResolvedValue({ stdout: '', command: 'rm', stderr: '' });
+
+    await installer.doUninstall(LOGGER_MOCK);
+
+    expect(processApi.exec).toHaveBeenCalledWith('rm', [systemPath], { isAdmin: true });
+  });
+
+  test('should use del command on Windows for system binary removal', async () => {
+    Object.defineProperty(envApi, 'isWindows', { value: true, configurable: true });
+    const systemPath = cli.getSystemBinaryPath();
+    CLI_TOOL_MOCK.path = systemPath;
+    vi.mocked(processApi.exec).mockResolvedValue({ stdout: '', command: 'del', stderr: '' });
+
+    await installer.doUninstall(LOGGER_MOCK);
+
+    expect(processApi.exec).toHaveBeenCalledWith('del', [systemPath], { isAdmin: true });
+  });
+
+  test('should not attempt system binary removal when path does not match', async () => {
+    CLI_TOOL_MOCK.path = '/some/other/path';
+    vi.mocked(processApi.exec).mockResolvedValue({ stdout: '', command: '', stderr: '' });
+
+    await installer.doUninstall(LOGGER_MOCK);
+
+    expect(processApi.exec).not.toHaveBeenCalledWith('rm', expect.anything(), expect.anything());
+  });
 });
