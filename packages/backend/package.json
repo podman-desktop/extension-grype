@@ -33,7 +33,7 @@
     "@types/adm-zip": "^0.5.8",
     "@types/node": "^24",
     "vite": "^8.0.16",
-    "vitest": "^4.1.9",
+    "vitest": "^4.1.10",
     "semver": "^7.8.5",
     "json-schema-to-typescript": "^15.0.4"
   },
