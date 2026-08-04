@@ -17,12 +17,14 @@
  ***********************************************************************/
 import type { Plugin } from 'vite';
 import { join } from 'node:path';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import type { JSONSchema } from 'json-schema-to-typescript';
 import { compile } from 'json-schema-to-typescript';
 
 const SYFT_JSON_SCHEMA_URL =
   'https://raw.githubusercontent.com/anchore/syft/refs/tags/v1.42.1/schema/json/schema-16.1.3.json';
+
+export const GRYPE_SYFT_JSON_SCHEMA_LOCAL_ENV = 'GRYPE_SYFT_JSON_SCHEMA_LOCAL';
 
 export function syftJSONSchema(): Plugin {
   return {
@@ -34,9 +36,18 @@ export function syftJSONSchema(): Plugin {
 
       const schemaPath = join(generated, 'syft-schema.json');
 
-      const response = await fetch(SYFT_JSON_SCHEMA_URL);
+      const localPath = process.env[GRYPE_SYFT_JSON_SCHEMA_LOCAL_ENV];
 
-      const content: unknown = await response.json();
+      let content: unknown;
+      if (localPath) {
+        console.log(`[syft-json-schema] using local schema from ${localPath}`);
+        await copyFile(localPath, schemaPath);
+        content = JSON.parse(await readFile(schemaPath, 'utf-8'));
+      } else {
+        console.log(`[syft-json-schema] fetching schema from ${SYFT_JSON_SCHEMA_URL}`);
+        const response = await fetch(SYFT_JSON_SCHEMA_URL);
+        content = await response.json();
+      }
 
       if (!content || typeof content !== 'object' || !('$ref' in content)) throw new Error('invalid json schema');
 
