@@ -69,7 +69,8 @@ export class ImageCheckerProvider implements Disposable, AsyncInit {
           title: 'Installing Grype binaries',
         },
         async () => {
-          await Promise.all([this.syft.install(), this.grype.install()]);
+          await this.syft.install();
+          await this.grype.install();
         },
       );
     }
