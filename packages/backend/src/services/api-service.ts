@@ -59,7 +59,8 @@ export class ApiService implements AsyncInit<never, GrypeExtensionApi> {
         title: 'Installing Grype binaries',
       },
       async () => {
-        await Promise.all([this.syftService.install(), this.grypeService.install()]);
+        await this.syftService.install();
+        await this.grypeService.install();
       },
     );
   }
