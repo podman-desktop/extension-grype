@@ -193,6 +193,47 @@ describe('check', () => {
     );
   });
 
+  test('cli tools should be installed sequentially', async () => {
+    vi.mocked(window.withProgress).mockImplementation((_, fn) => {
+      return fn({ report: vi.fn() }, {} as CancellationToken);
+    });
+
+    const { promise: syftInstallPromise, resolve: syftResolve } = Promise.withResolvers<void>();
+    const { promise: grypeInstallPromise, resolve: grypeResolve } = Promise.withResolvers<void>();
+    vi.mocked(SYFT_SERVICE_MOCK.install).mockReturnValue(syftInstallPromise);
+    vi.mocked(GRYPE_SERVICE_MOCK.install).mockReturnValue(grypeInstallPromise);
+
+    vi.mocked(SYFT_SERVICE_MOCK.analyse).mockResolvedValue('sbom-path');
+    vi.mocked(GRYPE_SERVICE_MOCK.analyse).mockResolvedValue({
+      matches: [],
+    });
+
+    vi.mocked(SYFT_SERVICE_MOCK.isInstalled).mockReturnValue(false);
+    vi.mocked(GRYPE_SERVICE_MOCK.isInstalled).mockReturnValue(false);
+
+    // mock user confirm
+    vi.mocked(window.showInformationMessage).mockResolvedValue('Yes');
+
+    const checkPromise = check(IMAGE_INFO_MOCK);
+
+    await vi.waitFor(() => {
+      expect(SYFT_SERVICE_MOCK.install).toHaveBeenCalled();
+    });
+    expect(GRYPE_SERVICE_MOCK.install).not.toHaveBeenCalled();
+
+    syftResolve();
+
+    await vi.waitFor(() => {
+      expect(GRYPE_SERVICE_MOCK.install).toHaveBeenCalled();
+    });
+
+    grypeResolve();
+
+    await checkPromise;
+
+    expect(GRYPE_SERVICE_MOCK.install).toHaveBeenCalledAfter(vi.mocked(SYFT_SERVICE_MOCK.install));
+  });
+
   test('cli not installed should install them on user confirm', async () => {
     vi.mocked(window.withProgress).mockImplementation((_, fn) => {
       return fn({ report: vi.fn() }, {} as CancellationToken);
