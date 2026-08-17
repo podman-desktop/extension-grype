@@ -4,7 +4,7 @@ This repository contains a Podman Desktop extension integrating [Syft](https://g
 
 ![screenshot](https://github.com/podman-desktop/extension-grype/raw/main/images/grype-image-checker.png)
 
-> :warning: Not affiliated with or supported by Anchore.
+> ⚠️ Not affiliated with or supported by Anchore.
 
 ## Install
 
