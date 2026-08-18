@@ -31,8 +31,8 @@ importers:
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.8.1(supports-color@8.1.1))
       '@podman-desktop/api':
-        specifier: ^1.28.3
-        version: 1.28.3
+        specifier: ^1.29.1
+        version: 1.29.1
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.67.0
         version: 8.67.0(@typescript-eslint/parser@8.67.0(eslint@10.8.1(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint@10.8.1(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)
@@ -110,8 +110,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@podman-desktop/api':
-        specifier: ^1.28.3
-        version: 1.28.3
+        specifier: ^1.29.1
+        version: 1.29.1
       json-schema-to-typescript:
         specifier: ^15.0.4
         version: 15.0.4
@@ -147,8 +147,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@podman-desktop/api':
-        specifier: ^1.28.3
-        version: 1.28.3
+        specifier: ^1.29.1
+        version: 1.29.1
       '@types/adm-zip':
         specifier: ^0.5.8
         version: 0.5.8
@@ -411,8 +411,8 @@ packages:
   '@oxc-project/types@0.143.0':
     resolution: {integrity: sha512-u6JZdLBTLotrNC9Vd6vPssINdzcCzleKAH6EJKImQb7GtYvX5keN2dxkoK44stCc4tffE6QQRtZTXVSzsLUlWA==}
 
-  '@podman-desktop/api@1.28.3':
-    resolution: {integrity: sha512-RCYrD90VfVn59oa8vTaDXj8Qy9BD0jxyiTNBhKNcloYf1hBCDMIKgqTcXYgNq15/5P1aGjRmgaG/jnhDEuux/g==}
+  '@podman-desktop/api@1.29.1':
+    resolution: {integrity: sha512-UtCY2t5hVLz5pHXSV5DmQESPLUqSxDgKhJfqlQ4GO7L0x/fQdaX22KGbuzOEUSs1KzB0nwWNB3ylaTcE/OBdZA==}
 
   '@rolldown/binding-android-arm64@1.2.3':
     resolution: {integrity: sha512-zrJtHDcaZJ1Fp7xf4hNl+7seH9Cn/N5TwLYkhgXREtBwAd/jaqW3uqeHxpDugJLVICWg4eW44kOQEGJ1r6jCGw==}
@@ -3133,7 +3133,7 @@ snapshots:
 
   '@oxc-project/types@0.143.0': {}
 
-  '@podman-desktop/api@1.28.3': {}
+  '@podman-desktop/api@1.29.1': {}
 
   '@rolldown/binding-android-arm64@1.2.3':
     optional: true
