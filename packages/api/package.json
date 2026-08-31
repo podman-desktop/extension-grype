@@ -22,7 +22,7 @@
     "publish:next": "pnpm publish --no-git-checks"
   },
   "devDependencies": {
-    "json-schema-to-typescript": "^15.0.4",
+    "json-schema-to-typescript": "^16.0.0",
     "@podman-desktop/api": "^1.28.3",
     "vite": "^8.2.2",
     "vitest": "^4.1.11",
