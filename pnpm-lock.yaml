@@ -106,8 +106,8 @@ importers:
   packages/api:
     dependencies:
       zod:
-        specifier: ^4.5.2
-        version: 4.5.2
+        specifier: ^4.5.4
+        version: 4.5.4
     devDependencies:
       '@podman-desktop/api':
         specifier: ^1.28.3
@@ -143,8 +143,8 @@ importers:
         specifier: ^7.5.22
         version: 7.5.22
       zod:
-        specifier: ^4.5.2
-        version: 4.5.2
+        specifier: ^4.5.4
+        version: 4.5.4
     devDependencies:
       '@podman-desktop/api':
         specifier: ^1.28.3
@@ -2876,8 +2876,8 @@ packages:
   zimmerframe@1.1.4:
     resolution: {integrity: sha512-B58NGBEoc8Y9MWWCQGl/gq9xBCe4IiKM0a2x7GZdQKOW5Exr8S1W24J6OgM1njK8xCRGvAJIL/MxXHf6SkmQKQ==}
 
-  zod@4.5.2:
-    resolution: {integrity: sha512-XkYXCol10+ba/6F/cueWV+TezUeOqXW0hdeJt5CdXjTYeAgAQg5N03RQdJ80mhfFE72+pblvYMW4wy2Qp4Qbrg==}
+  zod@4.5.4:
+    resolution: {integrity: sha512-sC95tT5iHHH9gtpj6A81kh+NEaRAUFN+qlUPDUbRfOMvNf5QCBqsb3WgvnpVtK5Y+4UfA6KqufotuTvMGiTlsA==}
 
 snapshots:
 
@@ -5707,4 +5707,4 @@ snapshots:
 
   zimmerframe@1.1.4: {}
 
-  zod@4.5.2: {}
+  zod@4.5.4: {}
