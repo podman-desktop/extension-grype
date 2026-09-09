@@ -50,6 +50,7 @@ const IMAGE_INFO_MOCK: ImageInfo = {
   VirtualSize: 0,
   engineId: 'Podman.podman',
   engineName: 'podman',
+  engineType: 'podman',
 };
 
 const EXTENSION_CONTEXT_MOCK: ExtensionContext = {
