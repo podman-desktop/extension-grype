@@ -40,7 +40,7 @@
   "dependencies": {
     "@podman-desktop/grype-extension-api": "workspace:^",
     "@octokit/rest": "^22.0.1",
-    "adm-zip": "^0.6.0",
+    "adm-zip": "^0.6.1",
     "tar": "^7.5.22",
     "inversify": "^8.2.3",
     "zod": "^4.6.2"
