@@ -29,6 +29,6 @@
     "unplugin-dts": "^1.1.0"
   },
   "dependencies": {
-    "zod": "^4.6.4"
+    "zod": "^4.6.5"
   }
 }
