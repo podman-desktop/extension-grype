@@ -73,8 +73,8 @@ importers:
         specifier: ^14.0.0
         version: 14.0.0(eslint@10.10.0(supports-color@8.1.1))
       eslint-plugin-sonarjs:
-        specifier: ^4.2.0
-        version: 4.2.0(eslint@10.10.0(supports-color@8.1.1))
+        specifier: ^4.2.1
+        version: 4.2.1(eslint@10.10.0(supports-color@8.1.1))
       eslint-plugin-svelte:
         specifier: ^3.23.0
         version: 3.23.0(eslint@10.10.0(supports-color@8.1.1))(svelte@5.55.9(@typescript-eslint/types@8.70.0))
@@ -713,6 +713,9 @@ packages:
 
   '@rushstack/ts-command-line@5.3.3':
     resolution: {integrity: sha512-c+ltdcvC7ym+10lhwR/vWiOhsrm/bP3By2VsFcs5qTKv+6tTmxgbVrtJ5NdNjANiV5TcmOZgUN+5KYQ4llsvEw==}
+
+  '@sonarsource/analyzer-commons-configurations@2.31.0-5284':
+    resolution: {integrity: sha512-ruk3blMs9BE9RNSp9LPpWZAIjxJmq4Cp00E3cELIHz7Kym3WxdWGRlKOMYLRQ5tJg/de7jN5AtEElY3bGIfTcw==}
 
   '@sveltejs/acorn-typescript@1.0.13':
     resolution: {integrity: sha512-wgKggnhZVL9Bfx1OaKKTrYY9BFRk6C8UAkQNUcIv1+llzYrIqy+RZm5HPKzn0NpEBvTVhTqB4kQyllZywsRBRQ==}
@@ -1483,8 +1486,8 @@ packages:
     peerDependencies:
       eslint: '>=5.0.0'
 
-  eslint-plugin-sonarjs@4.2.0:
-    resolution: {integrity: sha512-bqADfuNtTL7VK6RU29eoiFTtaaBKIpVPuX3bOl+rBpWSBa0zIBVZlqZNZQjfP6s4iXkAJokv5IsD8OsACkwApg==}
+  eslint-plugin-sonarjs@4.2.1:
+    resolution: {integrity: sha512-WGsnVkUxmHyBOytShcIeE+vhQaS8e+gYgbHNNi4y2e5Zj+DpE2DLTvarqDUhNwjceTZHGLgevSgfBSEVkt4EaA==}
     peerDependencies:
       eslint: ^8.0.0 || ^9.0.0 || ^10.0.0
 
@@ -2113,10 +2116,6 @@ packages:
 
   minimatch@10.2.3:
     resolution: {integrity: sha512-Rwi3pnapEqirPSbWbrZaa6N3nmqq4Xer/2XooiOKyV3q12ML06f7MOuc5DVH8ONZIFhwIYQ3yzPH4nt7iWHaTg==}
-    engines: {node: 18 || 20 || >=22}
-
-  minimatch@10.2.5:
-    resolution: {integrity: sha512-MULkVLfKGYDFYejP07QOurDLLQpcjk7Fw+7jXS2R2czRQzR56yHRveU5NDJEOviH+hETZKSkIk5c+T23GjFUMg==}
     engines: {node: 18 || 20 || >=22}
 
   minimatch@10.2.6:
@@ -2871,6 +2870,11 @@ packages:
     engines: {node: '>= 14.6'}
     hasBin: true
 
+  yaml@2.9.1:
+    resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
+
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
@@ -3371,6 +3375,8 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
     optional: true
+
+  '@sonarsource/analyzer-commons-configurations@2.31.0-5284': {}
 
   '@sveltejs/acorn-typescript@1.0.13(acorn@8.18.0)':
     dependencies:
@@ -4203,9 +4209,10 @@ snapshots:
     dependencies:
       eslint: 10.10.0(supports-color@8.1.1)
 
-  eslint-plugin-sonarjs@4.2.0(eslint@10.10.0(supports-color@8.1.1)):
+  eslint-plugin-sonarjs@4.2.1(eslint@10.10.0(supports-color@8.1.1)):
     dependencies:
       '@eslint-community/regexpp': 4.12.2
+      '@sonarsource/analyzer-commons-configurations': 2.31.0-5284
       builtin-modules: 3.3.0
       bytes: 3.1.2
       eslint: 10.10.0(supports-color@8.1.1)
@@ -4213,12 +4220,12 @@ snapshots:
       globals: 17.12.0
       jsx-ast-utils-x: 0.1.0
       lodash.merge: 4.6.2
-      minimatch: 10.2.5
+      minimatch: 10.2.6
       scslre: 0.3.0
       semver: 7.8.5
       ts-api-utils: 2.5.0(typescript@6.0.3)
       typescript: 6.0.3
-      yaml: 2.9.0
+      yaml: 2.9.1
 
   eslint-plugin-svelte@3.23.0(eslint@10.10.0(supports-color@8.1.1))(svelte@5.55.9(@typescript-eslint/types@8.70.0)):
     dependencies:
@@ -4877,10 +4884,6 @@ snapshots:
     dependencies:
       brace-expansion: 5.0.9
     optional: true
-
-  minimatch@10.2.5:
-    dependencies:
-      brace-expansion: 5.0.9
 
   minimatch@10.2.6:
     dependencies:
@@ -5680,6 +5683,8 @@ snapshots:
   yaml@1.10.3: {}
 
   yaml@2.9.0: {}
+
+  yaml@2.9.1: {}
 
   yocto-queue@0.1.0: {}
 
