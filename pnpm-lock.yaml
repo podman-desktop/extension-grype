@@ -85,11 +85,11 @@ importers:
         specifier: ^17.12.0
         version: 17.12.0
       prettier:
-        specifier: ^3.9.8
-        version: 3.9.8
+        specifier: ^3.9.9
+        version: 3.9.9
       prettier-plugin-svelte:
         specifier: ^4.1.1
-        version: 4.1.1(prettier@3.9.8)(svelte@5.55.9(@typescript-eslint/types@8.70.1))
+        version: 4.1.1(prettier@3.9.9)(svelte@5.55.9(@typescript-eslint/types@8.70.1))
       svelte-eslint-parser:
         specifier: ^1.8.1
         version: 1.8.1(svelte@5.55.9(@typescript-eslint/types@8.70.1))
@@ -2287,13 +2287,13 @@ packages:
       prettier: ^3.0.0
       svelte: '>=5.55.7'
 
-  prettier@3.9.6:
-    resolution: {integrity: sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==}
+  prettier@3.9.8:
+    resolution: {integrity: sha512-WRFq3Wn3WId7LLROfMLdH7xaFr2jR62wU8nLO6rQUOLOxNZUviyJQs1M0iIhLexSFy+L+w0ch66wtoO2jRjG0A==}
     engines: {node: '>=14'}
     hasBin: true
 
-  prettier@3.9.8:
-    resolution: {integrity: sha512-WRFq3Wn3WId7LLROfMLdH7xaFr2jR62wU8nLO6rQUOLOxNZUviyJQs1M0iIhLexSFy+L+w0ch66wtoO2jRjG0A==}
+  prettier@3.9.9:
+    resolution: {integrity: sha512-Z/CJHIkdujO/OtN7nXUii0Rf3VT5SRuhjBA82Xvu2XhBUgX3nhP67T0LHceBdQLex7OOFGTox+Q5Yg8Jk2Qivg==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -4651,7 +4651,7 @@ snapshots:
       js-yaml: 5.2.2
       lodash: 4.18.1
       minimist: 1.2.8
-      prettier: 3.9.6
+      prettier: 3.9.8
       tinyglobby: 0.2.17
 
   json-schema-traverse@0.4.1: {}
@@ -4964,14 +4964,14 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier-plugin-svelte@4.1.1(prettier@3.9.8)(svelte@5.55.9(@typescript-eslint/types@8.70.1)):
+  prettier-plugin-svelte@4.1.1(prettier@3.9.9)(svelte@5.55.9(@typescript-eslint/types@8.70.1)):
     dependencies:
-      prettier: 3.9.8
+      prettier: 3.9.9
       svelte: 5.55.9(@typescript-eslint/types@8.70.1)
 
-  prettier@3.9.6: {}
-
   prettier@3.9.8: {}
+
+  prettier@3.9.9: {}
 
   punycode@2.3.1: {}
 
