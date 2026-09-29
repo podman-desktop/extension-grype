@@ -19,8 +19,6 @@
 import globals from 'globals';
 import js from '@eslint/js';
 import typescriptLint from 'typescript-eslint';
-import tsParser from '@typescript-eslint/parser';
-import svelteParser from 'svelte-eslint-parser';
 import importPlugin from 'eslint-plugin-import';
 import { fixupConfigRules, fixupPluginRules } from '@eslint/compat';
 import { fileURLToPath } from 'node:url';
@@ -29,7 +27,6 @@ import { FlatCompat } from '@eslint/eslintrc';
 import unicorn from 'eslint-plugin-unicorn';
 import noNull from 'eslint-plugin-no-null';
 import sonarjs from 'eslint-plugin-sonarjs';
-import svelte from 'eslint-plugin-svelte';
 import redundantUndefined from 'eslint-plugin-redundant-undefined';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import vitest from '@vitest/eslint-plugin';
@@ -55,10 +52,8 @@ export default [
       '**/coverage/',
       '**/html/',
       'packages/backend/media/**',
-      '**/.svelte-kit/',
       'scripts/**',
       '**/generated/',
-      '**/.svelte-kit/',
       'tests/playwright/output/**',
       'tests/playwright/tests/**',
     ],
@@ -66,7 +61,6 @@ export default [
   js.configs.recommended,
   ...typescriptLint.configs.recommended,
   sonarjs.configs.recommended,
-  ...svelte.configs['flat/recommended'],
   ...fixupConfigRules(
     compat.extends('plugin:import/recommended', 'plugin:import/typescript'),
   ),
@@ -109,7 +103,6 @@ export default [
       // parser: tsParser,
       sourceType: 'module',
       parserOptions: {
-        extraFileExtensions: ['.svelte'],
         warnOnUnsupportedTypeScriptVersion: false,
         project: TYPESCRIPT_PROJECTS,
       },
@@ -174,24 +167,8 @@ export default [
       'sonarjs/no-unused-expressions': 'off',
       'redundant-undefined/redundant-undefined': 'error',
       'import/no-extraneous-dependencies': 'error',
-      'import/no-restricted-paths': [
-        'error',
-        {
-          zones: [
-            {
-              target: './packages/backend/**/*',
-              from: ['./packages/frontend/**/*'],
-            },
-            {
-              target: './packages/frontend/**/*',
-              from: ['./packages/backend/**/*'],
-            },
-          ],
-        },
-      ],
 
       // disabled as code in this project is not yet compliant:
-      'svelte/valid-compile': 'off',
       'no-undef': 'off',
       'vitest/prefer-import-in-mock': 'error',
       'vitest/consistent-test-it': [
@@ -235,52 +212,6 @@ export default [
       ],
       'vitest/prefer-expect-type-of': ['error'],
       'vitest/prefer-mock-return-shorthand': ['error'],
-    },
-  },
-
-  {
-    files: ['**/*.svelte'],
-
-    languageOptions: {
-      parser: svelteParser,
-      ecmaVersion: 5,
-      sourceType: 'script',
-      parserOptions: {
-        parser: tsParser,
-      },
-    },
-
-    rules: {
-      eqeqeq: 'off',
-      'no-inner-declarations': 'off',
-      'sonarjs/code-eval': 'off',
-      'sonarjs/different-types-comparison': 'off',
-      'sonarjs/prefer-nullish-coalescing': 'off',
-      'sonarjs/no-nested-template-literals': 'off',
-      'sonarjs/no-nested-conditional': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/ban-types': 'off',
-      '@typescript-eslint/no-unused-expressions': 'off',
-    },
-  },
-
-  {
-    files: ['packages/frontend/**'],
-    languageOptions: {
-      globals: {
-        ...Object.fromEntries(Object.entries(globals.node).map(([key]) => [key, 'off'])),
-        ...globals.browser,
-      },
-    },
-  },
-
-  {
-    files: ['packages/shared/**'],
-    languageOptions: {
-      globals: {
-        ...Object.fromEntries(Object.entries(globals.node).map(([key]) => [key, 'off'])),
-        ...Object.fromEntries(Object.entries(globals.browser).map(([key]) => [key, 'off'])),
-      },
     },
   },
 ];
