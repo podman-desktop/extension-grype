@@ -17,6 +17,7 @@ overrides:
   js-yaml@>=5.0.0: 5.4.2
   fast-uri@>=3.0.0 <4.0.0: ^3.1.7
   fast-uri@>=4.0.0: ^4.1.4
+  source-map-js@^1: ^1.2.2
 nodeLinker: hoisted
 allowBuilds:
   esbuild: true
