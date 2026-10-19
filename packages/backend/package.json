@@ -29,7 +29,7 @@
     ]
   },
   "devDependencies": {
-    "@podman-desktop/api": "^1.29.1",
+    "@podman-desktop/api": "^1.30.5",
     "@types/adm-zip": "^0.6.0",
     "@types/node": "^24",
     "@types/semver": "^7.8.0",
