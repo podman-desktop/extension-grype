@@ -20,7 +20,7 @@
     "format:fix": "prettier --write \"packages/**/*.{ts,js,json}\"",
     "lint:check": "eslint . --cache",
     "lint:fix": "eslint . --cache --fix",
-    "typecheck:configs": "tsc --noEmit --project tsconfig.vite.json",
+    "typecheck:configs": "tsc --noEmit --project tsconfig.json",
     "typecheck": "pnpm run typecheck:configs && pnpm run --recursive --parallel typecheck",
     "test:unit": "vitest --run"
   },
