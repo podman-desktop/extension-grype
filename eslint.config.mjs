@@ -38,8 +38,6 @@ const compat = new FlatCompat({
   allConfig: js.configs.all,
 });
 
-const TYPESCRIPT_PROJECTS = ['packages/*/tsconfig.json', 'tests/*/tsconfig.json', 'tsconfig.json'];
-
 export default [
   {
     ignores: [
@@ -102,7 +100,7 @@ export default [
       sourceType: 'module',
       parserOptions: {
         warnOnUnsupportedTypeScriptVersion: false,
-        project: TYPESCRIPT_PROJECTS,
+        projectService: true,
       },
     },
   },
