@@ -98,6 +98,8 @@ jobs:
     env:
       CI: 'true'
       SKIP_INSTALLATION: ${{ needs.build-extension.result == 'success' && 'true' || 'false' }}
+      # Required with PODMAN_DESKTOP_BINARY so tests-playwright attaches over CDP (see Quadlet e2e).
+      EXTENSION_PREINSTALLED: ${{ needs.build-extension.result == 'success' && 'true' || 'false' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -175,6 +177,8 @@ jobs:
       - name: Run installation smoke tests
         env:
           ELECTRON_DISABLE_SANDBOX: '1'
+          NODE_OPTIONS: --no-experimental-strip-types
+          DEBUGGING_PORT: '9222'
           PODMAN_DESKTOP_BINARY: ${{ steps.podman-desktop-install.outputs.binary }}
           OCI_IMAGE: ${{ steps.oci-image.outputs.url || 'ghcr.io/podman-desktop/extension-grype:next' }}
         run: pnpm test:e2e --grep @installation
