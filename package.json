@@ -16,13 +16,15 @@
     "build:api": "cd packages/api && npm run build",
     "build:backend": "cd packages/backend && npm run build",
     "build": "pnpm run build:api && pnpm run build:backend",
-    "format:check": "prettier --check \"packages/**/*.{ts,js,json}\"",
-    "format:fix": "prettier --write \"packages/**/*.{ts,js,json}\"",
+    "format:check": "prettier --check \"{packages,tests}/**/*.{ts,js,json}\"",
+    "format:fix": "prettier --write \"{packages,tests}/**/*.{ts,js,json}\"",
     "lint:check": "eslint . --cache",
     "lint:fix": "eslint . --cache --fix",
     "typecheck:configs": "tsc --noEmit --project tsconfig.json",
     "typecheck": "pnpm run typecheck:configs && pnpm run --recursive --parallel typecheck",
-    "test:unit": "vitest --run"
+    "test:unit": "vitest --run",
+    "test:configure-windows-e2e": "bash .github/scripts/configure-windows-e2e.test.sh",
+    "test:e2e": "pnpm --dir tests/playwright test:e2e"
   },
   "resolutions": {
     "string-width": "^4.2.0",

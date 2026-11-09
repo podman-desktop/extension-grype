@@ -3,6 +3,9 @@ packages:
   - 'tests/*'
 
 minimumReleaseAge: 1440
+# CI tests Podman Desktop main with its freshly published E2E framework.
+minimumReleaseAgeExclude:
+  - '@podman-desktop/tests-playwright'
 overrides:
   minimatch@>=9.0.0 <9.0.7: 9.0.7
   flatted@<3.4.0: '>=3.4.0'

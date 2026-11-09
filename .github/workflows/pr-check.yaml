@@ -59,7 +59,16 @@ jobs:
       - name: Run tests
         run: pnpm test:unit
 
+      - name: Run configure-windows-e2e script tests
+        run: pnpm test:configure-windows-e2e
+
       - name: Run typecheck
         run: pnpm typecheck
+
+  e2e-tests:
+    name: Extension installation
+    uses: ./.github/workflows/e2e-main.yaml
+    with:
+      build-extension: true
 
 
