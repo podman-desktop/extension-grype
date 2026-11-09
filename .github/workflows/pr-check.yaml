@@ -59,9 +59,6 @@ jobs:
       - name: Run tests
         run: pnpm test:unit
 
-      - name: Run configure-windows-e2e script tests
-        run: pnpm test:configure-windows-e2e
-
       - name: Run typecheck
         run: pnpm typecheck
 

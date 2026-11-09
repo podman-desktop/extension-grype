@@ -16,7 +16,7 @@ See the instruction on [How to install an extension](https://podman-desktop.io/d
 The Playwright suite installs Grype, checks that it is active, verifies its details page, and removes it during cleanup.
 It uses `@podman-desktop/tests-playwright` and an isolated Podman Desktop profile.
 CI refreshes the framework to `@next` to match Podman Desktop `main`, as bootc does. The framework is exempt from the
-workspace's minimum release age so the Azure runner can install the current nightly package.
+workspace's minimum release age so CI can install the current nightly package.
 
 Build a local checkout of Podman Desktop before running the tests:
 
@@ -69,16 +69,6 @@ it again before another run.
 - `pr-check.yaml` calls the reusable `e2e-main.yaml` workflow to build and test the PR's local OCI image on Ubuntu.
 - `e2e-main.yaml` also runs after a successful `next-build.yaml` run on `main`. It installs the image tagged with that
   build's commit SHA. Manual runs can select a published image or build from the selected branch.
-- `grype-e2e-nightly-windows.yaml` runs the full suite daily at 04:00 UTC on Azure Windows 10 22H2 and Windows 11 23H2
-  instances with WSL, using the same MAPT and PDE2E actions as bootc. It installs the published `next` image by default.
-  Manual runs can override Podman version, machine settings, and allowlisted test options. Dispatch inputs are validated
-  before they reach `$GITHUB_ENV`: only known keys are accepted, `MAPT_IMAGE` is fixed to
-  `quay.io/redhat-developer/mapt` (or `vars.MAPT_IMAGE` when that matches), and Podman Desktop / extension forks must
-  stay under `podman-desktop`. Pass-path Playwright traces and videos are off by default; set `SAVE_TRACES_ON_PASS=true`
-  locally if you need them. Azure uploads keep JUnit, logs, and screenshots (14-day retention).
 
-The Azure workflow requires the repository or organization secrets `ARM_TENANT_ID`, `ARM_SUBSCRIPTION_ID`,
-`ARM_CLIENT_ID`, `ARM_CLIENT_SECRET`, and `PODMAN_DESKTOP_BOT_TOKEN`. Optional repository variables `MAPT_IMAGE`,
-`MAPT_VERSION_TAG`, `MAPT_CPUS`, `MAPT_MEMORY`, and `MAPT_EXCLUDED_REGIONS` override its provisioning defaults
-(`MAPT_IMAGE` must remain `quay.io/redhat-developer/mapt`). Both workflows publish JUnit summaries and upload test
-artifacts; the Azure workflow always attempts instance cleanup.
+Both paths publish JUnit summaries and upload test artifacts. Pass-path Playwright traces and videos are off by default;
+set `SAVE_TRACES_ON_PASS=true` locally if you need them.

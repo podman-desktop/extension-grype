@@ -22,8 +22,7 @@ const extensionName = 'grype';
 const extensionLabel = 'podman-desktop.grype';
 const extensionHeading = 'Grype';
 const extensionImage = process.env.OCI_IMAGE ?? 'ghcr.io/podman-desktop/extension-grype:next';
-// Opt in locally with SAVE_TRACES_ON_PASS=true. Keep off in CI so Azure bot-token
-// runs do not upload pass-path traces/videos that may retain process env.
+// Opt in locally with SAVE_TRACES_ON_PASS=true. Keep off in CI by default.
 const saveArtifactsOnPass = process.env.SAVE_TRACES_ON_PASS === 'true';
 
 test.use({
