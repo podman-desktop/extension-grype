@@ -15,30 +15,32 @@ See the instruction on [How to install an extension](https://podman-desktop.io/d
 
 The Playwright suite installs Grype, checks that it is active, verifies its details page, and removes it during cleanup.
 It uses `@podman-desktop/tests-playwright` and an isolated Podman Desktop profile.
-CI refreshes the framework to `@next` to match Podman Desktop `main`, as bootc does. The framework is exempt from the
-workspace's minimum release age so CI can install the current nightly package.
+CI refreshes the framework to `@next` to match Podman Desktop `main`. The framework is exempt from the workspace's
+minimum release age so CI can install the current nightly package.
 
-Build a local checkout of Podman Desktop before running the tests:
+CI installs a Podman Desktop production binary via the shared `podman-desktop-install` action. Locally you can either
+point at a Podman Desktop checkout or a packaged binary:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm --dir tests/playwright exec playwright install chromium
+PODMAN_DESKTOP_BINARY=/path/to/podman-desktop pnpm test:e2e --grep @installation
+```
+
+Or build from a Podman Desktop source checkout:
 
 ```sh
 cd /path/to/podman-desktop
 pnpm install --frozen-lockfile
 pnpm test:e2e:build
-```
-
-Then run the installation tests from this repository:
-
-```sh
-pnpm install --frozen-lockfile
-pnpm --dir tests/playwright exec playwright install chromium
+cd /path/to/extension-grype
 PODMAN_DESKTOP_ARGS=/path/to/podman-desktop pnpm test:e2e --grep @installation
 ```
 
-On Windows, set `$env:PODMAN_DESKTOP_ARGS` in PowerShell before running `pnpm test:e2e --grep @installation`.
+On Windows, set `$env:PODMAN_DESKTOP_ARGS` or `$env:PODMAN_DESKTOP_BINARY` in PowerShell before running the tests.
 On Linux, install Xvfb and Playwright's system dependencies with
 `pnpm --dir tests/playwright exec playwright install --with-deps chromium`.
-A packaged binary built with Electron inspection enabled can be selected with `PODMAN_DESKTOP_BINARY` instead of
-`PODMAN_DESKTOP_ARGS`; set only one of these variables.
+Set only one of `PODMAN_DESKTOP_BINARY` / `PODMAN_DESKTOP_ARGS`.
 
 The default image is `ghcr.io/podman-desktop/extension-grype:next`. Set `OCI_IMAGE` to test another published image.
 Run `pnpm test:e2e` to execute the full suite. Reports, traces, and videos are written under
@@ -46,18 +48,18 @@ Run `pnpm test:e2e` to execute the full suite. Reports, traces, and videos are w
 
 ### Test a local container image
 
-PR checks build the repository's `Containerfile`, export the image, and preload its `/extension` directory into the test
-profile, following the [bootc PR workflow](https://github.com/podman-desktop/extension-bootc/blob/main/.github/workflows/pr-check.yaml).
-To reproduce this locally with Podman running:
+PR checks build the repository's `Containerfile`, export `/extension`, and preload it into the test profile (same pattern
+as [quadlet](https://github.com/podman-desktop/extension-podman-quadlet/blob/main/.github/workflows/e2e.yaml) /
+[crc](https://github.com/crc-org/crc-extension/blob/main/.github/workflows/e2e.yml)). To reproduce locally with Podman
+running:
 
 ```sh
-podman build -t localhost/extension-grype:e2e -f Containerfile .
-container_id=$(podman create --entrypoint /bin/true localhost/extension-grype:e2e)
-podman export --output /tmp/grype-extension.tar "$container_id"
-podman rm "$container_id"
+podman build -t localhost/local_image ./
+container_id=$(podman create --entrypoint /bin/true localhost/local_image)
 mkdir -p tests/playwright/tests/output/grype-tests-pd/plugins
-tar -xf /tmp/grype-extension.tar -C tests/playwright/tests/output/grype-tests-pd/plugins
-SKIP_INSTALLATION=true PODMAN_DESKTOP_ARGS=/path/to/podman-desktop pnpm test:e2e --grep @installation
+podman export "$container_id" | tar -x -C tests/playwright/tests/output/grype-tests-pd/plugins
+podman rm "$container_id"
+SKIP_INSTALLATION=true PODMAN_DESKTOP_BINARY=/path/to/podman-desktop pnpm test:e2e --grep @installation
 ```
 
 `SKIP_INSTALLATION=true` preserves the preloaded profile and skips the registry installation step. Activation and details
@@ -66,8 +68,9 @@ it again before another run.
 
 ### CI workflows
 
-- `pr-check.yaml` calls the reusable `e2e-main.yaml` workflow to build and test the PR's local OCI image on Ubuntu.
-- `e2e-main.yaml` also runs after a successful `next-build.yaml` run on `main`. It installs the image tagged with that
+- `pr-check.yaml` calls reusable `e2e.yaml` to build and preload the local OCI image on Ubuntu 26.04, install Podman
+  Desktop via `podman-desktop/gh-extensions-actions`, and run the installation smoke tests.
+- The same workflow also runs after a successful `next-build.yaml` on `main`. It installs the image tagged with that
   build's commit SHA, and skips the job if `main` has already moved past that commit so tests stay aligned with the
   image. Manual runs can select a published image or build from the selected branch.
 
