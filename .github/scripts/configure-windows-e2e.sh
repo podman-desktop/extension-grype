@@ -36,11 +36,9 @@ write_env() {
       exit 1
       ;;
   esac
-  {
-    echo "${name}<<EOF"
-    echo "${value}"
-    echo "EOF"
-  } >>"$GITHUB_ENV"
+  # Values are already newline-free; use NAME=VALUE so a value of "EOF" cannot
+  # collide with a heredoc delimiter and break the runner env file parser.
+  echo "${name}=${value}" >>"$GITHUB_ENV"
 }
 
 require_match() {

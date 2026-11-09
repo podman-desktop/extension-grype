@@ -144,15 +144,26 @@ jobs:
       - name: Resolve OCI image
         if: ${{ !inputs.build-extension }}
         id: oci-image
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+          WORKFLOW_RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          EXTENSION_IMAGE: ${{ inputs.extension-image }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_run" ]; then
-            image="ghcr.io/${{ github.repository }}:${{ github.event.workflow_run.head_sha }}"
-          elif [ -n "${{ inputs.extension-image }}" ]; then
-            image="${{ inputs.extension-image }}"
+          case "${EXTENSION_IMAGE}" in
+            *$'\n'* | *$'\r'*)
+              echo "Refusing newline/control characters in extension-image" >&2
+              exit 1
+              ;;
+          esac
+          if [ "${EVENT_NAME}" = "workflow_run" ]; then
+            image="ghcr.io/${REPOSITORY}:${WORKFLOW_RUN_SHA}"
+          elif [ -n "${EXTENSION_IMAGE}" ]; then
+            image="${EXTENSION_IMAGE}"
           else
             image="ghcr.io/podman-desktop/extension-grype:next"
           fi
-          echo "value=$image" >> "$GITHUB_OUTPUT"
+          echo "value=${image}" >> "$GITHUB_OUTPUT"
 
       - name: Run installation smoke tests
         working-directory: extension-grype

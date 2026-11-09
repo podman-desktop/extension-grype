@@ -101,16 +101,29 @@ with_defaults
 export MAPT_PARAMS='VERSION_TAG=v1;VERSION_TAG=v2'
 assert_exit 'rejects duplicate MAPT key' 1 run_configure
 
+# Last assignment wins in GITHUB_ENV; assert the effective final value per key.
+env_final_value() {
+  local key="$1"
+  local file="$2"
+  local line value=''
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    if [[ "$line" == "${key}="* ]]; then
+      value="${line#${key}=}"
+    fi
+  done <"$file"
+  printf '%s' "$value"
+}
+
 with_defaults
 export MAPT_PARAMS='IMAGE=ghcr.io/attacker/evil;VERSION_TAG=v9.9.9'
 assert_exit 'ignores MAPT IMAGE and accepts VERSION_TAG' 0 run_configure
-if ! grep -q $'MAPT_IMAGE<<EOF\nquay.io/redhat-developer/mapt\nEOF' "$GITHUB_ENV"; then
+if [[ "$(env_final_value MAPT_IMAGE "$GITHUB_ENV")" != 'quay.io/redhat-developer/mapt' ]]; then
   echo "FAIL MAPT IMAGE should stay allowlisted" >&2
   failures=$((failures + 1))
 else
   echo "PASS MAPT IMAGE stays allowlisted"
 fi
-if ! grep -q $'MAPT_VERSION_TAG<<EOF\nv9.9.9\nEOF' "$GITHUB_ENV"; then
+if [[ "$(env_final_value MAPT_VERSION_TAG "$GITHUB_ENV")" != 'v9.9.9' ]]; then
   echo "FAIL MAPT VERSION_TAG override missing" >&2
   failures=$((failures + 1))
 else
@@ -121,11 +134,21 @@ with_defaults
 export PD_REPO='attacker'
 export PD_REPO_ARGS='REPO=podman-desktop,FORK=podman-desktop,BRANCH=feature/x'
 assert_exit 'clears inherited PD_REPO before parse' 0 run_configure
-if ! grep -q $'PD_REPO<<EOF\npodman-desktop\nEOF' "$GITHUB_ENV"; then
+if [[ "$(env_final_value PD_REPO "$GITHUB_ENV")" != 'podman-desktop' ]]; then
   echo "FAIL inherited PD_REPO was not overwritten" >&2
   failures=$((failures + 1))
 else
   echo "PASS inherited PD_REPO cleared"
+fi
+
+with_defaults
+export MAPT_EXCLUDED_REGIONS='EOF'
+assert_exit 'accepts EOF as a single-line env value' 0 run_configure
+if [[ "$(env_final_value MAPT_EXCLUDED_REGIONS "$GITHUB_ENV")" != 'EOF' ]]; then
+  echo "FAIL value EOF was not written as NAME=VALUE" >&2
+  failures=$((failures + 1))
+else
+  echo "PASS value EOF written as NAME=VALUE"
 fi
 
 if [[ "$failures" -ne 0 ]]; then
