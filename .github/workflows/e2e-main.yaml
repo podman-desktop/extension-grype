@@ -50,23 +50,32 @@ permissions:
 jobs:
   e2e-tests:
     name: Grype installation smoke tests
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    # next-build only runs on main push/dispatch; still reject PR-triggered workflow_run.
+    if: >
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event != 'pull_request')
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
       CI: 'true'
       SKIP_INSTALLATION: ${{ inputs.build-extension && 'true' || 'false' }}
     steps:
+      # Always checkout the workflow's own github.sha. Never execute code from
+      # workflow_run.head_sha under workflow_dispatch (default-branch cache write).
+      # For post-next-build runs, head_sha is used only as the published image tag below.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.sha }}
           path: extension-grype
+          persist-credentials: false
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: podman-desktop/podman-desktop
           ref: main
           path: podman-desktop
+          persist-credentials: false
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
