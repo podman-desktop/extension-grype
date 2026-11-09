@@ -119,22 +119,14 @@ jobs:
       - name: Install Grype dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Extract @podman-desktop/api version
-        id: pd-api-version
-        shell: bash
-        run: |
-          PD_VERSION=$(pnpm why -C packages/backend "@podman-desktop/api" --json | jq -r '.[0].version')
-          echo "PD_VERSION=$PD_VERSION" >> "$GITHUB_OUTPUT"
-          echo "Using @podman-desktop/api $PD_VERSION"
-
+      # Omit version so the action installs the latest prerelease, matching tests-playwright@next.
       - name: Install Podman Desktop
         id: podman-desktop-install
         uses: podman-desktop/gh-extensions-actions/.github/actions/podman-desktop-install@e59cd52b942e8dfcc187293c5d8e9f3831c7ac0c # v0.11.0
         with:
-          version: ${{ steps.pd-api-version.outputs.PD_VERSION }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Match the framework to Podman Desktop main, as in other extension PR checks.
+      # Match the framework to Podman Desktop main / prereleases, as in other extension PR checks.
       - name: Use the nightly Podman Desktop test framework
         working-directory: tests/playwright
         run: pnpm add --save-dev --save-exact @podman-desktop/tests-playwright@next
