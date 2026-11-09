@@ -48,7 +48,9 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # workflow_run.id keeps each post-next-build smoke isolated so a newer main build
+  # does not cancel an in-progress test of the previous image.
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.id || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
