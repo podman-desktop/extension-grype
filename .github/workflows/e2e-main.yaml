@@ -51,19 +51,21 @@ jobs:
   e2e-tests:
     name: Grype installation smoke tests
     # next-build only runs on main push/dispatch; still reject PR-triggered workflow_run.
+    # When main moved past the built commit, skip so we never run tip tests against an older image
+    # (avoids checking out workflow_run.head_sha under workflow_dispatch / cache-write context).
     if: >
       github.event_name != 'workflow_run' ||
       (github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.event != 'pull_request')
+       github.event.workflow_run.event != 'pull_request' &&
+       github.event.workflow_run.head_sha == github.sha)
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
       CI: 'true'
       SKIP_INSTALLATION: ${{ inputs.build-extension && 'true' || 'false' }}
     steps:
-      # Always checkout the workflow's own github.sha. Never execute code from
-      # workflow_run.head_sha under workflow_dispatch (default-branch cache write).
-      # For post-next-build runs, head_sha is used only as the published image tag below.
+      # Checkout the workflow's own github.sha only. For post-next-build runs the job if
+      # above requires head_sha == github.sha, so tests match the published image tag.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}

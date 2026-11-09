@@ -68,7 +68,8 @@ it again before another run.
 
 - `pr-check.yaml` calls the reusable `e2e-main.yaml` workflow to build and test the PR's local OCI image on Ubuntu.
 - `e2e-main.yaml` also runs after a successful `next-build.yaml` run on `main`. It installs the image tagged with that
-  build's commit SHA. Manual runs can select a published image or build from the selected branch.
+  build's commit SHA, and skips the job if `main` has already moved past that commit so tests stay aligned with the
+  image. Manual runs can select a published image or build from the selected branch.
 
 Both paths publish JUnit summaries and upload test artifacts. Pass-path Playwright traces and videos are off by default;
 set `SAVE_TRACES_ON_PASS=true` locally if you need them.
