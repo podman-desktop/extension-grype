@@ -78,6 +78,9 @@ on:
         required: false
         type: string
 
+permissions:
+  contents: read
+
 jobs:
   windows:
     timeout-minutes: 240
