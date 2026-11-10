@@ -82,7 +82,7 @@ jobs:
           retention-days: 1
 
   e2e-tests:
-    name: Grype installation smoke tests
+    name: Grype installation smoke tests / ${{ matrix.os }}
     needs: build-extension
     # next-build only runs on main push/dispatch; still reject PR-triggered workflow_run.
     # When main moved past the built commit, skip so tip tests are not run against an older image.
@@ -93,8 +93,13 @@ jobs:
        (github.event.workflow_run.conclusion == 'success' &&
         github.event.workflow_run.event != 'pull_request' &&
         github.event.workflow_run.head_sha == github.sha))
-    runs-on: ubuntu-26.04
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        # Match extension-podman-quadlet: GitHub-hosted Windows + Ubuntu (no Azure MAPT).
+        os: [windows-2025, ubuntu-26.04]
     env:
       CI: 'true'
       SKIP_INSTALLATION: ${{ needs.build-extension.result == 'success' && 'true' || 'false' }}
@@ -105,6 +110,13 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
+
+      # ubuntu-26.04 runners already ship Podman.
+      - name: Install Podman
+        if: runner.os != 'Linux'
+        uses: redhat-actions/podman-install@aea6ff44f2a4a82da13d22061ce73443a125925d
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         name: Install pnpm
@@ -131,9 +143,15 @@ jobs:
         working-directory: tests/playwright
         run: pnpm add --save-dev --save-exact @podman-desktop/tests-playwright@next
 
-      - name: Install Playwright browser
+      - name: Install Playwright browser (Linux)
+        if: runner.os == 'Linux'
         working-directory: tests/playwright
         run: pnpm exec playwright install --with-deps chromium
+
+      - name: Install Playwright browser (Windows)
+        if: runner.os == 'Windows'
+        working-directory: tests/playwright
+        run: pnpm exec playwright install chromium
 
       - name: Download Grype plugin
         if: needs.build-extension.result == 'success'
@@ -145,6 +163,7 @@ jobs:
       - name: Resolve OCI image
         if: needs.build-extension.result != 'success'
         id: oci-image
+        shell: bash
         env:
           EVENT_NAME: ${{ github.event_name }}
           REPOSITORY: ${{ github.repository }}
@@ -167,6 +186,7 @@ jobs:
           echo "url=${image}" >> "$GITHUB_OUTPUT"
 
       - name: Run installation smoke tests
+        shell: bash
         env:
           ELECTRON_DISABLE_SANDBOX: '1'
           NODE_OPTIONS: --no-experimental-strip-types
@@ -190,7 +210,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: grype-e2e-tests
+          name: grype-e2e-tests-${{ matrix.os }}
           retention-days: 14
           path: |
             tests/playwright/output/
