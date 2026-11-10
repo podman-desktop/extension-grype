@@ -76,3 +76,17 @@ it again before another run.
 
 Both paths publish JUnit summaries and upload test artifacts. Pass-path Playwright traces and videos are off by default;
 set `SAVE_TRACES_ON_PASS=true` locally if you need them.
+
+- `grype-e2e-nightly-windows.yaml` runs Playwright E2E on Azure Windows 10/11 VMs (MAPT) on a nightly schedule and via
+  `workflow_dispatch`, following the
+  [extension-bootc Windows nightly](https://github.com/podman-desktop/extension-bootc/blob/main/.github/workflows/bootc-e2e-nightly-windows.yaml)
+  pattern. Dispatch inputs are validated by `.github/scripts/configure-windows-e2e.sh` before they reach `$GITHUB_ENV`
+  (allowlisted keys only; `MAPT_IMAGE` fixed to `quay.io/redhat-developer/mapt`; Podman Desktop / extension forks must
+  stay under `podman-desktop`). Reports and artifacts publish before the unconditional MAPT teardown so a stalled
+  destroy cannot block results.
+
+  Required repository secrets: `ARM_TENANT_ID`, `ARM_SUBSCRIPTION_ID`, `ARM_CLIENT_ID`, `ARM_CLIENT_SECRET`,
+  `PODMAN_DESKTOP_BOT_TOKEN`.
+
+  Optional repository variables: `MAPT_IMAGE`, `MAPT_VERSION_TAG`, `MAPT_CPUS`, `MAPT_MEMORY`, `MAPT_EXCLUDED_REGIONS`
+  (`MAPT_IMAGE` must remain `quay.io/redhat-developer/mapt`).
