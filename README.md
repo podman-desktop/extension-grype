@@ -69,24 +69,12 @@ it again before another run.
 ### CI workflows
 
 - `pr-check.yaml` calls reusable `e2e.yaml` to build and preload the local OCI image on Ubuntu 26.04, install Podman
-  Desktop via `podman-desktop/gh-extensions-actions`, and run the installation smoke tests.
+  Desktop via `podman-desktop/gh-extensions-actions`, and run the installation smoke tests on GitHub-hosted
+  `ubuntu-26.04` and `windows-2025` runners (same matrix pattern as
+  [extension-podman-quadlet](https://github.com/podman-desktop/extension-podman-quadlet/blob/main/.github/workflows/e2e.yaml)).
 - The same workflow also runs after a successful `next-build.yaml` on `main`. It installs the image tagged with that
   build's commit SHA, and skips the job if `main` has already moved past that commit so tests stay aligned with the
   image. Manual runs can select a published image or build from the selected branch.
 
-Both paths publish JUnit summaries and upload test artifacts. Pass-path Playwright traces and videos are off by default;
-set `SAVE_TRACES_ON_PASS=true` locally if you need them.
-
-- `grype-e2e-nightly-windows.yaml` runs Playwright E2E on Azure Windows 10/11 VMs (MAPT) on a nightly schedule and via
-  `workflow_dispatch`, following the
-  [extension-bootc Windows nightly](https://github.com/podman-desktop/extension-bootc/blob/main/.github/workflows/bootc-e2e-nightly-windows.yaml)
-  pattern. Dispatch inputs are validated by `.github/scripts/configure-windows-e2e.sh` before they reach `$GITHUB_ENV`
-  (allowlisted keys only; `MAPT_IMAGE` fixed to `quay.io/redhat-developer/mapt`; Podman Desktop / extension forks must
-  stay under `podman-desktop`). Reports and artifacts publish before the unconditional MAPT teardown so a stalled
-  destroy cannot block results.
-
-  Required repository secrets: `ARM_TENANT_ID`, `ARM_SUBSCRIPTION_ID`, `ARM_CLIENT_ID`, `ARM_CLIENT_SECRET`,
-  `PODMAN_DESKTOP_BOT_TOKEN`.
-
-  Optional repository variables: `MAPT_IMAGE`, `MAPT_VERSION_TAG`, `MAPT_CPUS`, `MAPT_MEMORY`, `MAPT_EXCLUDED_REGIONS`
-  (`MAPT_IMAGE` must remain `quay.io/redhat-developer/mapt`).
+Both paths publish JUnit summaries and upload per-OS test artifacts. Pass-path Playwright traces and videos are off by
+default; set `SAVE_TRACES_ON_PASS=true` locally if you need them.
