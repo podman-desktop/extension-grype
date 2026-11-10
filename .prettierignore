@@ -7,3 +7,7 @@ packages/**/coverage/*
 
 # ignore node_modules
 **/**/node_modules/**
+
+# ignore E2E reports and isolated Podman Desktop profiles
+tests/playwright/output/
+tests/playwright/tests/output/

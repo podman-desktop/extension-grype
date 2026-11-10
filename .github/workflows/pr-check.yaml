@@ -62,4 +62,9 @@ jobs:
       - name: Run typecheck
         run: pnpm typecheck
 
+  e2e-tests:
+    name: Extension installation
+    uses: ./.github/workflows/e2e.yaml
+    with:
+      build-extension: true
 
