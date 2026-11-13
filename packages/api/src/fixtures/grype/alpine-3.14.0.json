@@ -1,0 +1,1046 @@
+{
+  "matches": [
+    {
+      "vulnerability": {
+        "id": "CVE-2021-3711",
+        "dataSource": "https://security.alpinelinux.org/vuln/CVE-2021-3711",
+        "namespace": "alpine:distro:alpine:3.14",
+        "severity": "Critical",
+        "urls": [],
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 9.8,
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2021-3711",
+            "epss": 0.87816,
+            "percentile": 0.99765,
+            "date": "2026-11-12"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2021-3711",
+            "cwe": "CWE-120",
+            "source": "nvd@nist.gov",
+            "type": "Primary"
+          }
+        ],
+        "fix": {
+          "versions": ["1.1.1l-r0"],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "1.1.1l-r0",
+              "date": "2026-02-27",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 82.54704000000001
+      },
+      "relatedVulnerabilities": [
+        {
+          "id": "CVE-2021-3711",
+          "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2021-3711",
+          "namespace": "nvd:cpe",
+          "severity": "Critical",
+          "urls": [
+            "http://www.openwall.com/lists/oss-security/2021/08/26/2",
+            "https://cert-portal.siemens.com/productcert/pdf/ssa-389290.pdf",
+            "https://git.openssl.org/gitweb/?p=openssl.git%3Ba=commitdiff%3Bh=59f5e75f3bced8fc0e130d72a3f582cf7b480b46",
+            "https://lists.apache.org/thread.html/r18995de860f0e63635f3008fd2a6aca82394249476d21691e7c59c9e%40%3Cdev.tomcat.apache.org%3E",
+            "https://lists.apache.org/thread.html/rad5d9f83f0d11fb3f8bb148d179b8a9ad7c6a17f18d70e5805a713d1%40%3Cdev.tomcat.apache.org%3E",
+            "https://security.gentoo.org/glsa/202209-02",
+            "https://security.gentoo.org/glsa/202210-02",
+            "https://security.netapp.com/advisory/ntap-20210827-0010/",
+            "https://security.netapp.com/advisory/ntap-20211022-0003/",
+            "https://security.netapp.com/advisory/ntap-20240621-0006/",
+            "https://www.debian.org/security/2021/dsa-4963",
+            "https://www.openssl.org/news/secadv/20210824.txt",
+            "https://www.oracle.com/security-alerts/cpuapr2022.html",
+            "https://www.oracle.com/security-alerts/cpujan2022.html",
+            "https://www.oracle.com/security-alerts/cpuoct2021.html",
+            "https://www.tenable.com/security/tns-2021-16",
+            "https://www.tenable.com/security/tns-2022-02"
+          ],
+          "description": "In order to decrypt SM2 encrypted data an application is expected to call the API function EVP_PKEY_decrypt(). Typically an application will call this function twice. The first time, on entry, the \"out\" parameter can be NULL and, on exit, the \"outlen\" parameter is populated with the buffer size required to hold the decrypted plaintext. The application can then allocate a sufficiently sized buffer and call EVP_PKEY_decrypt() again, but this time passing a non-NULL value for the \"out\" parameter. A bug in the implementation of the SM2 decryption code means that the calculation of the buffer size required to hold the plaintext returned by the first call to EVP_PKEY_decrypt() can be smaller than the actual size required by the second call. This can lead to a buffer overflow when EVP_PKEY_decrypt() is called by the application a second time with a buffer that is too small. A malicious attacker who is able present SM2 content for decryption to an application could cause attacker chosen data to overflow the buffer by up to a maximum of 62 bytes altering the contents of other data held after the buffer, possibly changing application behaviour or causing the application to crash. The location of the buffer is application dependent but is typically heap allocated. Fixed in OpenSSL 1.1.1l (Affected 1.1.1-1.1.1k).",
+          "cvss": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "version": "3.1",
+              "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "metrics": {
+                "baseScore": 9.8,
+                "exploitabilityScore": 3.9,
+                "impactScore": 5.9
+              },
+              "vendorMetadata": {}
+            },
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "version": "2.0",
+              "vector": "AV:N/AC:L/Au:N/C:P/I:P/A:P",
+              "metrics": {
+                "baseScore": 7.5,
+                "exploitabilityScore": 10,
+                "impactScore": 6.5
+              },
+              "vendorMetadata": {}
+            }
+          ],
+          "epss": [
+            {
+              "cve": "CVE-2021-3711",
+              "epss": 0.87816,
+              "percentile": 0.99765,
+              "date": "2026-11-12"
+            }
+          ],
+          "cwes": [
+            {
+              "cve": "CVE-2021-3711",
+              "cwe": "CWE-120",
+              "source": "nvd@nist.gov",
+              "type": "Primary"
+            }
+          ]
+        }
+      ],
+      "matchDetails": [
+        {
+          "type": "exact-indirect-match",
+          "matcher": "apk-matcher",
+          "searchedBy": {
+            "distro": {
+              "type": "alpine",
+              "version": "3.14.0"
+            },
+            "package": {
+              "name": "openssl",
+              "version": "1.1.1k-r0"
+            },
+            "namespace": "alpine:distro:alpine:3.14"
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2021-3711",
+            "versionConstraint": "< 1.1.1l-r0 (apk)"
+          },
+          "fix": {
+            "suggestedVersion": "1.1.1l-r0"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "3fd9cbaa3d8259d2",
+        "name": "libcrypto1.1",
+        "version": "1.1.1k-r0",
+        "type": "apk",
+        "locations": [
+          {
+            "path": "/lib/apk/db/installed",
+            "layerID": "sha256:5e04d10b60a48b2fef3614c8b2bf64312b03380ac01bcec220e16885fe660be5",
+            "accessPath": "/lib/apk/db/installed",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": ["OpenSSL"],
+        "cpes": [
+          "cpe:2.3:a:libcrypto1.1:libcrypto1.1:1.1.1k-r0:*:*:*:*:*:*:*",
+          "cpe:2.3:a:libcrypto1.1:libcrypto:1.1.1k-r0:*:*:*:*:*:*:*",
+          "cpe:2.3:a:libcrypto:libcrypto1.1:1.1.1k-r0:*:*:*:*:*:*:*",
+          "cpe:2.3:a:libcrypto:libcrypto:1.1.1k-r0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:apk/alpine/libcrypto1.1@1.1.1k-r0?arch=aarch64&distro=alpine-3.14.0&upstream=openssl",
+        "upstreams": [
+          {
+            "name": "openssl"
+          }
+        ],
+        "metadataType": "ApkMetadata",
+        "metadata": {
+          "files": [
+            {
+              "path": "/etc"
+            },
+            {
+              "path": "/etc/ssl"
+            },
+            {
+              "path": "/etc/ssl/ct_log_list.cnf"
+            },
+            {
+              "path": "/etc/ssl/ct_log_list.cnf.dist"
+            },
+            {
+              "path": "/etc/ssl/openssl.cnf"
+            },
+            {
+              "path": "/etc/ssl/openssl.cnf.dist"
+            },
+            {
+              "path": "/etc/ssl/certs"
+            },
+            {
+              "path": "/etc/ssl/misc"
+            },
+            {
+              "path": "/etc/ssl/misc/CA.pl"
+            },
+            {
+              "path": "/etc/ssl/misc/tsget"
+            },
+            {
+              "path": "/etc/ssl/misc/tsget.pl"
+            },
+            {
+              "path": "/etc/ssl/private"
+            },
+            {
+              "path": "/lib"
+            },
+            {
+              "path": "/lib/libcrypto.so.1.1"
+            },
+            {
+              "path": "/usr"
+            },
+            {
+              "path": "/usr/lib"
+            },
+            {
+              "path": "/usr/lib/libcrypto.so.1.1"
+            },
+            {
+              "path": "/usr/lib/engines-1.1"
+            },
+            {
+              "path": "/usr/lib/engines-1.1/afalg.so"
+            },
+            {
+              "path": "/usr/lib/engines-1.1/capi.so"
+            },
+            {
+              "path": "/usr/lib/engines-1.1/padlock.so"
+            }
+          ],
+          "Arch": "aarch64"
+        }
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2023-2650",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2023-2650",
+        "namespace": "nvd:cpe",
+        "severity": "Medium",
+        "urls": [
+          "http://www.openwall.com/lists/oss-security/2023/05/30/1",
+          "https://git.openssl.org/gitweb/?p=openssl.git;a=commitdiff;h=423a2bc737a908ad0c77bda470b2b59dc879936b",
+          "https://git.openssl.org/gitweb/?p=openssl.git;a=commitdiff;h=853c5e56ee0b8650c73140816bb8b91d6163422c",
+          "https://git.openssl.org/gitweb/?p=openssl.git;a=commitdiff;h=9e209944b35cf82368071f160a744b6178f9b098",
+          "https://git.openssl.org/gitweb/?p=openssl.git;a=commitdiff;h=db779b0e10b047f2585615e0b8f2acdf21f8544a",
+          "https://lists.debian.org/debian-lts-announce/2023/06/msg00011.html",
+          "https://psirt.global.sonicwall.com/vuln-detail/SNWLID-2023-0009",
+          "https://security.gentoo.org/glsa/202402-08",
+          "https://security.netapp.com/advisory/ntap-20230703-0001/",
+          "https://security.netapp.com/advisory/ntap-20231027-0009/",
+          "https://www.debian.org/security/2023/dsa-5417",
+          "https://www.openssl.org/news/secadv/20230530.txt",
+          "https://cert-portal.siemens.com/productcert/html/ssa-398330.html",
+          "https://cert-portal.siemens.com/productcert/html/ssa-699386.html",
+          "https://cert-portal.siemens.com/productcert/html/ssa-943925.html"
+        ],
+        "description": "Issue summary: Processing some specially crafted ASN.1 object identifiers or\ndata containing them may be very slow.\n\nImpact summary: Applications that use OBJ_obj2txt() directly, or use any of\nthe OpenSSL subsystems OCSP, PKCS7/SMIME, CMS, CMP/CRMF or TS with no message\nsize limit may experience notable to very long delays when processing those\nmessages, which may lead to a Denial of Service.\n\nAn OBJECT IDENTIFIER is composed of a series of numbers - sub-identifiers -\nmost of which have no size limit.  OBJ_obj2txt() may be used to translate\nan ASN.1 OBJECT IDENTIFIER given in DER encoding form (using the OpenSSL\ntype ASN1_OBJECT) to its canonical numeric text form, which are the\nsub-identifiers of the OBJECT IDENTIFIER in decimal form, separated by\nperiods.\n\nWhen one of the sub-identifiers in the OBJECT IDENTIFIER is very large\n(these are sizes that are seen as absurdly large, taking up tens or hundreds\nof KiBs), the translation to a decimal number in text may take a very long\ntime.  The time complexity is O(n^2) with 'n' being the size of the\nsub-identifiers in bytes (*).\n\nWith OpenSSL 3.0, support to fetch cryptographic algorithms using names /\nidentifiers in string form was introduced.  This includes using OBJECT\nIDENTIFIERs in canonical numeric text form as identifiers for fetching\nalgorithms.\n\nSuch OBJECT IDENTIFIERs may be received through the ASN.1 structure\nAlgorithmIdentifier, which is commonly used in multiple protocols to specify\nwhat cryptographic algorithm should be used to sign or verify, encrypt or\ndecrypt, or digest passed data.\n\nApplications that call OBJ_obj2txt() directly with untrusted data are\naffected, with any version of OpenSSL.  If the use is for the mere purpose\nof display, the severity is considered low.\n\nIn OpenSSL 3.0 and newer, this affects the subsystems OCSP, PKCS7/SMIME,\nCMS, CMP/CRMF or TS.  It also impacts anything that processes X.509\ncertificates, including simple things like verifying its signature.\n\nThe impact on TLS is relatively low, because all versions of OpenSSL have a\n100KiB limit on the peer's certificate chain.  Additionally, this only\nimpacts clients, or servers that have explicitly enabled client\nauthentication.\n\nIn OpenSSL 1.1.1 and 1.0.2, this only affects displaying diverse objects,\nsuch as X.509 certificates.  This is assumed to not happen in such a way\nthat it would cause a Denial of Service, so these versions are considered\nnot affected by this issue in such a way that it would be cause for concern,\nand the severity is therefore considered low.",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+            "metrics": {
+              "baseScore": 6.5,
+              "exploitabilityScore": 2.9,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          },
+          {
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+            "metrics": {
+              "baseScore": 6.5,
+              "exploitabilityScore": 2.9,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2023-2650",
+            "epss": 0.75358,
+            "percentile": 0.99522,
+            "date": "2026-11-12"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2023-2650",
+            "cwe": "CWE-770",
+            "source": "nvd@nist.gov",
+            "type": "Primary"
+          },
+          {
+            "cve": "CVE-2023-2650",
+            "cwe": "CWE-770",
+            "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+            "type": "Secondary"
+          }
+        ],
+        "fix": {
+          "versions": [],
+          "state": "unknown"
+        },
+        "advisories": [],
+        "risk": 43.33085
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "apk-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": ["cpe:2.3:a:openssl:openssl:1.1.1k:*:*:*:*:*:*:*"],
+            "package": {
+              "name": "openssl",
+              "version": "1.1.1k-r0"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2023-2650",
+            "versionConstraint": ">= 1.0.2, < 1.0.2zh||>= 1.1.1, < 1.1.1u||>= 3.0.0, < 3.0.9||>= 3.1.0, < 3.1.1 (unknown)",
+            "cpes": ["cpe:2.3:a:openssl:openssl:*:*:*:*:*:*:*:*"]
+          }
+        }
+      ],
+      "artifact": {
+        "id": "3fd9cbaa3d8259d2",
+        "name": "libcrypto1.1",
+        "version": "1.1.1k-r0",
+        "type": "apk",
+        "locations": [
+          {
+            "path": "/lib/apk/db/installed",
+            "layerID": "sha256:5e04d10b60a48b2fef3614c8b2bf64312b03380ac01bcec220e16885fe660be5",
+            "accessPath": "/lib/apk/db/installed",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": ["OpenSSL"],
+        "cpes": [
+          "cpe:2.3:a:libcrypto1.1:libcrypto1.1:1.1.1k-r0:*:*:*:*:*:*:*",
+          "cpe:2.3:a:libcrypto1.1:libcrypto:1.1.1k-r0:*:*:*:*:*:*:*",
+          "cpe:2.3:a:libcrypto:libcrypto1.1:1.1.1k-r0:*:*:*:*:*:*:*",
+          "cpe:2.3:a:libcrypto:libcrypto:1.1.1k-r0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:apk/alpine/libcrypto1.1@1.1.1k-r0?arch=aarch64&distro=alpine-3.14.0&upstream=openssl",
+        "upstreams": [
+          {
+            "name": "openssl"
+          }
+        ],
+        "metadataType": "ApkMetadata",
+        "metadata": {
+          "files": [
+            {
+              "path": "/etc"
+            },
+            {
+              "path": "/etc/ssl"
+            },
+            {
+              "path": "/etc/ssl/ct_log_list.cnf"
+            },
+            {
+              "path": "/etc/ssl/ct_log_list.cnf.dist"
+            },
+            {
+              "path": "/etc/ssl/openssl.cnf"
+            },
+            {
+              "path": "/etc/ssl/openssl.cnf.dist"
+            },
+            {
+              "path": "/etc/ssl/certs"
+            },
+            {
+              "path": "/etc/ssl/misc"
+            },
+            {
+              "path": "/etc/ssl/misc/CA.pl"
+            },
+            {
+              "path": "/etc/ssl/misc/tsget"
+            },
+            {
+              "path": "/etc/ssl/misc/tsget.pl"
+            },
+            {
+              "path": "/etc/ssl/private"
+            },
+            {
+              "path": "/lib"
+            },
+            {
+              "path": "/lib/libcrypto.so.1.1"
+            },
+            {
+              "path": "/usr"
+            },
+            {
+              "path": "/usr/lib"
+            },
+            {
+              "path": "/usr/lib/libcrypto.so.1.1"
+            },
+            {
+              "path": "/usr/lib/engines-1.1"
+            },
+            {
+              "path": "/usr/lib/engines-1.1/afalg.so"
+            },
+            {
+              "path": "/usr/lib/engines-1.1/capi.so"
+            },
+            {
+              "path": "/usr/lib/engines-1.1/padlock.so"
+            }
+          ],
+          "Arch": "aarch64"
+        }
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2022-48174",
+        "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2022-48174",
+        "namespace": "nvd:cpe",
+        "severity": "Critical",
+        "urls": [
+          "https://bugs.busybox.net/show_bug.cgi?id=15216",
+          "https://lists.debian.org/debian-lts-announce/2025/01/msg00012.html",
+          "https://security.netapp.com/advisory/ntap-20241129-0001/",
+          "https://cert-portal.siemens.com/productcert/html/ssa-089022.html",
+          "https://cert-portal.siemens.com/productcert/html/ssa-585531.html"
+        ],
+        "description": "There is a stack overflow vulnerability in ash.c:6030 in busybox before 1.35. In the environment of Internet of Vehicles, this vulnerability can be executed from command to arbitrary code execution.",
+        "cvss": [
+          {
+            "source": "nvd@nist.gov",
+            "type": "Primary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "metrics": {
+              "baseScore": 9.8,
+              "exploitabilityScore": 3.9,
+              "impactScore": 5.9
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2022-48174",
+            "epss": 0.03158,
+            "percentile": 0.88154,
+            "date": "2026-11-12"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2022-48174",
+            "cwe": "CWE-787",
+            "source": "nvd@nist.gov",
+            "type": "Primary"
+          }
+        ],
+        "fix": {
+          "versions": [],
+          "state": ""
+        },
+        "advisories": [],
+        "risk": 2.96852
+      },
+      "relatedVulnerabilities": [],
+      "matchDetails": [
+        {
+          "type": "cpe-match",
+          "matcher": "apk-matcher",
+          "searchedBy": {
+            "namespace": "nvd:cpe",
+            "cpes": ["cpe:2.3:a:busybox:busybox:1.33.1:*:*:*:*:*:*:*"],
+            "package": {
+              "name": "busybox",
+              "version": "1.33.1-r2"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "CVE-2022-48174",
+            "versionConstraint": "<= 1.36.1 (unknown)",
+            "cpes": ["cpe:2.3:a:busybox:busybox:*:*:*:*:*:*:*:*"]
+          }
+        }
+      ],
+      "artifact": {
+        "id": "ea114a2c5f8333ab",
+        "name": "busybox",
+        "version": "1.33.1-r2",
+        "type": "apk",
+        "locations": [
+          {
+            "path": "/lib/apk/db/installed",
+            "layerID": "sha256:5e04d10b60a48b2fef3614c8b2bf64312b03380ac01bcec220e16885fe660be5",
+            "accessPath": "/lib/apk/db/installed",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": ["GPL-2.0-only"],
+        "cpes": ["cpe:2.3:a:busybox:busybox:1.33.1-r2:*:*:*:*:*:*:*"],
+        "purl": "pkg:apk/alpine/busybox@1.33.1-r2?arch=aarch64&distro=alpine-3.14.0",
+        "upstreams": [
+          {
+            "name": "busybox"
+          }
+        ],
+        "metadataType": "ApkMetadata",
+        "metadata": {
+          "files": [
+            {
+              "path": "/bin"
+            },
+            {
+              "path": "/bin/busybox"
+            },
+            {
+              "path": "/bin/sh"
+            },
+            {
+              "path": "/etc"
+            },
+            {
+              "path": "/etc/securetty"
+            },
+            {
+              "path": "/etc/udhcpd.conf"
+            },
+            {
+              "path": "/etc/logrotate.d"
+            },
+            {
+              "path": "/etc/logrotate.d/acpid"
+            },
+            {
+              "path": "/etc/network"
+            },
+            {
+              "path": "/etc/network/if-down.d"
+            },
+            {
+              "path": "/etc/network/if-post-down.d"
+            },
+            {
+              "path": "/etc/network/if-post-up.d"
+            },
+            {
+              "path": "/etc/network/if-pre-down.d"
+            },
+            {
+              "path": "/etc/network/if-pre-up.d"
+            },
+            {
+              "path": "/etc/network/if-up.d"
+            },
+            {
+              "path": "/etc/network/if-up.d/dad"
+            },
+            {
+              "path": "/sbin"
+            },
+            {
+              "path": "/tmp"
+            },
+            {
+              "path": "/usr"
+            },
+            {
+              "path": "/usr/sbin"
+            },
+            {
+              "path": "/usr/share"
+            },
+            {
+              "path": "/usr/share/udhcpc"
+            },
+            {
+              "path": "/usr/share/udhcpc/default.script"
+            },
+            {
+              "path": "/var"
+            },
+            {
+              "path": "/var/cache"
+            },
+            {
+              "path": "/var/cache/misc"
+            },
+            {
+              "path": "/var/lib"
+            },
+            {
+              "path": "/var/lib/udhcpd"
+            }
+          ],
+          "Arch": "aarch64"
+        }
+      }
+    }
+  ],
+  "alertsByPackage": [
+    {
+      "package": {
+        "id": "0667d973fc73c233",
+        "name": "libssl1.1",
+        "version": "1.1.1k-r0",
+        "type": "apk",
+        "locations": [
+          {
+            "path": "/lib/apk/db/installed",
+            "layerID": "sha256:5e04d10b60a48b2fef3614c8b2bf64312b03380ac01bcec220e16885fe660be5",
+            "accessPath": "/lib/apk/db/installed",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "",
+        "licenses": ["OpenSSL"],
+        "cpes": [
+          "cpe:2.3:a:libssl1.1:libssl1.1:1.1.1k-r0:*:*:*:*:*:*:*",
+          "cpe:2.3:a:libssl1.1:libssl:1.1.1k-r0:*:*:*:*:*:*:*",
+          "cpe:2.3:a:libssl:libssl1.1:1.1.1k-r0:*:*:*:*:*:*:*",
+          "cpe:2.3:a:libssl:libssl:1.1.1k-r0:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:apk/alpine/libssl1.1@1.1.1k-r0?arch=aarch64&distro=alpine-3.14.0&upstream=openssl",
+        "upstreams": [
+          {
+            "name": "openssl"
+          }
+        ],
+        "metadataType": "ApkMetadata",
+        "metadata": {
+          "files": [
+            {
+              "path": "/lib"
+            },
+            {
+              "path": "/lib/libssl.so.1.1"
+            },
+            {
+              "path": "/usr"
+            },
+            {
+              "path": "/usr/lib"
+            },
+            {
+              "path": "/usr/lib/libssl.so.1.1"
+            }
+          ],
+          "Arch": "aarch64"
+        }
+      },
+      "alerts": [
+        {
+          "type": "distro-eol",
+          "message": "Package is from end-of-life distro: alpine 3.14.0",
+          "metadata": {
+            "name": "alpine",
+            "version": "3.14.0"
+          }
+        }
+      ]
+    }
+  ],
+  "source": {
+    "type": "image",
+    "target": {
+      "userInput": "alpine:3.14.0",
+      "imageID": "sha256:b0e47758dc53e7391c7abf92fd56fd959bf37fb74574feba3d557b4182d15801",
+      "manifestDigest": "sha256:53b74ddfc6225e3c8cc84d7985d0f34666e4e8b0b6892a9b2ad1f7516bc21b54",
+      "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+      "tags": [],
+      "imageSize": 5323809,
+      "layers": [
+        {
+          "mediaType": "application/vnd.docker.image.rootfs.diff.tar.gzip",
+          "digest": "sha256:5e04d10b60a48b2fef3614c8b2bf64312b03380ac01bcec220e16885fe660be5",
+          "size": 5323809
+        }
+      ],
+      "manifest": "ewogICAic2NoZW1hVmVyc2lvbiI6IDIsCiAgICJtZWRpYVR5cGUiOiAiYXBwbGljYXRpb24vdm5kLmRvY2tlci5kaXN0cmlidXRpb24ubWFuaWZlc3QudjIranNvbiIsCiAgICJjb25maWciOiB7CiAgICAgICJtZWRpYVR5cGUiOiAiYXBwbGljYXRpb24vdm5kLmRvY2tlci5jb250YWluZXIuaW1hZ2UudjEranNvbiIsCiAgICAgICJzaXplIjogMTQ3MiwKICAgICAgImRpZ2VzdCI6ICJzaGEyNTY6YjBlNDc3NThkYzUzZTczOTFjN2FiZjkyZmQ1NmZkOTU5YmYzN2ZiNzQ1NzRmZWJhM2Q1NTdiNDE4MmQxNTgwMSIKICAgfSwKICAgImxheWVycyI6IFsKICAgICAgewogICAgICAgICAibWVkaWFUeXBlIjogImFwcGxpY2F0aW9uL3ZuZC5kb2NrZXIuaW1hZ2Uucm9vdGZzLmRpZmYudGFyLmd6aXAiLAogICAgICAgICAic2l6ZSI6IDI3MDk2MjYsCiAgICAgICAgICJkaWdlc3QiOiAic2hhMjU2OjU4YWI0NzUxOTI5NzIxMjQ2ODMyMGIyM2I4MTAwZmMxYjJiOTZlOGQzNDIwNDA4MDZhZTUwOWE3NzhhMGEwN2EiCiAgICAgIH0KICAgXQp9",
+      "config": "eyJhcmNoaXRlY3R1cmUiOiJhcm02NCIsImNvbmZpZyI6eyJIb3N0bmFtZSI6IiIsIkRvbWFpbm5hbWUiOiIiLCJVc2VyIjoiIiwiQXR0YWNoU3RkaW4iOmZhbHNlLCJBdHRhY2hTdGRvdXQiOmZhbHNlLCJBdHRhY2hTdGRlcnIiOmZhbHNlLCJUdHkiOmZhbHNlLCJPcGVuU3RkaW4iOmZhbHNlLCJTdGRpbk9uY2UiOmZhbHNlLCJFbnYiOlsiUEFUSD0vdXNyL2xvY2FsL3NiaW46L3Vzci9sb2NhbC9iaW46L3Vzci9zYmluOi91c3IvYmluOi9zYmluOi9iaW4iXSwiQ21kIjpbIi9iaW4vc2giXSwiSW1hZ2UiOiJzaGEyNTY6YTgxY2E0Mzk0Yjk5ZWQ0OWM5NTRlZTIyYzIyMzhiMjc4NjAxNjJhYjJiZTQ4ZGZlYTBkODVkZTBkZDk3ZTY4NyIsIlZvbHVtZXMiOm51bGwsIldvcmtpbmdEaXIiOiIiLCJFbnRyeXBvaW50IjpudWxsLCJPbkJ1aWxkIjpudWxsLCJMYWJlbHMiOm51bGx9LCJjb250YWluZXIiOiJlYTlmMjhjNmMyMDgxZTY2YmUwY2Y2ZWQwMmY2ODY3YTQ0NTg3MWY0OTc5ZGJkZTI3ZDRmNDgwYjlkZmJiZTNjIiwiY29udGFpbmVyX2NvbmZpZyI6eyJIb3N0bmFtZSI6ImVhOWYyOGM2YzIwOCIsIkRvbWFpbm5hbWUiOiIiLCJVc2VyIjoiIiwiQXR0YWNoU3RkaW4iOmZhbHNlLCJBdHRhY2hTdGRvdXQiOmZhbHNlLCJBdHRhY2hTdGRlcnIiOmZhbHNlLCJUdHkiOmZhbHNlLCJPcGVuU3RkaW4iOmZhbHNlLCJTdGRpbk9uY2UiOmZhbHNlLCJFbnYiOlsiUEFUSD0vdXNyL2xvY2FsL3NiaW46L3Vzci9sb2NhbC9iaW46L3Vzci9zYmluOi91c3IvYmluOi9zYmluOi9iaW4iXSwiQ21kIjpbIi9iaW4vc2giLCItYyIsIiMobm9wKSAiLCJDTUQgW1wiL2Jpbi9zaFwiXSJdLCJJbWFnZSI6InNoYTI1NjphODFjYTQzOTRiOTllZDQ5Yzk1NGVlMjJjMjIzOGIyNzg2MDE2MmFiMmJlNDhkZmVhMGQ4NWRlMGRkOTdlNjg3IiwiVm9sdW1lcyI6bnVsbCwiV29ya2luZ0RpciI6IiIsIkVudHJ5cG9pbnQiOm51bGwsIk9uQnVpbGQiOm51bGwsIkxhYmVscyI6e319LCJjcmVhdGVkIjoiMjAyMS0wNi0xNVQyMTo0NDo1Ni44OTEwNzgzMjdaIiwiZG9ja2VyX3ZlcnNpb24iOiIxOS4wMy4xMiIsImhpc3RvcnkiOlt7ImNyZWF0ZWQiOiIyMDIxLTA2LTE1VDIxOjQ0OjU2LjY4NTg2Mjk5MVoiLCJjcmVhdGVkX2J5IjoiL2Jpbi9zaCAtYyAjKG5vcCkgQUREIGZpbGU6Njc5N2NhYWNiZmU0MWJmZTQ0MDAwYjM5ZWQwMTcwMTZjNmZjYzQ5MmIzZDY1NTdjZGFiYTg4NTM2ZGY2Yzg3NiBpbiAvICJ9LHsiY3JlYXRlZCI6IjIwMjEtMDYtMTVUMjE6NDQ6NTYuODkxMDc4MzI3WiIsImNyZWF0ZWRfYnkiOiIvYmluL3NoIC1jICMobm9wKSAgQ01EIFtcIi9iaW4vc2hcIl0iLCJlbXB0eV9sYXllciI6dHJ1ZX1dLCJvcyI6ImxpbnV4Iiwicm9vdGZzIjp7InR5cGUiOiJsYXllcnMiLCJkaWZmX2lkcyI6WyJzaGEyNTY6NWUwNGQxMGI2MGE0OGIyZmVmMzYxNGM4YjJiZjY0MzEyYjAzMzgwYWMwMWJjZWMyMjBlMTY4ODVmZTY2MGJlNSJdfX0=",
+      "repoDigests": [
+        "index.docker.io/library/alpine@sha256:adab3844f497ab9171f070d4cae4114b5aec565ac772e2f2579405b78be67c96"
+      ],
+      "architecture": "arm64",
+      "os": "linux"
+    }
+  },
+  "distro": {
+    "name": "alpine",
+    "version": "3.14.0",
+    "idLike": []
+  },
+  "descriptor": {
+    "name": "grype",
+    "version": "0.121.3",
+    "configuration": {
+      "output": ["json"],
+      "file": "/out/grype.json",
+      "pretty": false,
+      "distro": "",
+      "add-cpes-if-none": false,
+      "output-template-file": "",
+      "check-for-app-update": true,
+      "only-fixed": false,
+      "only-notfixed": false,
+      "ignore-wontfix": "",
+      "platform": "",
+      "search": {
+        "scope": "squashed",
+        "unindexed-archives": false,
+        "indexed-archives": true
+      },
+      "ignore": [
+        {
+          "vulnerability": "",
+          "include-aliases": false,
+          "reason": "",
+          "namespace": "",
+          "fix-state": "",
+          "package": {
+            "name": "kernel-headers",
+            "version": "",
+            "language": "",
+            "type": "rpm",
+            "location": "",
+            "upstream-name": "kernel"
+          },
+          "vex-status": "",
+          "vex-justification": "",
+          "match-type": "exact-indirect-match"
+        },
+        {
+          "vulnerability": "",
+          "include-aliases": false,
+          "reason": "",
+          "namespace": "",
+          "fix-state": "",
+          "package": {
+            "name": "linux(-.*)?-headers-.*",
+            "version": "",
+            "language": "",
+            "type": "deb",
+            "location": "",
+            "upstream-name": "linux.*"
+          },
+          "vex-status": "",
+          "vex-justification": "",
+          "match-type": "exact-indirect-match"
+        },
+        {
+          "vulnerability": "",
+          "include-aliases": false,
+          "reason": "",
+          "namespace": "",
+          "fix-state": "",
+          "package": {
+            "name": "linux-libc-dev",
+            "version": "",
+            "language": "",
+            "type": "deb",
+            "location": "",
+            "upstream-name": "linux"
+          },
+          "vex-status": "",
+          "vex-justification": "",
+          "match-type": "exact-indirect-match"
+        },
+        {
+          "vulnerability": "",
+          "include-aliases": false,
+          "reason": "",
+          "namespace": "",
+          "fix-state": "",
+          "package": {
+            "name": "linux-kbuild-.*",
+            "version": "",
+            "language": "",
+            "type": "deb",
+            "location": "",
+            "upstream-name": "linux.*"
+          },
+          "vex-status": "",
+          "vex-justification": "",
+          "match-type": "exact-indirect-match"
+        }
+      ],
+      "exclude": [],
+      "externalSources": {
+        "enable": false,
+        "maven": {
+          "searchUpstreamBySha1": true,
+          "baseUrl": "https://search.maven.org/solrsearch/select",
+          "rateLimit": 300000000
+        }
+      },
+      "match": {
+        "java": {
+          "using-cpes": false
+        },
+        "jvm": {
+          "using-cpes": true
+        },
+        "dotnet": {
+          "using-cpes": false
+        },
+        "golang": {
+          "using-cpes": false,
+          "always-use-cpe-for-stdlib": false,
+          "allow-main-module-pseudo-version-comparison": false
+        },
+        "javascript": {
+          "using-cpes": false
+        },
+        "python": {
+          "using-cpes": false
+        },
+        "ruby": {
+          "using-cpes": false
+        },
+        "rust": {
+          "using-cpes": false
+        },
+        "hex": {
+          "using-cpes": false
+        },
+        "stock": {
+          "using-cpes": true
+        },
+        "dpkg": {
+          "using-cpes": false,
+          "missing-epoch-strategy": "zero",
+          "use-cpes-for-eol": false
+        },
+        "rpm": {
+          "using-cpes": false,
+          "missing-epoch-strategy": "auto",
+          "use-cpes-for-eol": false
+        }
+      },
+      "fail-on-severity": "",
+      "registry": {
+        "insecure-skip-tls-verify": false,
+        "insecure-use-http": false,
+        "ca-cert": ""
+      },
+      "show-suppressed": false,
+      "include-matcher-suppressions": false,
+      "by-cve": false,
+      "SortBy": {
+        "sort-by": "risk"
+      },
+      "name": "",
+      "default-image-pull-source": "",
+      "from": null,
+      "vex-documents": [],
+      "vex-add": [],
+      "match-upstream-kernel-headers": false,
+      "fix-channel": {
+        "redhat-eus": {
+          "apply": "auto",
+          "versions": ">= 8.0"
+        },
+        "ubuntu-esm": {
+          "apply": "auto",
+          "versions": ""
+        }
+      },
+      "timestamp": true,
+      "alerts": {
+        "enable-eol-distro-warnings": true
+      },
+      "db": {
+        "cache-dir": "/cache",
+        "update-url": "https://grype.anchore.io/databases",
+        "ca-cert": "",
+        "auto-update": true,
+        "validate-by-hash-on-start": true,
+        "validate-age": true,
+        "max-allowed-built-age": 432000000000000,
+        "require-update-check": false,
+        "update-available-timeout": 30000000000,
+        "update-download-timeout": 300000000000,
+        "max-update-check-frequency": 7200000000000
+      },
+      "exp": {},
+      "dev": {
+        "db": {
+          "debug": false
+        }
+      }
+    },
+    "db": {
+      "status": {
+        "schemaVersion": "v6.1.10",
+        "from": "https://grype.anchore.io/databases/v6/vulnerability-db_v6.1.10_2026-11-13T00:21:35Z_1794550821.tar.zst?checksum=sha256%3A7776d82a5be335571ee9aa77093375659ceaae3fe324b9ed4ba2ba94abbaa36e",
+        "built": "2026-11-13T06:20:21Z",
+        "path": "/cache/6/vulnerability.db",
+        "valid": true
+      },
+      "providers": {
+        "alma": {
+          "captured": "2026-11-13T00:21:42Z",
+          "input": "xxh64:7c7f732182a20222"
+        },
+        "alpine": {
+          "captured": "2026-11-13T00:21:47Z",
+          "input": "xxh64:58e23ea952476873"
+        },
+        "amazon": {
+          "captured": "2026-11-13T00:22:14Z",
+          "input": "xxh64:e4f61db203980e6a"
+        },
+        "arch": {
+          "captured": "2026-11-13T00:21:41Z",
+          "input": "xxh64:6c29863d89e40f65"
+        },
+        "bitnami": {
+          "captured": "2026-11-13T00:21:38Z",
+          "input": "xxh64:1b1b44659e15469f"
+        },
+        "chainguard": {
+          "captured": "2026-11-13T00:21:59Z",
+          "input": "xxh64:b07c6675f4b68bab"
+        },
+        "chainguard-libraries": {
+          "captured": "2026-11-13T00:21:35Z",
+          "input": "xxh64:b0393b01520dedbb"
+        },
+        "debian": {
+          "captured": "2026-11-13T00:22:00Z",
+          "input": "xxh64:ef8ed24d89bc1fd4"
+        },
+        "echo": {
+          "captured": "2026-11-13T00:21:53Z",
+          "input": "xxh64:c8e777d8f016c742"
+        },
+        "eol": {
+          "captured": "2026-11-13T00:21:49Z",
+          "input": "xxh64:ffde365b89c82e35"
+        },
+        "epss": {
+          "captured": "2026-11-13T00:23:10Z",
+          "input": "xxh64:94fe05b01b9b6602"
+        },
+        "fedora": {
+          "captured": "2026-11-13T00:22:10Z",
+          "input": "xxh64:df1b01f41a66ed75"
+        },
+        "github": {
+          "captured": "2026-11-13T00:23:01Z",
+          "input": "xxh64:6ee9069686161cb7"
+        },
+        "govulndb": {
+          "captured": "2026-11-13T00:21:42Z",
+          "input": "xxh64:62eb98444ae8ee02"
+        },
+        "hummingbird": {
+          "captured": "2026-11-13T00:44:46Z",
+          "input": "xxh64:745d16e779178a1d"
+        },
+        "kev": {
+          "captured": "2026-11-13T00:22:01Z",
+          "input": "xxh64:783f3e247b968528"
+        },
+        "mariner": {
+          "captured": "2026-11-13T00:21:51Z",
+          "input": "xxh64:c9285c93dc64ed8d"
+        },
+        "minimos": {
+          "captured": "2026-11-13T00:21:52Z",
+          "input": "xxh64:d92e5bf414909a1e"
+        },
+        "nvd": {
+          "captured": "2026-11-13T00:22:41Z",
+          "input": "xxh64:d26215d00d6b9965"
+        },
+        "oracle": {
+          "captured": "2026-11-13T00:21:45Z",
+          "input": "xxh64:1d0a4566a7c5b420"
+        },
+        "photon": {
+          "captured": "2026-11-13T00:22:05Z",
+          "input": "xxh64:c4cc22d42ae165c7"
+        },
+        "rhel": {
+          "captured": "2026-11-13T00:40:40Z",
+          "input": "xxh64:f591bcf7eaa5a728"
+        },
+        "secureos": {
+          "captured": "2026-11-13T00:21:50Z",
+          "input": "xxh64:779faf39a5991ba5"
+        },
+        "sles": {
+          "captured": "2026-11-13T00:41:27Z",
+          "input": "xxh64:e291b42fdcd739a1"
+        },
+        "ubuntu": {
+          "captured": "2026-11-13T00:40:07Z",
+          "input": "xxh64:a4bbd1991365231f"
+        },
+        "wolfi": {
+          "captured": "2026-11-13T00:21:49Z",
+          "input": "xxh64:c85e4412eca6887a"
+        }
+      }
+    },
+    "timestamp": "2026-11-13T11:09:34.631263151Z"
+  }
+}
