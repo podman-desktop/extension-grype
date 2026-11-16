@@ -1,7 +1,8 @@
 FROM registry.access.redhat.com/ubi10/nodejs-24-minimal:10.1-1766060610 AS builder
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN npm i -g corepack@0.31.0 && corepack enable
+# pnpm 12 ships bin/pnpm.mjs; corepack <0.34.5 still looks for bin/pnpm.cjs.
+RUN npm i -g corepack@0.34.6 && corepack enable
 
 # change home directory to be at /opt/app-root
 ENV HOME=/opt/app-root
