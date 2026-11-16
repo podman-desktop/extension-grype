@@ -1,29 +1,31 @@
-FROM registry.access.redhat.com/ubi10/nodejs-24-minimal:10.1-1766060610 AS builder
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-# pnpm 12 ships bin/pnpm.mjs; corepack <0.34.5 still looks for bin/pnpm.cjs.
-RUN npm i -g corepack@0.34.6 && corepack enable
+FROM registry.access.redhat.com/ubi10/nodejs-24-minimal:1791463197@sha256:498ccfc43f6fe349a4d87db6af6d83ab420e9450f3800140cdc90c290dcd462f AS builder
 
-# change home directory to be at /opt/app-root
-ENV HOME=/opt/app-root
+WORKDIR /opt/app-root/src
 
-# copy the application files to the /opt/app-root/extension-source directory
-WORKDIR /opt/app-root/extension-source
-RUN mkdir -p /opt/app-root/extension-source
+# pnpm runs an implicit dependency check before `run` scripts, which spawns a
+# nested `pnpm install`. Setting CI here rather than per-RUN makes every pnpm
+# invocation non-interactive, otherwise that nested install blocks on a prompt.
+ENV CI=true
 
-COPY --chown=1001:root . /opt/app-root/extension-source
+RUN npm i -g corepack@0.36.0 && corepack enable
+
+COPY --chown=1001:1001 . .
 
 RUN pnpm install --frozen-lockfile
 RUN pnpm build
 
+# Assemble the extension layout, so the final stage is a single COPY
+RUN mkdir -p /opt/app-root/extension
+RUN cp -r packages/backend/dist /opt/app-root/extension/
+RUN cp packages/backend/package.json /opt/app-root/extension/
+RUN cp LICENSE /opt/app-root/extension/
+RUN cp packages/backend/icon.png /opt/app-root/extension/
+RUN cp packages/backend/syft.png /opt/app-root/extension/
+RUN cp README.md /opt/app-root/extension/
+
 FROM scratch
 
-COPY --from=builder /opt/app-root/extension-source/packages/backend/dist/ /extension/dist
-COPY --from=builder /opt/app-root/extension-source/packages/backend/package.json /extension/
-COPY --from=builder /opt/app-root/extension-source/LICENSE /extension/
-COPY --from=builder /opt/app-root/extension-source/packages/backend/icon.png /extension/
-COPY --from=builder /opt/app-root/extension-source/packages/backend/syft.png /extension/
-COPY --from=builder /opt/app-root/extension-source/README.md /extension/
+COPY --from=builder /opt/app-root/extension /extension
 
 LABEL org.opencontainers.image.title="Grype Extension" \
         org.opencontainers.image.description="Grype Extension" \
