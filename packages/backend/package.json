@@ -2,7 +2,7 @@
   "name": "grype",
   "displayName": "Grype",
   "description": "Unofficial grype & syft integration for Podman Desktop",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "icon": "icon.png",
   "publisher": "podman-desktop",
   "type": "module",
