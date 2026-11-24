@@ -13,7 +13,15 @@ See the instruction on [How to install an extension](https://podman-desktop.io/d
 
 ## End-to-end tests
 
-The Playwright suite installs Grype, checks that it is active, verifies its details page, and removes it during cleanup.
+The Playwright suite covers two areas, each in its own spec file:
+
+- **Installation smoke tests** (`@installation`, `grype-extension-smoke.spec.ts`): install Grype, check that it is
+  active, verify its details page, and remove it during cleanup.
+- **Vulnerability scanning tests** (`@scan`, `grype-extension-scan.spec.ts`): pull images with and without known
+  vulnerabilities, run the image analysis from the image details _Check_ tab (including the Syft/Grype binaries
+  installation prompted by the extension), and assert the reported vulnerabilities. The first scan downloads the
+  binaries and the Grype vulnerability database, so it is slow; the tests use extended timeouts accordingly.
+
 It uses `@podman-desktop/tests-playwright` and an isolated Podman Desktop profile.
 CI refreshes the framework to `@next` to match Podman Desktop `main`. The framework is exempt from the workspace's
 minimum release age so CI can install the current nightly package.
@@ -40,7 +48,10 @@ PODMAN_DESKTOP_ARGS=/path/to/podman-desktop pnpm test:e2e --grep @installation
 On Windows, set `$env:PODMAN_DESKTOP_ARGS` or `$env:PODMAN_DESKTOP_BINARY` in PowerShell before running the tests.
 On Linux, install Xvfb and Playwright's system dependencies with
 `pnpm --dir tests/playwright exec playwright install --with-deps chromium`.
-Set only one of `PODMAN_DESKTOP_BINARY` / `PODMAN_DESKTOP_ARGS`.
+Set only one of `PODMAN_DESKTOP_BINARY` / `PODMAN_DESKTOP_ARGS`. On macOS, prefer `PODMAN_DESKTOP_ARGS` or a
+[testing-enabled binary](https://github.com/podman-desktop/testing-prereleases): Playwright cannot attach to the
+retail `Podman Desktop.app` because its hardened runtime strips the environment variables the Electron driver
+needs.
 
 The default image is `ghcr.io/podman-desktop/extension-grype:next`. Set `OCI_IMAGE` to test another published image.
 Run `pnpm test:e2e` to execute the full suite. Reports, traces, and videos are written under
@@ -63,14 +74,15 @@ SKIP_INSTALLATION=true PODMAN_DESKTOP_BINARY=/path/to/podman-desktop pnpm test:e
 ```
 
 `SKIP_INSTALLATION=true` preserves the preloaded profile and skips the registry installation step. Activation and details
-checks still run and fail if the local extension is missing or cannot activate. Cleanup removes the extension, so export
-it again before another run.
+checks still run and fail if the local extension is missing or cannot activate. The preloaded extension is left installed,
+so reruns reuse it (delete the profile under `tests/playwright/tests/output/grype-tests-pd/` to force a fresh start).
+Without `SKIP_INSTALLATION`, cleanup removes the extension the spec installed itself.
 
 ### CI workflows
 
 - `pr-check.yaml` calls reusable `e2e.yaml` to build and preload the local OCI image on Ubuntu 26.04, install Podman
-  Desktop via `podman-desktop/gh-extensions-actions`, and run the installation smoke tests on GitHub-hosted
-  `ubuntu-26.04` and `windows-2025` runners (same matrix pattern as
+  Desktop via `podman-desktop/gh-extensions-actions`, and run the e2e tests (installation and vulnerability scanning)
+  on GitHub-hosted `ubuntu-26.04` and `windows-2025` runners (same matrix pattern as
   [extension-podman-quadlet](https://github.com/podman-desktop/extension-podman-quadlet/blob/main/.github/workflows/e2e.yaml)).
 - The same workflow also runs after a successful `next-build.yaml` on `main`. It installs the image tagged with that
   build's commit SHA, and skips the job if `main` has already moved past that commit so tests stay aligned with the

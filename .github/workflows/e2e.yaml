@@ -82,7 +82,7 @@ jobs:
           retention-days: 1
 
   e2e-tests:
-    name: Grype installation smoke tests / ${{ matrix.os }}
+    name: Grype e2e tests / ${{ matrix.os }}
     needs: build-extension
     # next-build only runs on main push/dispatch; still reject PR-triggered workflow_run.
     # When main moved past the built commit, skip so tip tests are not run against an older image.
@@ -94,7 +94,8 @@ jobs:
         github.event.workflow_run.event != 'pull_request' &&
         github.event.workflow_run.head_sha == github.sha))
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    # The scan tests download the Syft/Grype binaries and the Grype vulnerability database.
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -185,7 +186,7 @@ jobs:
           fi
           echo "url=${image}" >> "$GITHUB_OUTPUT"
 
-      - name: Run installation smoke tests
+      - name: Run e2e tests
         shell: bash
         env:
           ELECTRON_DISABLE_SANDBOX: '1'
@@ -193,7 +194,7 @@ jobs:
           DEBUGGING_PORT: '9222'
           PODMAN_DESKTOP_BINARY: ${{ steps.podman-desktop-install.outputs.binary }}
           OCI_IMAGE: ${{ steps.oci-image.outputs.url || 'ghcr.io/podman-desktop/extension-grype:next' }}
-        run: pnpm test:e2e --grep @installation
+        run: pnpm test:e2e --grep "@installation|@scan"
 
       - name: Publish test report
         if: always()
