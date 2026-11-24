@@ -29,8 +29,8 @@ export const preloaded = process.env.SKIP_INSTALLATION === 'true';
 const saveArtifactsOnPass = process.env.SAVE_TRACES_ON_PASS === 'true';
 
 // Isolated Podman Desktop profile location, relative to the tests/playwright package root.
-export const profileFolderName = 'grype-tests-pd';
-export const profileOutputFolder = 'tests/output';
+const profileFolderName = 'grype-tests-pd';
+const profileOutputFolder = 'tests/output';
 
 export function createRunnerOptions(): RunnerOptions {
   return new RunnerOptions({

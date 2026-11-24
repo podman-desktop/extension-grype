@@ -16,13 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import { expect, test } from '@podman-desktop/tests-playwright';
+import { expect, isWindows, test, waitUntil } from '@podman-desktop/tests-playwright';
 import type { Locator, Page } from '@playwright/test';
-import { execFile } from 'node:child_process';
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { promisify } from 'node:util';
 import {
   createRunnerOptions,
   extensionHeading,
@@ -30,8 +25,6 @@ import {
   extensionLabel,
   extensionName,
   preloaded,
-  profileFolderName,
-  profileOutputFolder,
   removeInstalledExtension,
   startSpec,
 } from './spec-utils';
@@ -43,17 +36,6 @@ const vulnerableImageName = 'docker.io/library/alpine';
 // hello-world has no packages, so Grype must report no vulnerability for it.
 const cleanImage = 'docker.io/library/hello-world:latest';
 const cleanImageName = 'docker.io/library/hello-world';
-
-const tools = ['syft', 'grype'];
-
-// The extension stores the binaries it installs under its storage folder in the isolated profile.
-const extensionStorageDir = join(
-  fileURLToPath(new URL('..', import.meta.url)), // the tests/playwright package root
-  profileOutputFolder,
-  profileFolderName,
-  'extensions-storage',
-  extensionLabel,
-);
 
 test.use({
   runnerOptions: createRunnerOptions(),
@@ -106,83 +88,72 @@ function severityFilter(page: Page, severity: string): Locator {
   return page.getByRole('group', { name: 'Severity Filters' }).getByRole('button', { name: severity, exact: false });
 }
 
-/** Wait for the binaries installation prompt; undefined when the binaries are already installed on the host. */
-async function waitForInstallPrompt(page: Page, timeout: number): Promise<Locator | undefined> {
-  const dialog = extensionDialog(page);
-  try {
-    await dialog.getByText('do you want to install them').waitFor({ state: 'visible', timeout });
-  } catch {
-    return undefined;
-  }
-  return dialog;
-}
-
-/** Decline the binaries installation prompt; returns false when they are already installed, so the caller can skip. */
-async function declineBinariesInstallation(page: Page): Promise<boolean> {
-  const dialog = await waitForInstallPrompt(page, 30_000);
-  if (!dialog) {
+/** The status header switches to "Image analysis complete" once every provider finished (or failed). */
+async function analysisIsComplete(page: Page): Promise<boolean> {
+  const status = analysisStatus(page);
+  if (!(await status.isVisible().catch(() => false))) {
     return false;
   }
-  await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
-  return true;
+  return await status
+    .innerText({ timeout: 1_000 })
+    .then(text => text.includes('complete'))
+    .catch(() => false);
 }
 
 /**
- * Mirrors the extension's installed detection (AnchoreCliService.getInstalledInfo): a tool counts as
- * installed when a binary is found on the system PATH or in the extension storage and it runs.
+ * Drive the image analysis to completion, answering the Syft/Grype binaries installation dialogs on the
+ * way (hummingbird-style: handle whichever dialog is currently up and let the loop retry, instead of
+ * expecting a fixed prompt sequence — install() skips tools that already have a binary, and a download
+ * can fail midway, so the exact dialog order is not predictable).
+ * acceptBinaries picks the answer to the binaries installation prompt; the system-wide installs are
+ * always declined (they would need admin rights).
  */
-async function isToolInstalledOnHost(tool: string): Promise<boolean> {
-  const locations: string[] = [];
-  try {
-    const { stdout } = await promisify(execFile)(process.platform === 'win32' ? 'where' : 'which', [tool]);
-    locations.push(...stdout.split(/\r?\n/).filter(line => line.trim() !== ''));
-  } catch {
-    // not on the system PATH; fall through to the extension storage
-  }
-  const internal = join(extensionStorageDir, tool, process.platform === 'win32' ? `${tool}.exe` : tool);
-  if (existsSync(internal)) {
-    locations.push(internal);
-  }
+async function runImageAnalysis(page: Page, acceptBinaries: boolean): Promise<void> {
+  await waitUntil(
+    async () => {
+      if (await analysisIsComplete(page)) {
+        return true;
+      }
 
-  // A binary that cannot run is not installed for the extension either: its version detection fails.
-  const runnable = await Promise.all(
-    locations.map(location =>
-      promisify(execFile)(location, ['--version']).then(
-        () => true,
-        () => false,
-      ),
-    ),
+      const dialog = extensionDialog(page);
+      // Swallow click errors (e.g. the dialog closed in between): the loop retries.
+      if (
+        await dialog
+          .getByText('do you want to install them')
+          .isVisible()
+          .catch(() => false)
+      ) {
+        await dialog
+          .getByRole('button', { name: acceptBinaries ? 'Yes' : 'Cancel', exact: true })
+          .click({ timeout: 10_000 })
+          .catch(() => {});
+      } else if (
+        await dialog
+          .getByText('system-wide')
+          .isVisible()
+          .catch(() => false)
+      ) {
+        await dialog
+          .getByRole('button', { name: 'Cancel', exact: true })
+          .click({ timeout: 10_000 })
+          .catch(() => {});
+      }
+      return false;
+    },
+    {
+      // The first scan downloads the Syft/Grype binaries and the Grype vulnerability database: slow.
+      timeout: 10 * 60_000,
+      diff: 1_000,
+      message: 'Image analysis did not complete',
+    },
   );
-  return runnable.some(Boolean);
-}
-
-/** Accept the binaries installation prompt and decline the system-wide installs (they need admin rights); promptTimeout bounds the wait for the prompt. */
-async function acceptBinariesInstallation(page: Page, promptTimeout = 30_000): Promise<void> {
-  const dialog = await waitForInstallPrompt(page, promptTimeout);
-  if (!dialog) {
-    return; // binaries are already installed
-  }
-
-  // install() skips tools that already have a binary, so a system-wide prompt shows up only for the
-  // missing ones; waiting for the others would time out (e.g. when the host has only syft or grype).
-  // Detect the missing tools before the Yes click: it starts the installs that write the binaries.
-  const missing: string[] = [];
-  for (const tool of tools) {
-    if (!(await isToolInstalledOnHost(tool))) {
-      missing.push(tool);
-    }
-  }
-
-  await dialog.getByRole('button', { name: 'Yes', exact: true }).click();
-
-  for (const tool of missing) {
-    const systemWidePrompt = dialog.getByText(`Do you want to install ${tool} system-wide?`);
-    await expect(systemWidePrompt).toBeVisible({ timeout: 240_000 });
-    await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
-  }
 }
 
 test.describe.serial('Grype extension vulnerability scanning', { tag: ['@scan'] }, () => {
+  // Like the hummingbird extension: the scanning flow is only exercised on Windows.
+  // eslint-disable-next-line sonarjs/no-skipped-tests
+  test.skip(!isWindows, 'Grype scanning tests are only exercised on Windows');
+
   test('Install Grype from an OCI image', async ({ navigationBar }) => {
     // eslint-disable-next-line sonarjs/no-skipped-tests -- PRs preload the image; the next tests must still verify it.
     test.skip(preloaded, 'The workflow preloads the locally built OCI image');
@@ -207,16 +178,16 @@ test.describe.serial('Grype extension vulnerability scanning', { tag: ['@scan'] 
     const details = await imagesPage.openImageDetails(vulnerableImageName);
     await details.activateTab('Check');
 
-    const prompted = await declineBinariesInstallation(page);
-    if (!prompted) {
-      // A missing prompt may also mean a broken extension: require the Grype provider row, so it fails instead of skipping.
-      await expect(grypeProviderRow(page)).toBeVisible({ timeout: 30_000 });
-    }
-    // eslint-disable-next-line sonarjs/no-skipped-tests -- Syft/Grype may already be installed on developer machines.
-    test.skip(!prompted, 'Syft/Grype binaries are already installed on the host');
+    await runImageAnalysis(page, false);
 
-    await expect(analysisStatus(page)).toContainText('Image analysis complete', { timeout: 30_000 });
-    await expect(grypeProviderRow(page).getByLabel('Provider Error')).toContainText('user cancelled the installation');
+    // An error row means the decline was registered; without one the binaries were already installed
+    // on the host, so there was no prompt to decline.
+    const providerError = grypeProviderRow(page).getByLabel('Provider Error');
+    await providerError.waitFor({ state: 'visible', timeout: 30_000 }).catch(() => undefined);
+    // eslint-disable-next-line sonarjs/no-skipped-tests -- Syft/Grype may already be installed on developer machines.
+    test.skip(!(await providerError.isVisible()), 'Syft/Grype binaries are already installed on the host');
+
+    await expect(providerError).toContainText('user cancelled the installation');
     await expect(resultRows(page)).toHaveCount(0);
   });
 
@@ -227,9 +198,9 @@ test.describe.serial('Grype extension vulnerability scanning', { tag: ['@scan'] 
     const details = await imagesPage.openImageDetails(vulnerableImageName);
     await details.activateTab('Check');
 
-    await acceptBinariesInstallation(page);
+    // Accepts the binaries installation (declining the system-wide installs) and waits for the report.
+    await runImageAnalysis(page, true);
 
-    await expect(analysisStatus(page)).toContainText('Image analysis complete', { timeout: 10 * 60_000 });
     await expect(grypeProviderRow(page).getByLabel('Provider Error')).toBeHidden();
 
     const rows = resultRows(page);
@@ -253,10 +224,9 @@ test.describe.serial('Grype extension vulnerability scanning', { tag: ['@scan'] 
     const details = await imagesPage.openImageDetails(cleanImageName);
     await details.activateTab('Check');
 
-    // The previous test already installed the binaries, so wait only shortly for the prompt (still self-contained when run alone).
-    await acceptBinariesInstallation(page, 10_000);
+    // The previous test already installed the binaries: the loop settles for waiting on the report.
+    await runImageAnalysis(page, true);
 
-    await expect(analysisStatus(page)).toContainText('Image analysis complete', { timeout: 5 * 60_000 });
     await expect(
       page.getByLabel('Analysis Results').getByRole('row', { name: 'No vulnerabilities found' }),
     ).toBeVisible();
