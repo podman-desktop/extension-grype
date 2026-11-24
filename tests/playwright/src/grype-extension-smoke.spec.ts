@@ -16,46 +16,34 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import { expect, ExtensionState, RunnerOptions, test } from '@podman-desktop/tests-playwright';
-
-const extensionName = 'grype';
-const extensionLabel = 'podman-desktop.grype';
-const extensionHeading = 'Grype';
-const extensionImage = process.env.OCI_IMAGE ?? 'ghcr.io/podman-desktop/extension-grype:next';
-// Opt in locally with SAVE_TRACES_ON_PASS=true. Keep off in CI by default.
-const saveArtifactsOnPass = process.env.SAVE_TRACES_ON_PASS === 'true';
+import { expect, ExtensionState, test } from '@podman-desktop/tests-playwright';
+import {
+  createRunnerOptions,
+  extensionHeading,
+  extensionImage,
+  extensionLabel,
+  extensionName,
+  preloaded,
+  removeInstalledExtension,
+  startSpec,
+} from './spec-utils';
 
 test.use({
-  runnerOptions: new RunnerOptions({
-    customFolder: 'grype-tests-pd',
-    customOutputFolder: 'tests/output',
-    autoUpdate: false,
-    autoCheckUpdates: false,
-    saveTracesOnPass: saveArtifactsOnPass,
-    saveVideosOnPass: saveArtifactsOnPass,
-  }),
+  runnerOptions: createRunnerOptions(),
 });
 
 test.beforeAll(async ({ runner, welcomePage, navigationBar }) => {
-  runner.setVideoAndTraceName('grype-extension-smoke');
-  await welcomePage.handleWelcomePage(true);
-  await expect(welcomePage.skipOnBoarding).toBeHidden();
-  const dashboardPage = await navigationBar.openDashboard();
-  await expect(dashboardPage.heading).toBeVisible();
+  await startSpec(runner, welcomePage, navigationBar, 'grype-extension-smoke');
 });
 
 test.afterAll(async ({ navigationBar }) => {
-  const extensionsPage = await navigationBar.openExtensions();
-  if (await extensionsPage.extensionIsInstalled(extensionLabel)) {
-    const details = await extensionsPage.openExtensionDetails(extensionName, extensionLabel, extensionHeading);
-    await details.removeExtension();
-    await navigationBar.openExtensions();
-    await expect.poll(() => extensionsPage.extensionIsInstalled(extensionLabel), { timeout: 30_000 }).toBeFalsy();
+  // Remove the extension only when this spec installed it itself; keep CI's preloaded profile intact.
+  if (!preloaded) {
+    await removeInstalledExtension(navigationBar);
   }
 });
 
-// Playwright runs this hook even if cleanup fails, after recording the failure
-// so runner.close() retains its diagnostic artifacts.
+// Runs even if the previous afterAll failed, so runner.close() retains diagnostic artifacts.
 test.afterAll(async ({ runner }) => {
   await runner.close();
 });
@@ -63,7 +51,7 @@ test.afterAll(async ({ runner }) => {
 test.describe.serial('Grype extension installation', { tag: ['@smoke', '@installation'] }, () => {
   test('Install Grype from an OCI image', async ({ navigationBar }) => {
     // eslint-disable-next-line sonarjs/no-skipped-tests -- PRs preload the image; the next tests must still verify it.
-    test.skip(process.env.SKIP_INSTALLATION === 'true', 'The workflow preloads the locally built OCI image');
+    test.skip(preloaded, 'The workflow preloads the locally built OCI image');
     const extensionsPage = await navigationBar.openExtensions();
     await expect.poll(() => extensionsPage.extensionIsInstalled(extensionLabel)).toBeFalsy();
     await extensionsPage.installExtensionFromOCIImage(extensionImage);

@@ -24,11 +24,11 @@ on:
         description: Build and preload the extension from the checked-out source
         type: boolean
         default: false
-      extension-image:
-        description: Published extension image to install when build-extension is false
+      extension-tag:
+        description: Tag of the published extension image to install when build-extension is false
         type: string
-        default: ghcr.io/podman-desktop/extension-grype:next
-  # Test the merged commit only after its image has been published.
+        default: next
+  # After-merge path: test the image next-build.yaml just published (no local build).
   workflow_run:
     workflows: ['next-build.yaml']
     types: [completed]
@@ -39,18 +39,19 @@ on:
         description: Build and preload the extension from the checked-out source
         type: boolean
         default: false
-      extension-image:
-        description: Published extension image to install when build-extension is false
+      extension-tag:
+        description: Tag of the published extension image to install when build-extension is false
         type: string
-        default: ghcr.io/podman-desktop/extension-grype:next
+        default: next
 
 permissions:
   contents: read
 
 concurrency:
-  # workflow_run.id keeps each post-next-build smoke isolated so a newer main build
-  # does not cancel an in-progress test of the previous image.
-  group: ${{ github.workflow }}-${{ github.event.workflow_run.id || github.event.pull_request.number || github.ref }}
+  # Isolate per triggering run so newer builds do not cancel in-progress tests. The
+  # e2e- prefix avoids the caller's group: in a reusable workflow github.workflow is
+  # the caller's name, and sharing its group would deadlock the run.
+  group: e2e-${{ github.event.workflow_run.id || github.event.pull_request.number || github.ref }}-${{ inputs.extension-tag || 'next' }}
   cancel-in-progress: true
 
 jobs:
@@ -82,10 +83,12 @@ jobs:
           retention-days: 1
 
   e2e-tests:
-    name: Grype installation smoke tests / ${{ matrix.os }}
+    name: Grype e2e tests / ${{ matrix.os }}
     needs: build-extension
     # next-build only runs on main push/dispatch; still reject PR-triggered workflow_run.
     # When main moved past the built commit, skip so tip tests are not run against an older image.
+    # Do not check out workflow_run.head_sha to pin the specs to the built commit (as the hummingbird
+    # extension does): CodeQL flags that as a privileged checkout of untrusted code on workflow_run.
     if: >
       always() &&
       (needs.build-extension.result == 'success' || needs.build-extension.result == 'skipped') &&
@@ -94,7 +97,8 @@ jobs:
         github.event.workflow_run.event != 'pull_request' &&
         github.event.workflow_run.head_sha == github.sha))
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    # The scan tests download the Syft/Grype binaries and the Grype vulnerability database.
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -108,8 +112,24 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.sha }}
           persist-credentials: false
+
+      - name: Resolve OCI image
+        if: needs.build-extension.result != 'success'
+        id: oci-image
+        shell: bash
+        env:
+          REPOSITORY: ${{ github.repository }}
+          # workflow_run carries no inputs: use the commit-specific SHA tag next-build pushed with :next.
+          EXTENSION_TAG: ${{ inputs.extension-tag || github.event.workflow_run.head_sha }}
+        run: |
+          tag="${EXTENSION_TAG}"
+          if [[ ! "${tag}" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
+            echo "extension-tag must be a bare OCI tag (e.g. next, 0.3.0, a 40-char commit SHA)" >&2
+            exit 1
+          fi
+          # ghcr.io references must be lowercase; fork owners may contain uppercase letters.
+          echo "url=ghcr.io/${REPOSITORY,,}:${tag}" >> "$GITHUB_OUTPUT"
 
       # ubuntu-26.04 runners already ship Podman.
       - name: Install Podman
@@ -160,40 +180,41 @@ jobs:
           name: grype-plugin
           path: tests/playwright/tests/output/grype-tests-pd/plugins/
 
-      - name: Resolve OCI image
-        if: needs.build-extension.result != 'success'
-        id: oci-image
-        shell: bash
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          REPOSITORY: ${{ github.repository }}
-          WORKFLOW_RUN_SHA: ${{ github.event.workflow_run.head_sha }}
-          EXTENSION_IMAGE: ${{ inputs.extension-image }}
+      # Stop Docker so Podman Desktop pulls via Podman only: with Docker running, pulls
+      # land there and fail (short image names on Linux, "no matching manifest for
+      # windows" on Windows).
+      - name: Make Podman the only container engine (Linux)
+        if: runner.os == 'Linux'
         run: |
-          case "${EXTENSION_IMAGE}" in
-            *$'\n'* | *$'\r'*)
-              echo "Refusing newline/control characters in extension-image" >&2
-              exit 1
-              ;;
-          esac
-          if [ "${EVENT_NAME}" = "workflow_run" ]; then
-            image="ghcr.io/${REPOSITORY}:${WORKFLOW_RUN_SHA}"
-          elif [ -n "${EXTENSION_IMAGE}" ]; then
-            image="${EXTENSION_IMAGE}"
-          else
-            image="ghcr.io/podman-desktop/extension-grype:next"
-          fi
-          echo "url=${image}" >> "$GITHUB_OUTPUT"
+          sudo systemctl stop docker.socket docker.service || true
+          sudo loginctl enable-linger "$(id -un)" || true
+          # Retry: the user session may not be up yet right after enabling lingering.
+          for attempt in 1 2 3; do systemctl --user enable --now podman.socket && break; sleep 5; done
+          systemctl --user is-active --quiet podman.socket
+          podman info
 
-      - name: Run installation smoke tests
+      - name: Make Podman the only container engine (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Get-Service -Name docker -ErrorAction SilentlyContinue | Stop-Service
+          # podman-install adds Podman to PATH only for its own step; export it for the later steps.
+          "$env:LOCALAPPDATA\Programs\Podman" | Out-File -Append $env:GITHUB_PATH
+          & "$env:LOCALAPPDATA\Programs\Podman\podman.exe" info
+
+      # Full suite (installation smoke plus vulnerability scanning). Do not pass
+      # --grep "@installation|@scan": on Windows the script args reach cmd.exe, which
+      # interprets the unquoted pipe as a shell pipe and breaks the command.
+      - name: Run e2e tests
         shell: bash
         env:
           ELECTRON_DISABLE_SANDBOX: '1'
           NODE_OPTIONS: --no-experimental-strip-types
           DEBUGGING_PORT: '9222'
           PODMAN_DESKTOP_BINARY: ${{ steps.podman-desktop-install.outputs.binary }}
-          OCI_IMAGE: ${{ steps.oci-image.outputs.url || 'ghcr.io/podman-desktop/extension-grype:next' }}
-        run: pnpm test:e2e --grep @installation
+          # Read only when installing from the registry; empty when the plugin is preloaded.
+          OCI_IMAGE: ${{ steps.oci-image.outputs.url }}
+        run: pnpm test:e2e
 
       - name: Publish test report
         if: always()

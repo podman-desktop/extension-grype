@@ -1,0 +1,235 @@
+/**********************************************************************
+ * Copyright (C) 2026 Red Hat, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ ***********************************************************************/
+
+import { expect, test, waitUntil } from '@podman-desktop/tests-playwright';
+import type { Locator, Page } from '@playwright/test';
+import {
+  createRunnerOptions,
+  extensionHeading,
+  extensionImage,
+  extensionLabel,
+  extensionName,
+  preloaded,
+  removeInstalledExtension,
+  startSpec,
+} from './spec-utils';
+
+// alpine:3.10 is end-of-life, so its packages (busybox, ssl_client, ...) have known vulnerabilities.
+// Images are pulled with their tag but listed in the Images page under their tag-less name.
+const vulnerableImage = 'docker.io/library/alpine:3.10';
+const vulnerableImageName = 'docker.io/library/alpine';
+// hello-world has no packages, so Grype must report no vulnerability for it.
+const cleanImage = 'docker.io/library/hello-world:latest';
+const cleanImageName = 'docker.io/library/hello-world';
+
+test.use({
+  runnerOptions: createRunnerOptions(),
+});
+
+test.beforeAll(async ({ runner, welcomePage, navigationBar }) => {
+  await startSpec(runner, welcomePage, navigationBar, 'grype-extension-scan');
+});
+
+test.afterAll(async ({ navigationBar }) => {
+  // Remove the extension only when this spec installed it itself; keep CI's preloaded profile intact.
+  if (!preloaded) {
+    await removeInstalledExtension(navigationBar);
+  }
+});
+
+// Runs even if the previous afterAll failed, so runner.close() retains diagnostic artifacts.
+test.afterAll(async ({ runner }) => {
+  await runner.close();
+});
+
+// The message box shown by the extension for window.showInformationMessage calls: a dialog
+// named after the extension display name.
+function extensionDialog(page: Page): Locator {
+  return page.getByRole('dialog', { name: extensionHeading, exact: true });
+}
+
+// Status header of the image checks UI ("Image analysis in progress..." / "Image analysis complete").
+function analysisStatus(page: Page): Locator {
+  return page.getByRole('status', { name: 'Analysis Status' });
+}
+
+// Column listing the registered image checker providers.
+function providersColumn(page: Page): Locator {
+  return page.getByLabel('Providers');
+}
+
+// The Grype image checker provider row.
+function grypeProviderRow(page: Page): Locator {
+  return providersColumn(page).getByRole('row', { name: extensionHeading });
+}
+
+// Column listing the analysis results (one row per vulnerability).
+function resultRows(page: Page): Locator {
+  return page.getByLabel('Analysis Results').getByRole('row');
+}
+
+// Severity filter button of the image checks UI, e.g. "High (12)".
+function severityFilter(page: Page, severity: string): Locator {
+  return page.getByRole('group', { name: 'Severity Filters' }).getByRole('button', { name: severity, exact: false });
+}
+
+/** The status header switches to "Image analysis complete" once every provider finished (or failed). */
+async function analysisIsComplete(page: Page): Promise<boolean> {
+  const status = analysisStatus(page);
+  if (!(await status.isVisible().catch(() => false))) {
+    return false;
+  }
+  return await status
+    .innerText({ timeout: 1_000 })
+    .then(text => text.includes('complete'))
+    .catch(() => false);
+}
+
+/**
+ * Drive the image analysis to completion, answering the Syft/Grype binaries installation dialogs on the
+ * way (hummingbird-style: handle whichever dialog is currently up and let the loop retry, instead of
+ * expecting a fixed prompt sequence — install() skips tools that already have a binary, and a download
+ * can fail midway, so the exact dialog order is not predictable).
+ * acceptBinaries picks the answer to the binaries installation prompt; the system-wide installs are
+ * always declined (they would need admin rights).
+ */
+async function runImageAnalysis(page: Page, acceptBinaries: boolean): Promise<void> {
+  await waitUntil(
+    async () => {
+      if (await analysisIsComplete(page)) {
+        return true;
+      }
+
+      const dialog = extensionDialog(page);
+      // Swallow click errors (e.g. the dialog closed in between): the loop retries.
+      if (
+        await dialog
+          .getByText('do you want to install them')
+          .isVisible()
+          .catch(() => false)
+      ) {
+        await dialog
+          .getByRole('button', { name: acceptBinaries ? 'Yes' : 'Cancel', exact: true })
+          .click({ timeout: 10_000 })
+          .catch(() => {});
+      } else if (
+        await dialog
+          .getByText('system-wide')
+          .isVisible()
+          .catch(() => false)
+      ) {
+        await dialog
+          .getByRole('button', { name: 'Cancel', exact: true })
+          .click({ timeout: 10_000 })
+          .catch(() => {});
+      }
+      return false;
+    },
+    {
+      // The first scan downloads the Syft/Grype binaries and the Grype vulnerability database: slow.
+      timeout: 10 * 60_000,
+      diff: 1_000,
+      message: 'Image analysis did not complete',
+    },
+  );
+}
+
+test.describe.serial('Grype extension vulnerability scanning', { tag: ['@scan'] }, () => {
+  test('Install Grype from an OCI image', async ({ navigationBar }) => {
+    // eslint-disable-next-line sonarjs/no-skipped-tests -- PRs preload the image; the next tests must still verify it.
+    test.skip(preloaded, 'The workflow preloads the locally built OCI image');
+    const extensionsPage = await navigationBar.openExtensions();
+    await expect.poll(() => extensionsPage.extensionIsInstalled(extensionLabel)).toBeFalsy();
+    await extensionsPage.installExtensionFromOCIImage(extensionImage);
+    const extension = await extensionsPage.getInstalledExtension(extensionName, extensionLabel);
+    await expect(extension.card).toBeVisible();
+  });
+
+  test('Declining the binaries installation prompt fails the analysis', async ({ navigationBar, page }) => {
+    test.setTimeout(5 * 60_000);
+    // Also verifies the preloaded extension when the installation test is skipped.
+    const extensionsPage = await navigationBar.openExtensions();
+    await expect.poll(() => extensionsPage.extensionIsInstalled(extensionLabel), { timeout: 60_000 }).toBeTruthy();
+
+    const imagesPage = await navigationBar.openImages();
+    const pullImagePage = await imagesPage.openPullImage();
+    await pullImagePage.pullImage(vulnerableImage);
+    await imagesPage.waitForImageExists(vulnerableImageName, 30_000);
+
+    const details = await imagesPage.openImageDetails(vulnerableImageName);
+    await details.activateTab('Check');
+
+    await runImageAnalysis(page, false);
+
+    // A missing provider row would also leave the error row absent: require the provider, so a broken
+    // extension fails instead of being skipped as "binaries already installed".
+    await expect(grypeProviderRow(page)).toBeVisible({ timeout: 30_000 });
+
+    // An error row means the decline was registered; without one the binaries were already installed
+    // on the host, so there was no prompt to decline.
+    const providerError = grypeProviderRow(page).getByLabel('Provider Error');
+    await providerError.waitFor({ state: 'visible', timeout: 30_000 }).catch(() => undefined);
+    // eslint-disable-next-line sonarjs/no-skipped-tests -- Syft/Grype may already be installed on developer machines.
+    test.skip(!(await providerError.isVisible()), 'Syft/Grype binaries are already installed on the host');
+
+    await expect(providerError).toContainText('user cancelled the installation');
+    await expect(resultRows(page)).toHaveCount(0);
+  });
+
+  test('Scan an image with known vulnerabilities', async ({ navigationBar, page }) => {
+    // Downloading the binaries and the Grype vulnerability database on first use is slow.
+    test.setTimeout(15 * 60_000);
+    const imagesPage = await navigationBar.openImages();
+    const details = await imagesPage.openImageDetails(vulnerableImageName);
+    await details.activateTab('Check');
+
+    // Accepts the binaries installation (declining the system-wide installs) and waits for the report.
+    await runImageAnalysis(page, true);
+
+    await expect(grypeProviderRow(page).getByLabel('Provider Error')).toBeHidden();
+
+    const rows = resultRows(page);
+    await expect(rows.first()).toBeVisible();
+    const count = await rows.count();
+    expect(count, 'Grype should report vulnerabilities for the end-of-life alpine:3.10 image').toBeGreaterThan(0);
+    await expect(rows.first()).toContainText('Reported by Grype');
+    // The check name is a vulnerability identifier (the row text starts with a space before the icon).
+    await expect(rows.first()).toContainText(/^\s*(CVE|GHSA)-/);
+    // A failed check is never listed under the "Passed" filter.
+    await expect(severityFilter(page, 'Passed')).toContainText('Passed (0)');
+  });
+
+  test('Scan an image without vulnerabilities', async ({ navigationBar, page }) => {
+    test.setTimeout(10 * 60_000);
+    const imagesPage = await navigationBar.openImages();
+    const pullImagePage = await imagesPage.openPullImage();
+    await pullImagePage.pullImage(cleanImage);
+    await imagesPage.waitForImageExists(cleanImageName, 30_000);
+
+    const details = await imagesPage.openImageDetails(cleanImageName);
+    await details.activateTab('Check');
+
+    // The previous test already installed the binaries: the loop settles for waiting on the report.
+    await runImageAnalysis(page, true);
+
+    await expect(
+      page.getByLabel('Analysis Results').getByRole('row', { name: 'No vulnerabilities found' }),
+    ).toBeVisible();
+    await expect(severityFilter(page, 'Passed')).toContainText('Passed (1)');
+  });
+});
