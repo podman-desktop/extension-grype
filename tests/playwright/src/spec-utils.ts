@@ -28,10 +28,14 @@ export const preloaded = process.env.SKIP_INSTALLATION === 'true';
 // Opt in locally with SAVE_TRACES_ON_PASS=true. Keep off in CI by default.
 const saveArtifactsOnPass = process.env.SAVE_TRACES_ON_PASS === 'true';
 
+// Isolated Podman Desktop profile location, relative to the tests/playwright package root.
+export const profileFolderName = 'grype-tests-pd';
+export const profileOutputFolder = 'tests/output';
+
 export function createRunnerOptions(): RunnerOptions {
   return new RunnerOptions({
-    customFolder: 'grype-tests-pd',
-    customOutputFolder: 'tests/output',
+    customFolder: profileFolderName,
+    customOutputFolder: profileOutputFolder,
     autoUpdate: false,
     autoCheckUpdates: false,
     saveTracesOnPass: saveArtifactsOnPass,

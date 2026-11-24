@@ -18,6 +18,11 @@
 
 import { expect, test } from '@podman-desktop/tests-playwright';
 import type { Locator, Page } from '@playwright/test';
+import { execFile } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { promisify } from 'node:util';
 import {
   createRunnerOptions,
   extensionHeading,
@@ -25,6 +30,8 @@ import {
   extensionLabel,
   extensionName,
   preloaded,
+  profileFolderName,
+  profileOutputFolder,
   removeInstalledExtension,
   startSpec,
 } from './spec-utils';
@@ -36,6 +43,17 @@ const vulnerableImageName = 'docker.io/library/alpine';
 // hello-world has no packages, so Grype must report no vulnerability for it.
 const cleanImage = 'docker.io/library/hello-world:latest';
 const cleanImageName = 'docker.io/library/hello-world';
+
+const tools = ['syft', 'grype'];
+
+// The extension stores the binaries it installs under its storage folder in the isolated profile.
+const extensionStorageDir = join(
+  fileURLToPath(new URL('..', import.meta.url)), // the tests/playwright package root
+  profileOutputFolder,
+  profileFolderName,
+  'extensions-storage',
+  extensionLabel,
+);
 
 test.use({
   runnerOptions: createRunnerOptions(),
@@ -109,15 +127,55 @@ async function declineBinariesInstallation(page: Page): Promise<boolean> {
   return true;
 }
 
+/**
+ * Mirrors the extension's installed detection (AnchoreCliService.getInstalledInfo): a tool counts as
+ * installed when a binary is found on the system PATH or in the extension storage and it runs.
+ */
+async function isToolInstalledOnHost(tool: string): Promise<boolean> {
+  const locations: string[] = [];
+  try {
+    const { stdout } = await promisify(execFile)(process.platform === 'win32' ? 'where' : 'which', [tool]);
+    locations.push(...stdout.split(/\r?\n/).filter(line => line.trim() !== ''));
+  } catch {
+    // not on the system PATH; fall through to the extension storage
+  }
+  const internal = join(extensionStorageDir, tool, process.platform === 'win32' ? `${tool}.exe` : tool);
+  if (existsSync(internal)) {
+    locations.push(internal);
+  }
+
+  // A binary that cannot run is not installed for the extension either: its version detection fails.
+  const runnable = await Promise.all(
+    locations.map(location =>
+      promisify(execFile)(location, ['--version']).then(
+        () => true,
+        () => false,
+      ),
+    ),
+  );
+  return runnable.some(Boolean);
+}
+
 /** Accept the binaries installation prompt and decline the system-wide installs (they need admin rights); promptTimeout bounds the wait for the prompt. */
 async function acceptBinariesInstallation(page: Page, promptTimeout = 30_000): Promise<void> {
   const dialog = await waitForInstallPrompt(page, promptTimeout);
   if (!dialog) {
     return; // binaries are already installed
   }
+
+  // install() skips tools that already have a binary, so a system-wide prompt shows up only for the
+  // missing ones; waiting for the others would time out (e.g. when the host has only syft or grype).
+  // Detect the missing tools before the Yes click: it starts the installs that write the binaries.
+  const missing: string[] = [];
+  for (const tool of tools) {
+    if (!(await isToolInstalledOnHost(tool))) {
+      missing.push(tool);
+    }
+  }
+
   await dialog.getByRole('button', { name: 'Yes', exact: true }).click();
 
-  for (const tool of ['syft', 'grype']) {
+  for (const tool of missing) {
     const systemWidePrompt = dialog.getByText(`Do you want to install ${tool} system-wide?`);
     await expect(systemWidePrompt).toBeVisible({ timeout: 240_000 });
     await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
