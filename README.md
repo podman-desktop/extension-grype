@@ -87,9 +87,11 @@ Without `SKIP_INSTALLATION`, cleanup removes the extension the spec installed it
   The runners also run Docker, which Podman Desktop may pick for pulls (breaking them in different ways
   per OS), so the workflow stops Docker and starts the Podman socket before the tests to make Podman
   the only container engine.
-- The same workflow also runs after a successful `next-build.yaml` on `main`. It installs the image tagged with that
-  build's commit SHA, and skips the job if `main` has already moved past that commit so tests stay aligned with the
-  image. Manual runs can select a published image or build from the selected branch.
+- The same workflow also runs after a successful `next-build.yaml` on `main`. It checks out that build's commit
+  and installs the image `next-build` tags with that commit's SHA (pushed alongside `:next`), so every merge is
+  covered even when several land close together; it never builds an extension of its own on that path. Manual runs
+  (and reusable-workflow callers) can select any published image tag via the `extension-tag` input — `next` by
+  default, e.g. `0.3.0` or a full 40-character commit SHA — or build from the selected branch.
 
 Both paths publish JUnit summaries and upload per-OS test artifacts. Pass-path Playwright traces and videos are off by
 default; set `SAVE_TRACES_ON_PASS=true` locally if you need them.
