@@ -176,6 +176,10 @@ test.describe.serial('Grype extension vulnerability scanning', { tag: ['@scan'] 
 
     await runImageAnalysis(page, false);
 
+    // A missing provider row would also leave the error row absent: require the provider, so a broken
+    // extension fails instead of being skipped as "binaries already installed".
+    await expect(grypeProviderRow(page)).toBeVisible({ timeout: 30_000 });
+
     // An error row means the decline was registered; without one the binaries were already installed
     // on the host, so there was no prompt to decline.
     const providerError = grypeProviderRow(page).getByLabel('Provider Error');
