@@ -84,6 +84,9 @@ Without `SKIP_INSTALLATION`, cleanup removes the extension the spec installed it
   Desktop via `podman-desktop/gh-extensions-actions`, and run the e2e tests (installation and vulnerability scanning)
   on GitHub-hosted `ubuntu-26.04` and `windows-2025` runners (same matrix pattern as
   [extension-podman-quadlet](https://github.com/podman-desktop/extension-podman-quadlet/blob/main/.github/workflows/e2e.yaml)).
+  The runners also run Docker, which Podman Desktop may pick for pulls (breaking them in different ways
+  per OS), so the workflow stops Docker and starts the Podman socket before the tests to make Podman
+  the only container engine.
 - The same workflow also runs after a successful `next-build.yaml` on `main`. It installs the image tagged with that
   build's commit SHA, and skips the job if `main` has already moved past that commit so tests stay aligned with the
   image. Manual runs can select a published image or build from the selected branch.

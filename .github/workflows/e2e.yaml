@@ -186,6 +186,31 @@ jobs:
           fi
           echo "url=${image}" >> "$GITHUB_OUTPUT"
 
+      # Stop Docker so Podman Desktop pulls via Podman only: with Docker running, pulls
+      # land there and fail (short image names on Linux, "no matching manifest for
+      # windows" on Windows).
+      - name: Make Podman the only container engine (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo systemctl stop docker.socket docker.service || true
+          sudo loginctl enable-linger "$(id -un)" || true
+          # Retry: the user session may not be up yet right after enabling lingering.
+          for attempt in 1 2 3; do systemctl --user enable --now podman.socket && break; sleep 5; done
+          systemctl --user is-active --quiet podman.socket
+          podman info
+
+      - name: Make Podman the only container engine (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Get-Service -Name docker -ErrorAction SilentlyContinue | Stop-Service
+          # podman-install adds Podman to PATH only for its own step; export it for the later steps.
+          "$env:LOCALAPPDATA\Programs\Podman" | Out-File -Append $env:GITHUB_PATH
+          & "$env:LOCALAPPDATA\Programs\Podman\podman.exe" info
+
+      # Full suite (installation smoke plus vulnerability scanning). Do not pass
+      # --grep "@installation|@scan": on Windows the script args reach cmd.exe, which
+      # interprets the unquoted pipe as a shell pipe and breaks the command.
       - name: Run e2e tests
         shell: bash
         env:
@@ -194,7 +219,7 @@ jobs:
           DEBUGGING_PORT: '9222'
           PODMAN_DESKTOP_BINARY: ${{ steps.podman-desktop-install.outputs.binary }}
           OCI_IMAGE: ${{ steps.oci-image.outputs.url || 'ghcr.io/podman-desktop/extension-grype:next' }}
-        run: pnpm test:e2e --grep "@installation|@scan"
+        run: pnpm test:e2e
 
       - name: Publish test report
         if: always()
