@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  ***********************************************************************/
 
-import { expect, isWindows, test, waitUntil } from '@podman-desktop/tests-playwright';
+import { expect, test, waitUntil } from '@podman-desktop/tests-playwright';
 import type { Locator, Page } from '@playwright/test';
 import {
   createRunnerOptions,
@@ -150,10 +150,6 @@ async function runImageAnalysis(page: Page, acceptBinaries: boolean): Promise<vo
 }
 
 test.describe.serial('Grype extension vulnerability scanning', { tag: ['@scan'] }, () => {
-  // Like the hummingbird extension: the scanning flow is only exercised on Windows.
-  // eslint-disable-next-line sonarjs/no-skipped-tests
-  test.skip(!isWindows, 'Grype scanning tests are only exercised on Windows');
-
   test('Install Grype from an OCI image', async ({ navigationBar }) => {
     // eslint-disable-next-line sonarjs/no-skipped-tests -- PRs preload the image; the next tests must still verify it.
     test.skip(preloaded, 'The workflow preloads the locally built OCI image');

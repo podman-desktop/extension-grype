@@ -19,8 +19,7 @@ The Playwright suite covers two areas, each in its own spec file:
   active, verify its details page, and remove it during cleanup.
 - **Vulnerability scanning tests** (`@scan`, `grype-extension-scan.spec.ts`): pull images with and without known
   vulnerabilities, run the image analysis from the image details _Check_ tab (including the Syft/Grype binaries
-  installation prompted by the extension), and assert the reported vulnerabilities. Like the hummingbird extension,
-  CI exercises them on Windows only; on other operating systems the suite is skipped. The installation dialogs are
+  installation prompted by the extension), and assert the reported vulnerabilities. The installation dialogs are
   handled by an outcome-driven polling loop (whichever dialog is up gets answered until the analysis completes), so
   the tests do not depend on a fixed prompt order. The first scan downloads the binaries and the Grype vulnerability
   database, so it is slow; the tests use extended timeouts accordingly.
@@ -84,18 +83,17 @@ Without `SKIP_INSTALLATION`, cleanup removes the extension the spec installed it
 ### CI workflows
 
 - `pr-check.yaml` calls reusable `e2e.yaml` to build and preload the local OCI image on Ubuntu 26.04, install Podman
-  Desktop via `podman-desktop/gh-extensions-actions`, and run the e2e tests on GitHub-hosted
-  `ubuntu-26.04` and `windows-2025` runners (same matrix pattern as
-  [extension-podman-quadlet](https://github.com/podman-desktop/extension-podman-quadlet/blob/main/.github/workflows/e2e.yaml)):
-  the installation smoke tests run on both, the vulnerability scanning tests on Windows only.
+  Desktop via `podman-desktop/gh-extensions-actions`, and run the e2e tests (installation smoke plus vulnerability
+  scanning) on GitHub-hosted `ubuntu-26.04` and `windows-2025` runners (same matrix pattern as
+  [extension-podman-quadlet](https://github.com/podman-desktop/extension-podman-quadlet/blob/main/.github/workflows/e2e.yaml)).
   The runners also run Docker, which Podman Desktop may pick for pulls (breaking them in different ways
   per OS), so the workflow stops Docker and starts the Podman socket before the tests to make Podman
   the only container engine.
-- The same workflow also runs after a successful `next-build.yaml` on `main`. It checks out that build's commit
-  and installs the image `next-build` tags with that commit's SHA (pushed alongside `:next`), so every merge is
-  covered even when several land close together; it never builds an extension of its own on that path. Manual runs
-  (and reusable-workflow callers) can select any published image tag via the `extension-tag` input — `next` by
-  default, e.g. `0.3.0` or a full 40-character commit SHA — or build from the selected branch.
+- The same workflow also runs after a successful `next-build.yaml` on `main`. It installs the image `next-build` tags
+  with that build's commit SHA (pushed alongside `:next`), and skips the job if `main` has already moved past that
+  commit so the tests stay aligned with the tested image; it never builds an extension of its own on that path.
+  Manual runs (and reusable-workflow callers) can select any published image tag via the `extension-tag` input —
+  `next` by default, e.g. `0.3.0` or a full 40-character commit SHA — or build from the selected branch.
 
 Both paths publish JUnit summaries and upload per-OS test artifacts. Pass-path Playwright traces and videos are off by
 default; set `SAVE_TRACES_ON_PASS=true` locally if you need them.

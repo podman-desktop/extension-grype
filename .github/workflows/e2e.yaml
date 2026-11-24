@@ -85,13 +85,17 @@ jobs:
   e2e-tests:
     name: Grype e2e tests / ${{ matrix.os }}
     needs: build-extension
-    # After-merge: only successful, non-PR next-build runs; every merge gets covered.
+    # next-build only runs on main push/dispatch; still reject PR-triggered workflow_run.
+    # When main moved past the built commit, skip so tip tests are not run against an older image.
+    # Do not check out workflow_run.head_sha to pin the specs to the built commit (as the hummingbird
+    # extension does): CodeQL flags that as a privileged checkout of untrusted code on workflow_run.
     if: >
-      !cancelled() &&
+      always() &&
       (needs.build-extension.result == 'success' || needs.build-extension.result == 'skipped') &&
       (github.event_name != 'workflow_run' ||
        (github.event.workflow_run.conclusion == 'success' &&
-        github.event.workflow_run.event != 'pull_request'))
+        github.event.workflow_run.event != 'pull_request' &&
+        github.event.workflow_run.head_sha == github.sha))
     runs-on: ${{ matrix.os }}
     # The scan tests download the Syft/Grype binaries and the Grype vulnerability database.
     timeout-minutes: 60
@@ -108,8 +112,6 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # On workflow_run, test the commit next-build built, not main's current head.
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           persist-credentials: false
 
       - name: Resolve OCI image
